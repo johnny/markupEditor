@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8' />
+    <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame -->
+    <meta content='IE=edge,chrome=1' http-equiv='X-UA-Compatible' />
+    <link type="text/css" href="/stylesheets/markupEditor.css" rel="stylesheet" media="screen" />
+    <link type="text/css" href="/stylesheets/smoothness/jquery-ui-1.8.9.custom.css" rel="stylesheet" media="screen" />
+    <link type="text/css" href="/stylesheets/qunit.css" rel="stylesheet" media="screen" />
+    <title>MarkupEditor's test suite</title>
+  </head>
+  <body class='test'>
+    <h1 id='qunit-header'>MarkupEditor's test suite</h1>
+    <h2 id='qunit-banner'></h2>
+    <div id='qunit-testrunner-toolbar'></div>
+    <div id='qunit-userAgent'></div>
+    <ol id='qunit-tests'></ol>
+    <div id='qunit-fixture'>
+      will be hidden
+    </div>
+    <form id='textile'>
+      <textarea class='markup textile'></textarea>
+    </form>
+    <form id='wysiwyg'>
+      <textarea class='markup textile wysiwyg'></textarea>
+    </form>
+    <div id='link-dialog' title='Link'>
+      <form>
+        <fieldset>
+          <label for="title">Title</label><input type="text" class="title" name="title" />
+          <label for="uri">Enter uri</label><input type="text" class="uri" name="uri" />
+          <select class="uri" name="uri-select">
+          <option value="">or select uri</option>
+          <option value="http://www.example.com">Example Link</option>
+          <option value="http://www.google.com">Google</option>
+          <option value="index.html">relative uri</option></select>
+        </fieldset>
+      </form>
+    </div>
+    <div id='insertImage-dialog' title='Insert Image'>
+      <form>
+        <fieldset>
+          <label for="imageUri">Enter image uri</label><input type="text" class="imageUri" name="imageUri" />
+          <label for="title">Title</label><input type="text" class="title" name="title" />
+          <label for="uri">Enter uri</label><input type="text" class="uri" name="uri" />
+        </fieldset>
+      </form>
+    </div>
+    <script type="text/javascript" src="/javascripts/vendor/jquery.js"></script>
+    <script type="text/javascript" src="/javascripts/vendor/jquery-ui-1.8.9.custom.min.js"></script>
+    <script type="text/javascript" src="/javascripts/markupEditor.js"></script>
+    <script type="text/javascript" src="/javascripts/modes/textile/textileMode.js"></script>
+    <script type="text/javascript" src="/javascripts/modes/textile/bruteForceCompiler.js"></script>
+    <script type="text/javascript" src="/javascripts/modes/htmlMode.js"></script>
+    <script type="text/javascript" src="/javascripts/modes/wysiwygMode.js"></script>
+    <script type="text/javascript" src="/javascripts/vendor/qunit.js"></script>
+    <script type="text/javascript" src="/javascripts/test/wysiwygMode.js"></script>
+    <script type="text/javascript" src="/javascripts/test/textileMode.js"></script>
+    <script type="text/javascript" src="/javascripts/test/textileCompiler.js"></script>
+  </body>
+</html>
