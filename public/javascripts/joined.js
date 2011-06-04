@@ -567,7 +567,8 @@ ME.addMode("textile", function() {
   }
 
   regexpes = {
-    "*": /^(\w+\. )?\s*\*(.*)\*/
+    "*": [/^(\w+\. )?\s*\*/, /\*([\.]*)$/],
+    "_": [/^(\w+\. )?\s*_/, /_([\.]*)$/]
   };
   return {
     name: "Textile Mode",
@@ -586,20 +587,20 @@ ME.addMode("textile", function() {
               if(/ on$/.test(target.className)){
                 
                 // first handle the left part
-                match = currentLine.match(/^(\w+\. )?\s*\*/);
+                match = currentLine.match(regexpes[this.delimiter][0]);
                 if(match){
                   currentLine = (match[1] || "") + currentLine.slice(match[0].length);
                 } else {
                   // place delimiter left and extend selection
-                  currentLine = "*" + toolbar.extendLeftSelection(/[ .]+/) + currentLine;
+                  currentLine = this.delimiter + toolbar.extendLeftSelection(/[ .]+/) + currentLine;
                 }
 
                 // Then handle the right
-                match = currentLine.match(/\*([\.]*)$/);
+                match = currentLine.match(regexpes[this.delimiter][1]);
                 if(match){
                   currentLine = currentLine.slice(0, - match[0].length) + (match[1] || ""); 
                 } else {
-                  currentLine += toolbar.extendRightSelection(/ +/) + "*";
+                  currentLine += toolbar.extendRightSelection(/ +/) + this.delimiter;
                 }
                 
               } else {
