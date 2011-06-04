@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-files = %w{markupEditor modes/textile/textileMode modes/textile/bruteForceCompiler modes/htmlMode modes/wysiwygMode}
+files = %w{markupEditor modes/textile/textileMode modes/textile/bruteForceCompiler modes/wysiwygMode}
 
 File.open('public/javascripts/joined.js','w') do |file|
   files.each do |filename|

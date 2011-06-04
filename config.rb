@@ -46,4 +46,5 @@ configure :build do
   # activate :ugly_haml
   
   # set :http_prefix, "file:///home/jonas/projects/markup_editor/build/"
+  set :http_prefix, "/markupEditor"
 end
