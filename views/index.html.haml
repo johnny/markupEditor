@@ -1,0 +1,13 @@
+- content_for :head do
+  %title MarkupEditor
+
+%h1 MarkupEditor
+
+%p
+  is a small editor whith a strong support for textile. Other markup languages will follow.
+  It has an impressive
+  = link_to "test suite", "test.html"
+  \.
+
+%form#textile
+  %textarea.markup.textile= erb :"textareas/textile"

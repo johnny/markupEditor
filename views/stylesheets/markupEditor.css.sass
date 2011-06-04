@@ -1,0 +1,109 @@
+@import "compass"
+
+form
+  float: left
+
+  textarea
+    clear: both
+    height: 300px
+    width: 500px
+    &.markup
+      width: 490px
+      border-top-width: 1px
+      padding: 2px
+
+
+  .markupEditor
+    -moz-border-radius: 1em 1em 1em 1em
+    background: none repeat scroll 0 0 #F9F9F9
+    border: 1px solid #E4E4E4
+    margin: 1em 0 5em
+    overflow: hidden
+    padding: 1em
+    width: 500px
+    .preview
+      margin: 2em 0 0 
+    .toolbar
+      a
+        +border-radius(0.3em)
+        filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr='#f4f4f4', endColorstr='#ececec')
+        background: -webkit-gradient(linear, left top, left bottom, from(#f4f4f4), to(#ececec))
+        background: -moz-linear-gradient(top, #f4f4f4, #ececec)
+        /* +linear-gradient(center top , #F4F4F4, #ECECEC) 
+        border: 1px solid #DDDDDD
+        color: #333333
+        display: block
+        float: left
+        height: 25px
+        margin: 0.2em 0.5em 0 0
+        overflow: hidden
+        text-shadow: 0 1px 0 #FFFFFF
+        width: 25px
+        &.on
+          background: -webkit-gradient(linear, left top, left bottom, from(#599bdc), to(#3072b3))
+          background: -moz-linear-gradient(top, #599bdc, #3072b3)
+        &:hover
+          background: -webkit-gradient(linear, left top, left bottom, from(#599bdc), to(#3072b3))
+          background: -moz-linear-gradient(top, #599bdc, #3072b3)
+          filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr='#599bdc', endColorstr='#3072b3')
+          /* +linear-gradient(center top , #599BDC, #3072B3)
+          color: #FFFFFF
+          text-decoration: none
+          text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3)
+        &.on:hover
+          background: -webkit-gradient(linear, left top, left bottom, from(#f4f4f4), to(#ececec))
+          background: -moz-linear-gradient(top, #f4f4f4, #ececec)
+        span
+          background-repeat: no-repeat
+          background-position: center
+          display: block
+          height: 25px
+          overflow: hidden
+          text-indent: -5000px
+          width: 25px
+        &.bold span
+          background-image: url("images/icons/text_bold.png")
+        &.italic span
+          background-image: url("images/icons/text_italic.png")
+        &.alignLeft span
+          background-image: url("images/icons/text_align_left.png")
+        &.alignRight span
+          background-image: url("images/icons/text_align_right.png")
+        &.alignCenter span
+          background-image: url("images/icons/text_align_center.png")
+        &.link span
+          background-image: url("images/icons/link.png")
+        &.insertImage span
+          background-image: url("images/icons/image.png")
+      select
+        background-color: #F9F9F9
+        border: 1px solid #F9F9F9
+        float: right
+        margin-bottom: 0
+        padding: 0.5em 0.7em
+        &:hover
+          +border-radius(0.5em)
+          background-color: #FFFFFF
+          border: 1px solid #DDDDDD
+            
+    .preview
+      .left
+        text-align: left
+      .right
+        text-align: right
+      .center
+        text-align: center
+      min-height: 300px
+
+#link-dialog, #insertImage-dialog
+  display: none
+
+  label
+    float: left
+    clear: left
+  input
+    clear: left
+    float: left
+  select
+    clear: left
+    float: left

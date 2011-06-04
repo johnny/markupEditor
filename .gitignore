@@ -1,0 +1,10 @@
+#specific files
+
+# dirs
+build/
+inspiration/
+
+# tempfiles
+*[~#]
+.#*
+*_flymake*

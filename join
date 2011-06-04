@@ -1,0 +1,18 @@
+#!/usr/bin/ruby
+
+files = %w{markupEditor modes/textile/textileMode modes/textile/bruteForceCompiler modes/htmlMode modes/wysiwygMode}
+
+File.open('public/javascripts/joined.js','w') do |file|
+  files.each do |filename|
+    file.puts File.open('public/javascripts/' + filename + '.js').read
+  end
+end
+
+require 'rubygems'
+require 'closure-compiler'
+File.open('public/javascripts/joined-min.js','w') do |file|
+  # closure = Closure::Compiler.new(:compilation_level => 'ADVANCED_OPTIMIZATIONS')
+  closure = Closure::Compiler.new
+  file.puts closure.compile(File.open('public/javascripts/joined.js', 'r'))
+end
+

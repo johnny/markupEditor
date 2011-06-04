@@ -1,0 +1,47 @@
+* [5/11] Further improvements
+  - [X] Fix bugs in textileCompiler
+  - [X] get specs running in Firefox
+    - [X] W: check if selection is in preview before calculating states
+      and doing things: Firefox select text -> h1 -> p -> all gone
+  - [X] formatBlock should select multiple paragraphs
+  - [X] refactor to use prototypes
+  - [X] abstract getStates
+  - [-] publish project
+    - [ ] documentation
+    - [X] better static files handling:
+    - [ ] package files
+      - [ ] join and compress js files
+    - [ ] push to github
+  - [ ] update preview periodically (and track changes)
+  - [ ] clean pasted text
+  - [ ] Better Dialogs (for inspiration see gollum)
+    - [ ] dialogs should be created on the fly
+    - [ ] values for the selects should be defined by a method call
+  - [ ] localization
+  - [ ] different toolbars for different modes.
+
+* [0/2] Bugs
+  - [ ] Select Paragraph Box -> up and down arrows don't change the
+    text, but they should
+  - [ ] pressing enter at the end of a heading sets the cursor outside any paragraph
+
+* [/] Consider
+  - [ ] turn off url display in bottom (consider accessability, gollum
+    has the same construct)
+  - [ ] double click should work: use hover to change contentEditable
+    value and remember selection
+  - [ ] remove conflicting markup in textile in one line (means if you
+    select a string with parts of it already marked bold and click the
+    unselected bold button, the parts should be marked as bold as a whole)
+    - [ ] bold
+    - [ ] italic
+
+* List of Firefox Bugs
+
+- doubleclicking a word does not select the Word itself but some
+  whitespace left of it too
+- first paragraph in contentEditable cannot be changed
+- pressing enter at the end of a heading does not create a new p tag
+  (webkit too)
+- justify* does only work with contentEditable = true on body
+- double click in textarea does not select the word if there is an element with contentEditable = true on the page
