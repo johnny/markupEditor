@@ -9,9 +9,9 @@
   - [-] publish project
     - [ ] documentation
     - [X] better static files handling:
-    - [ ] package files
-      - [ ] join and compress js files
-    - [ ] push to github
+    - [X] package files
+      - [X] join and compress js files
+    - [X] push to github
   - [ ] update preview periodically (and track changes)
   - [ ] clean pasted text
   - [ ] Better Dialogs (for inspiration see gollum)
