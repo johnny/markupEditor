@@ -9,9 +9,8 @@ helpers do
   end
 end
 
-with_layout :devLayout do
-  page "/test.html"
-  page "/dev.html"
+with_layout :releaseLayout do
+  page "/index.html"
 end
 
 # Change the JS directory

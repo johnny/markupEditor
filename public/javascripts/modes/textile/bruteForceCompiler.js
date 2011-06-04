@@ -12,7 +12,8 @@
    * @type Builder
    */
   var builder = (function (){
-    var stack, tracingStack, stackPosition, traceJustStarted, traceJustEnded, popping, pointer, sP, eP, tracing, lastTrace, unsuccessfulPush = false;
+    var stack, tracingStack, stackPosition, traceJustStarted, traceJustEnded, popping, pointer, sP, eP, tracing, lastTrace, unsuccessfulPush = false, stringLength,
+    ignoredTags = ['li'],
     definableAttributes = {
       img: ['title','src'],
       a: ['href']
@@ -45,7 +46,15 @@
     function canMoveStackDown(targetNode){
       var equalTag = true, key, equalAttributes = true, blockTag = (stackPosition == -1), stackNode, i, l;
       if(blockTag){
-        stackNode = tracingStack[0];
+        // List nodes should be weaker than a paragraph node
+        if(/(o|u)l/.test(tracingStack[0].tag)){
+          if(/(o|u)l/.test(targetNode.tag) && targetNode.tag != tracingStack[0].tag){
+            targetNode = {tag: 'p'};
+          }
+          stackNode = tracingStack[0] = targetNode;
+        } else {
+          stackNode = tracingStack[0];
+        }
       } else {
         for(i = stackPosition + 1, l = tracingStack.length; i < l; i++ ){
           if(tracingStack[i].tag === targetNode.tag){
@@ -81,9 +90,9 @@
      * 
      * @param {object} node 
      */
-    function traceNode(node){
-      return {tag: node.tag,
-              attributes: node.attributes};
+    function TraceNode(node){
+      this.tag = node.tag;
+      this.attributes = node.attributes;
     }
 
     /**
@@ -124,12 +133,16 @@
      * Start the tracing
      */
     function startTrace(){
-      var length = stack.length, i;
+      var length = stack.length, i, numberOfIgnoredTags = 0;
       // console.log("################################## startTrace");
       tracing = true;
       traceJustStarted = true;
       for(i=1;i<length;i++){
-        tracingStack[i-1] = traceNode(stack[i]);
+        if(ignoredTags.indexOf(stack[i].tag) == -1){
+          tracingStack[i-1 - numberOfIgnoredTags] = new TraceNode(stack[i]);
+        } else {
+          numberOfIgnoredTags += 1;
+        }
       }
       // console.log(tracingStack.length);
       stackPosition = tracingStack.length -1;
@@ -158,12 +171,13 @@
       /**
        * Initialize Builder for tracing operation
        */
-      initTrace: function(startPosition, endPosition){
+      initTrace: function(startPosition, endPosition, lengthOfString){
         tracingStack = [];
         tracing = undefined;
         pointer = 0;
         sP = startPosition;
         eP = endPosition;
+        stringLength = lengthOfString;
       },
       /**
        * Definitly ends the trace
@@ -178,17 +192,21 @@
        * Handles starting and ending of the trace
        * 
        * @param {Integer} advanceAmount
+       * @param {Boolean} forceEndTrace wether to forcably end the trace
        */
-      advancePointer: function(advanceAmount){
+      advancePointer: function(advanceAmount, forceEndTrace){
         pointer += advanceAmount;
-        // console.log("pointer",pointer,"endPointer", eP);
-        if(tracing === undefined && pointer > sP){
+        // console.log("pointer",pointer,"startPointer", sP, "endPointer", eP);
+        if(tracing === undefined && (pointer > sP || pointer == stringLength)){
           startTrace();
         }
-        if(lastTrace){
-          endTrace();
-        } else if(tracing && pointer > eP){
-          lastTrace = true;
+        if(tracing && pointer > eP){
+          if(lastTrace || forceEndTrace){
+            endTrace();
+          } else {
+            // console.log("set last trace");
+            lastTrace = true;
+          }
         }
       },
       /**
@@ -203,10 +221,10 @@
                     content: ""};
         // console.log("open tag", node);
         stack.push(node);
-        if(tracing){
+        if(tracing && ignoredTags.indexOf(tag) == -1){
           if(traceJustStarted){
             // console.log("inserting node ", node);
-            tracingStack[stackPosition+1] = traceNode(node);
+            tracingStack[stackPosition+1] = new TraceNode(node);
             stackPosition += 1;
           }
           else if(tracingStack[stackPosition+1]){
@@ -235,7 +253,7 @@
         }
 
         // console.log("closing", removedNode);
-        if(tracing){
+        if(tracing && ignoredTags.indexOf(tag) == -1){
           traceJustStarted = false;
           if(unsuccessfulPush){
             // console.log("slicing because of difference "+stackPosition);
@@ -321,6 +339,14 @@
         // console.log("check is Open", tag, stack.length);
         return typeof getStackPositionOf(tag) === 'number';
       },
+      blockTagIsOpen: function(){
+        return !!stack[1];
+      },
+      closeBlockTag: function(){
+        while(stack[1]){
+          this.closeTag();
+        }
+      },
       /**
        * @returns {Object} The trace stack
        */
@@ -345,7 +371,7 @@
       whitespaceLength = /^\s*/.exec(match[0])[0].length;
       matchLength = match[0].length;
       if(whitespaceLength){
-        builder.advancePointer(whitespaceLength);
+        builder.advancePointer(whitespaceLength, true);
       }
       if(matchLength - whitespaceLength){
         builder.advancePointer(matchLength - whitespaceLength);
@@ -373,8 +399,6 @@
         }
 
         builder.pushTag(match[1], attributes);
-      } else {
-        builder.pushTag("p");
       }
       parseLines();
       builder.popParagraphEnd();
@@ -388,20 +412,26 @@
   }
   
   function parseLineStart(){
+    var match;
     if(advance(/^ *\* /)){
       if(!builder.isOpen("ul")){ // this won't work for nested uls,
         // solve with lookahead
+        builder.closeBlockTag();
         builder.pushTag("ul");
       }
       builder.pushTag("li");
     } else if(advance(/^ *# /)){
       if(!builder.isOpen("ol")){ // this won't work for nested uls
+        builder.closeBlockTag();
         builder.pushTag("ol");
       }
       builder.pushTag("li");
     } else {
       while(builder.isOpen("ul") || builder.isOpen("ol")){
         builder.closeTag();
+      }
+      if(!builder.blockTagIsOpen()){
+        builder.pushTag("p");
       }
     }
     // Eat Whitespace at the beginning of the Line after the tag
@@ -458,7 +488,7 @@
         builder.closeTag();
       }
       // Image
-      else if(match = advance(/^( *)!([^!\(]+)(\(([^\)]*)\))?!(:([^ ]+))?/)) {
+      else if(match = advance(/^( *)!([^!\(]+)(\(([^\)]*)\))?!(:([^ \n]+))?/)) {
         builder.pushString(match[1]);
         if(match[6]){
           builder.pushTag("a", {href: match[6]});
@@ -502,10 +532,9 @@
       return builder.toHtml();
     },
     trace: function(textToCompile, startTrace, endTrace){
-      builder.initTrace(startTrace, endTrace);
+      builder.initTrace(startTrace, endTrace, textToCompile.length);
       this.compile(textToCompile);
       builder.finalizeTrace();
-      // console.log(builder.toHtml());
       return builder.getTrace();
     }
   };

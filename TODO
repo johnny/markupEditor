@@ -1,4 +1,117 @@
-* [5/11] Further improvements
+* [17/29] Further improvements
+  - [-] publish project
+    - [ ] documentation
+    - [X] better static files handling:
+    - [X] package files
+      - [X] join and compress js files
+    - [X] push to github
+  - [X] decouple preview and data-modes
+  - [-] wysiwyg
+    - [ ] Toolbar should work only if there is a range inside the preview
+          (also the state checking)
+    - [ ] expand selection to word boundaries, just as in textile
+    - [ ] join lists on backspace/entf between lists
+    - [ ] Firefox: fix checkState for one bold word
+    - [ ] br tags should be top level, because Border expects that
+          or alternatively change behavior of the node search within Border
+          This would be the approach with a future since there might be other
+          cases of nested nodes ( b>i, i>b would be different now, but should 
+          be the same)
+    - [X] handle delete key
+    - [X] selecting all and pressing bold should bolden each (part of a) paragraph in turn
+    - [X] ignore special keyCodes on deletion
+    - [X] on keyup check if the content is still in a valid block tag
+      - [X] chrome problems
+        - [X] return at the end of a heading
+        - [X] backspace into another paragraph
+              this will keep the style of the backspaced paragraph with span tags
+      - [X] firefox problems
+        - [X] selecting all and deleting/overwriting it
+              overwriting with normal keys won't work
+        - [X] respect the top blockformat on overwriting
+        - [X] return at the end of a heading
+        - [X] enter in the middle of a heading does not move the rest of the heading down
+        - [X] selecting all by hand and deleting it leaves empty tags
+              this is a result of the current implementation of checkIfDeletedAll
+  - [ ] textile
+    - [ ] replace this.tag
+  - [ ] add close editor
+  - [ ] flexible toolbar, which stays on top
+  - [ ] support haml
+  - [ ] provide support for external mode select
+  - [-] Better Dialogs (for inspiration see gollum)
+    - [ ] display errors as tooltips
+    - [X] reset errors on open
+    - [X] enhancedTextfield: type, click clear, type again (no button), click cancel (button appears and button click did not work)
+    - [X] style clearButton + autocomplete
+    - [X] use errors
+    - [X] autocomplete select should trigger change (file bug)
+    - [X] support prompts in textfields
+    - [X] add a clear button to text fields
+    - [X] dialogs should be created on the fly
+    - [X] values for the selects should be defined by a method call if functions are defined
+    - [X] fields should share the combobox
+  - [ ] localization
+  - [ ] spec with selenium
+    - [ ] spec press enter
+      - [ ] in list
+      - [ ] in heading
+    - [ ] spec press shift enter
+      - [ ] in list
+    - [ ] show window in different awesome tab
+    - [ ] use existing window (not supported in ruby bindings)
+    - [ ] fire native events (not supported in awesome, try in kde or windows)
+  - [ ] clean and parse pasted html
+  - [ ] handle blocktags within lists
+  - [X] list functionality
+    - [X] wysiwyg
+      - [X] button click
+        - [X] own
+          - [X] on
+          - [X] off
+          - [X] off in the middle should seperate the list
+        - [X] align
+        - [X] bold/italic 
+          - [X] conversion to textile should handle linebreaks
+        - [X] link
+        - [X] image
+        - [X] paragraph
+      - [X] backspace out of list (also at the beginning of the div) should remove list
+            and replace it with a paragraph
+      - [X] ensure <br> only inside block tags (this is now handled during conversion. 
+            this way html import is easier)
+      - [X] shift + enter throws error
+      - [X] enter in list (by default)
+      - [X] fix conversion
+    - [X] refactor selection api to mode
+    - [X] fix textile compiler
+    - [X] textile
+      - [X] shift enter in list
+      - [X] enter in list
+      - [X] button click
+        - [X] own
+        - [X] align
+        - [X] bold/italic
+        - [X] link
+        - [X] image
+        - [X] paragraph (ignore it)
+      - [X] create own selenium view template
+      - [X] load firebug into selenium window
+      - [X] fix selection on end of textfield
+  - [X] should not catch strg-r
+  - [X] fix joined file
+  - [X] generalize spec helpers
+  - [X] load editor from any html element
+    - [X] optimize hiding and showing. use least possible dom calls
+    - [X] dynamically change the toolbar. Each mode should define the
+          visible fields. If save is visible is defined by the
+          presence of the save setting. The order is defined in markupEditor and not
+          changeable. It would confuse the user otherwise
+    - [X] spec
+    - [X] add save button which calls a submit callback
+    - [X] basics
+    - [X] keep styles from the original html element
+  - [X] different toolbars for different modes.
   - [X] Fix bugs in textileCompiler
   - [X] get specs running in Firefox
     - [X] W: check if selection is in preview before calculating states
@@ -6,30 +119,32 @@
   - [X] formatBlock should select multiple paragraphs
   - [X] refactor to use prototypes
   - [X] abstract getStates
-  - [-] publish project
-    - [ ] documentation
-    - [X] better static files handling:
-    - [X] package files
-      - [X] join and compress js files
-    - [X] push to github
-  - [ ] update preview periodically (and track changes)
-  - [ ] clean pasted text
-  - [ ] Better Dialogs (for inspiration see gollum)
-    - [ ] dialogs should be created on the fly
-    - [ ] values for the selects should be defined by a method call
-  - [ ] localization
-  - [ ] different toolbars for different modes.
+  - [X] update preview periodically (and track changes)
+  - [X] prevent link click follow
+  - [X] preview div should always have a p-tag inside
+  - [X] on mode change clear selection (select something in ta
+        -> preview -> ta selection should be gone)
+  - [X] fix rare bug: updating preview in preview mode should not write textile into preview
+        reproduce: load dev.html -> press any key -> wait
 
-* [0/2] Bugs
-  - [ ] Select Paragraph Box -> up and down arrows don't change the
-    text, but they should
-  - [ ] pressing enter at the end of a heading sets the cursor outside any paragraph
+* [1/3] Bugs
+  - [X] pressing enter at the end of a heading sets the cursor outside
+    any paragraph
+  - [ ] h1. * item1
+        does not compile right
+  - [ ] set cursor between _a and click italic two times -> not the
+    same situation as before. Such two clicks should be idempotent
 
-* [/] Consider
+* [0/5] Consider
+  - [ ] Partial list change should either
+        change the whole list (currently wysiwyg)
+        change part off the list (currently textile and the norm)
   - [ ] turn off url display in bottom (consider accessability, gollum
     has the same construct)
   - [ ] double click should work: use hover to change contentEditable
     value and remember selection
+  - [ ] do not focus the textarea after toolbar action, so that the current select 
+        is still selected and can be changed via the arrow keys
   - [ ] remove conflicting markup in textile in one line (means if you
     select a string with parts of it already marked bold and click the
     unselected bold button, the parts should be marked as bold as a whole)
@@ -38,10 +153,15 @@
 
 * List of Firefox Bugs
 
+- Selecting everything and pressing delete removes all content within the wysiwyg area
 - doubleclicking a word does not select the Word itself but some
   whitespace left of it too
-- first paragraph in contentEditable cannot be changed
-- pressing enter at the end of a heading does not create a new p tag
-  (webkit too)
+- pressing enter at the end of a heading lands outside any tag
 - justify* does only work with contentEditable = true on body
 - double click in textarea does not select the word if there is an element with contentEditable = true on the page
+
+* List of Chrome Bugs
+
+- pressing enter at the end of a heading lands inside a div
+- backspacing into a different paragraph type will keep the 
+  style of the backspaced paragraph with span tags

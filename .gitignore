@@ -3,6 +3,10 @@
 # dirs
 build/
 inspiration/
+.sass-cache/
+.bundle/
+bin/
+selenium/support/firefox_profile/Cache
 
 # tempfiles
 *[~#]

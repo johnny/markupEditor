@@ -1,109 +1,171 @@
 @import "compass"
 
-form
-  float: left
+$overlay: rgba(255, 255, 255, .5)
+$transparent: rgba(255, 255, 255, .8)
+$width: 20px
 
-  textarea
-    clear: both
-    height: 300px
-    width: 500px
-    &.markup
+@mixin editorElement
+  background: none repeat scroll 0 0 #F9F9F9
+  border: 1px solid #E4E4E4
+  width: 650px
+
+.markupEditor
+
+  margin-bottom: 10px
+
+  .textarea
+    @include editorElement
+    border-width: 0 1px 1px
+    padding: 5px
+
+    textarea
+      height: 300px
       width: 490px
-      border-top-width: 1px
-      padding: 2px
 
+  .preview
+    min-height: 300px
+    padding: 0
+    border: 1px dotted #E4E4E4
 
-  .markupEditor
-    -moz-border-radius: 1em 1em 1em 1em
-    background: none repeat scroll 0 0 #F9F9F9
-    border: 1px solid #E4E4E4
-    margin: 1em 0 5em
-    overflow: hidden
-    padding: 1em
-    width: 500px
-    .preview
-      margin: 2em 0 0 
-    .toolbar
-      a
-        +border-radius(0.3em)
-        filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr='#f4f4f4', endColorstr='#ececec')
+    background-color: #eee
+    background-image: -webkit-repeating-linear-gradient(-45deg, $transparent, $transparent $width, $overlay $width, $overlay 2*$width)
+    background-image: -moz-repeating-linear-gradient(-45deg, $transparent, $transparent $width, $overlay $width, $overlay 2*$width)
+
+    .left
+      text-align: left
+    .right
+      text-align: right
+    .center
+      text-align: center
+    h1,h2,h3,h4,p
+      display: block
+    p
+      min-height: 1em
+
+  .toolbar
+    @include editorElement
+    padding: 3px 5px
+    height: 32px
+
+    a
+      +border-radius(0.3em)
+      filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr='#f4f4f4', endColorstr='#ececec')
+      background: -webkit-gradient(linear, left top, left bottom, from(#f4f4f4), to(#ececec))
+      background: -moz-linear-gradient(top, #f4f4f4, #ececec)
+      /* +linear-gradient(center top , #F4F4F4, #ECECEC) 
+      border: 1px solid #DDDDDD
+      color: #333333
+      display: block
+      float: left
+      height: 25px
+      margin: 0.2em 0.5em 0 0
+      overflow: hidden
+      text-shadow: 0 1px 0 #FFFFFF
+      width: 25px
+      &.on
+        background: -webkit-gradient(linear, left top, left bottom, from(#599bdc), to(#3072b3))
+        background: -moz-linear-gradient(top, #599bdc, #3072b3)
+      &.disabled, &.disabled:hover
+        background: -webkit-gradient(linear, left top, left bottom, from(#fefefe), to(#f9f9f9))
+        background: -moz-linear-gradient(top, #fefefe, #f9f9f9)
+        cursor: default
+      &:hover
+        background: -webkit-gradient(linear, left top, left bottom, from(#599bdc), to(#3072b3))
+        background: -moz-linear-gradient(top, #599bdc, #3072b3)
+        filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr='#599bdc', endColorstr='#3072b3')
+        /* +linear-gradient(center top , #599BDC, #3072B3)
+        color: #FFFFFF
+        text-decoration: none
+        text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3)
+      &.on:hover
         background: -webkit-gradient(linear, left top, left bottom, from(#f4f4f4), to(#ececec))
         background: -moz-linear-gradient(top, #f4f4f4, #ececec)
-        /* +linear-gradient(center top , #F4F4F4, #ECECEC) 
-        border: 1px solid #DDDDDD
-        color: #333333
+      span
+        background-repeat: no-repeat
+        background-position: center
         display: block
-        float: left
         height: 25px
-        margin: 0.2em 0.5em 0 0
         overflow: hidden
-        text-shadow: 0 1px 0 #FFFFFF
+        text-indent: -5000px
         width: 25px
-        &.on
-          background: -webkit-gradient(linear, left top, left bottom, from(#599bdc), to(#3072b3))
-          background: -moz-linear-gradient(top, #599bdc, #3072b3)
-        &:hover
-          background: -webkit-gradient(linear, left top, left bottom, from(#599bdc), to(#3072b3))
-          background: -moz-linear-gradient(top, #599bdc, #3072b3)
-          filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr='#599bdc', endColorstr='#3072b3')
-          /* +linear-gradient(center top , #599BDC, #3072B3)
-          color: #FFFFFF
-          text-decoration: none
-          text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3)
-        &.on:hover
-          background: -webkit-gradient(linear, left top, left bottom, from(#f4f4f4), to(#ececec))
-          background: -moz-linear-gradient(top, #f4f4f4, #ececec)
-        span
-          background-repeat: no-repeat
-          background-position: center
-          display: block
-          height: 25px
-          overflow: hidden
-          text-indent: -5000px
-          width: 25px
-        &.bold span
-          background-image: url("images/icons/text_bold.png")
-        &.italic span
-          background-image: url("images/icons/text_italic.png")
-        &.alignLeft span
-          background-image: url("images/icons/text_align_left.png")
-        &.alignRight span
-          background-image: url("images/icons/text_align_right.png")
-        &.alignCenter span
-          background-image: url("images/icons/text_align_center.png")
-        &.link span
-          background-image: url("images/icons/link.png")
-        &.insertImage span
-          background-image: url("images/icons/image.png")
-      select
-        background-color: #F9F9F9
-        border: 1px solid #F9F9F9
-        float: right
-        margin-bottom: 0
-        padding: 0.5em 0.7em
-        &:hover
-          +border-radius(0.5em)
-          background-color: #FFFFFF
-          border: 1px solid #DDDDDD
-            
-    .preview
-      .left
-        text-align: left
-      .right
-        text-align: right
-      .center
-        text-align: center
-      min-height: 300px
+      &.bold span
+        background-image: url("images/icons/text_bold.png")
+      &.italic span
+        background-image: url("images/icons/text_italic.png")
+      &.alignLeft span
+        background-image: url("images/icons/text_align_left.png")
+      &.alignRight span
+        background-image: url("images/icons/text_align_right.png")
+      &.alignCenter span
+        background-image: url("images/icons/text_align_center.png")
+      &.unorderedList span
+        background-image: url("images/icons/text_list_bullets.png")
+      &.orderedList span
+        background-image: url("images/icons/text_list_numbers.png")
+      &.link span
+        background-image: url("images/icons/link.png")
+      &.insertImage span
+        background-image: url("images/icons/image.png")
+      &.save span
+        background-image: url("images/icons/disk.png")
+      &.wysiwyg span
+        background-image: url("images/icons/layout.png")
+    select
+      background-color: #F9F9F9
+      border: 1px solid #F9F9F9
+      float: right
+      margin-bottom: 0
+      padding: 0.5em 0.7em
+      &:hover
+        +border-radius(0.5em)
+        background-color: #FFFFFF
+        border: 1px solid #DDDDDD
 
 #link-dialog, #insertImage-dialog
   display: none
 
   label
+    display: block
     float: left
     clear: left
-  input
-    clear: left
+    width: 130px
+    padding: 0.53em 0
+    margin: 0 0.4em
+    text-align: right
+  span.clearButton
+    display: block
     float: left
-  select
-    clear: left
+    width: 300px
+    margin: 0 0 0.4em
+    border: 1px solid #d3d3d3
+    &.focus
+      border: 1px solid #eec77c
+    &.error
+      color: #666666
+      border: 1px solid #ff0000
+    &.ui-corner-all
+      width: 342px
+      input
+        width: 312px
+    input
+      width: 270px
+      border: none
+      padding: 0.49em 0
+      margin: 0 0.4em
+      &:focus
+        border: none
+        outline: none
+    span
+      width: 10px
+      cursor: pointer
+  input, select
+    width: 300px
+    padding: 0.6em 0
+    margin: 0.4em 0
+
+  .ui-button
+    margin: 0
+    margin-left: -1px
     float: left
+  .ui-button-icon-only .ui-button-text
+    padding: 0.36em

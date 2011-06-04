@@ -1,0 +1,5 @@
+= haml :'dev.html'
+
+- content_for :bottom do
+  = javascript_include_tag "test/testHelper"
+  = javascript_include_tag "test/seleniumSupport"

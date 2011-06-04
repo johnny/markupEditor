@@ -1,0 +1,27 @@
+- content_for :head do
+  %title MarkupEditor's test suite
+
+%h1#qunit-header MarkupEditor's test suite
+%h2#qunit-banner
+#qunit-testrunner-toolbar
+#qunit-userAgent
+%ol#qunit-tests
+#qunit-fixture
+  will be hidden
+
+%form#textile
+  %textarea.markup.textile
+
+%form#wysiwyg
+  %textarea.markup.textile.wysiwyg
+
+%div.markupClick.textile
+  = erb :"textareas/html"
+
+- content_for :bottom do
+  = javascript_include_tag "vendor/qunit"
+  = javascript_include_tag "test/testHelper"
+  = javascript_include_tag "test/markupEditor"
+  = javascript_include_tag "test/wysiwygMode"
+  = javascript_include_tag "test/textileMode"
+  = javascript_include_tag "test/textileCompiler"

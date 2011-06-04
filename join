@@ -1,10 +1,22 @@
 #!/usr/bin/ruby
 
-files = %w{markupEditor modes/textile/textileMode modes/textile/bruteForceCompiler modes/wysiwygMode}
+files = %w{plugins/isValid  markupEditor util plugins/enhanceTextfield plugins/combobox dialog modes/textile/textileMode modes/textile/bruteForceCompiler modes/wysiwygMode}
 
 File.open('public/javascripts/joined.js','w') do |file|
   files.each do |filename|
-    file.puts File.open('public/javascripts/' + filename + '.js').read
+    regexp = /( # Match she-bang style C-comment
+    \/\*[!*]   # Opening delimiter.
+    [^*]*\*+    # {normal*} Zero or more non-*, one or more *
+    (?:         # Begin {(special normal*)*} construct.
+      [^*\/]    # {special} a non-*, non-\/ following star.
+      [^*]*\*+  # More {normal*}
+    )*          # Finish "Unrolling-the-Loop"
+    \/          # Closing delimiter.
+    |           # Or
+    $\s*\/\/.*      # One line comments
+    )/x
+
+    file.puts File.open('public/javascripts/' + filename + '.js').read #.gsub(regexp, '')
   end
 end
 

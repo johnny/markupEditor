@@ -1,0 +1,5 @@
+source "http://rubygems.org"
+gem "middleman"
+gem "closure-compiler"
+gem "selenium-webdriver"
+gem "rspec"

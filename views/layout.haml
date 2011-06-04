@@ -6,17 +6,20 @@
     / Always force latest IE rendering engine (even in intranet) & Chrome Frame
     %meta{ :content => "IE=edge,chrome=1", "http-equiv" => "X-UA-Compatible" }
 
-    / Comment in layout
-
-    = stylesheet_link_tag "markupEditor", "smoothness/jquery-ui-1.8.9.custom"
-    = javascript_include_tag "vendor/jquery", "vendor/jquery-ui-1.8.9.custom.min", "joined"
-
+    = stylesheet_link_tag "markupEditor", "smoothness/jquery-ui-1.8.13.custom", "qunit"
 
     = yield_content :head
     
   %body{ :class => page_classes }
 
-    #main{ :role => "main" }
-      = yield
+    = yield
 
-    = haml :"partials/dialogs"
+    = javascript_include_tag "vendor/jquery", "vendor/jquery-ui", "plugins/isValid.js"
+    = javascript_include_tag "markupEditor", "util"
+    = javascript_include_tag "plugins/combobox", "plugins/enhanceTextfield", "dialog"
+    = javascript_include_tag "modes/textile/textileMode", "modes/textile/bruteForceCompiler"
+    // = javascript_include_tag "modes/htmlMode"
+    = javascript_include_tag "modes/wysiwygMode"
+    = javascript_include_tag "site.js"
+
+    = yield_content :bottom

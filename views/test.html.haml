@@ -1,24 +1,13 @@
 - content_for :head do
-  %title MarkupEditor's test suite
+  %title MarkupEditor's tests
 
-- content_for :bottom do
-  = javascript_include_tag "vendor/qunit"
-  = javascript_include_tag "test/wysiwygMode"
-  = javascript_include_tag "test/textileMode"
-  = javascript_include_tag "test/textileCompiler"
-
-  
-
-%h1#qunit-header MarkupEditor's test suite
-%h2#qunit-banner
-#qunit-testrunner-toolbar
-#qunit-userAgent
-%ol#qunit-tests
-#qunit-fixture
-  will be hidden
-
-%form#textile
-  %textarea.markup.textile
-
-%form#wysiwyg
-  %textarea.markup.textile.wysiwyg
+%h1 Test Overview
+%p
+  Select the filter to run the tests:
+%ul
+  %li= link_to "All", "test_runner.html"
+  %li= link_to "General", "test_runner.html?filter=Markup"
+  %li= link_to "Textile Mode", "test_runner.html?filter=textile"
+  %li= link_to "Textile Compiler", "test_runner.html?filter=textileCompiler"
+  %li= link_to "Textile Tracer", "test_runner.html?filter=textileTracer"
+  %li= link_to "Wysiwyg Mode", "test_runner.html?filter=wysiwyg"
