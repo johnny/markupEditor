@@ -1,0 +1,15 @@
+# Markup Editor
+
+Markup editor is a wysiwyg markup editor for the browser written in javascript.
+It's aim is to support the most important html tags.
+
+Currently the only supported markup language is textile. Others are planned.
+
+## Dependencies
+
+jquery
+jquery-ui
+
+## Development Dependencies
+
+gem install middleman closure-compiler
