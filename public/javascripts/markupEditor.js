@@ -1,11 +1,21 @@
 ME = function ($) {
 
   var globalSettings = {}, availableModes = {}, toolbarItems = {};
-
+  
+  /**
+   * Create a new Mode
+   * @constructor
+   * @param {Object} customFunctions these functions will be added to the Mode object
+   */
   function Mode(customFunctions){
     $.extend(this, customFunctions);
   }
   Mode.prototype = {
+    /**
+     * This loads the mode for the current Editor
+     * TODO this is ugly. why should every editor have every mode?
+     * @param {Editor} editor
+     */
     load: function(editor) {
       this.editor = editor;
       this.htmlDiv = editor.htmlDiv;
@@ -13,7 +23,16 @@ ME = function ($) {
 
       console.log("loaded Mode " + this.name);
     },
+    /**
+     * This is a placeholder. Each mode should define its version
+     * @returns {Object} an object that describes the states
+     * @see Toolbar#setActive
+     * @api
+     */
     getStates: $.noop,
+    /**
+     * Activate this mode for the editor
+     */
     activate: function() {
       if(this.htmlDiv.is(":empty")) {
         this.updatePreview();
@@ -22,18 +41,38 @@ ME = function ($) {
       }
       this.afterActivation();
     },
+    /**
+     * Update the preview html div with the html representation of the mode
+     */
     updatePreview: function() {
       console.log("updating preview in Mode " + this.name);
       this.htmlDiv.html(this.toHTML());
     },
+    /**
+     * Update the textarea with the text representation of the mode
+     */
     updateTextArea: function() {
       console.log("updating TA in Mode " + this.name);
       this.textArea.val(this.toText());
     },
+    /**
+     * Run after activation. Default behaviour for text modes. wysiwyg mode has 
+     * its own version
+     */
     afterActivation: function() {
       this.textArea.show();
       this.htmlDiv.attr("contentEditable",false);
     },
+    /**
+     * Iterates over the given nodes and builds the state object which defines 
+     * the active buttons
+     * 
+     * CONSIDER make currentNodes a property
+     * @param {Array} nodes The active nodes (e.g. a,li). The highest node is on the right
+     * @param {Object} currentNodes A reference that will be filled with important nodes (e.g. a) to be used by the mode
+     * 
+     * @returns {Object} The state object
+     */
     buildStateObject: function(nodes, currentNodes){
       function getTag(node){
         return node.tag ? node.tag : node.nodeName.toLowerCase();
@@ -75,20 +114,41 @@ ME = function ($) {
     }
   };
 
+  /**
+   * Create a button for the toolbar
+   * @constructor
+   * 
+   * @param {String} name The class name of the button
+   * @param {Function} [clicked] The default action if the button is clicked
+   */
   function ToolbarButton(name){
     this.name = name;
   }
   ToolbarButton.prototype = {
+    /**
+     * @returns {String} A html string of the button
+     */
     getButton: function() {
       return '<a href="#" class=\"'+ this.name +'" ><span>'+ this.name +'</span></a>';
     }
   };
 
+  /**
+   * Create a select for the toolbar
+   * @constructor
+   * 
+   * @param {String} name The class name of the button
+   * @param {Array} [options] The options of the select
+   * @param {Function} [clicked] The default action if the button is clicked
+   */
   function ToolbarSelect(name, options){
     this.name = name;
     this.options = options || [];
   }
   ToolbarSelect.prototype = {
+    /**
+     * @returns {String} A html string of the button
+     */
     getButton: function() {
       var select = $("<select class=\"" + this.name +  "\"></select>"),
       optionsLength = this.options.length,
@@ -103,6 +163,12 @@ ME = function ($) {
     }
   };  // end ToolbarSelect
   
+  /**
+   * Create a toolbar for an editor. Every editor has its own toolbar, since the
+   * items of the toolbar can be defined on a per editor basis (save callback)
+   *
+   * @constructor
+   */
   function Toolbar(editor) {
 
     // init Toolbar Items
@@ -121,7 +187,7 @@ ME = function ($) {
       }
     }
     
-    toolbarDiv.mouseup(function(e) { // buttons
+    toolbarDiv.mouseup(function(e) { // Trigger on button click
       var target = e.target;
 
       if(!(/(select|option)/i).test(target.nodeName)) {
@@ -137,7 +203,7 @@ ME = function ($) {
         editor.checkState(); // TODO this does not work with dialogs
       }
       return false;
-    }).change(function(e) { // select lists
+    }).change(function(e) { // trigger on select change
       var target = e.target;
       that.runAction(target.className, target);
       return false;
@@ -147,6 +213,9 @@ ME = function ($) {
   } // end initToolbar
 
   Toolbar.prototype = {
+    /**
+     * TODO abstract this or kick it
+     */
     getDivSelection: function() {
       this.htmlDiv.focus();
 
@@ -155,6 +224,10 @@ ME = function ($) {
       theRange = theSelection.getRangeAt(0);
       return theRange.toString();
     },
+    /**
+     * @param {Boolean} [extendSelectionToWordBoundaries] If the selection should be extended
+     * @returns {String} The currently selected string
+     */
     getTextAreaSelection: function(extendSelectionToWordBoundaries) {
       var textArea = this.textArea, text = textArea.val(), spacePos, subString;
       textArea.focus();
@@ -198,6 +271,10 @@ ME = function ($) {
       this.selection = text.slice(this.selectionStart, this.selectionEnd);
       return this.selection;
     },
+    /**
+     * Replace the current selection with the given string
+     * @param {String} string The replacement string
+     */
     replaceTextAreaSelection: function(string) {
       var textArea = this.textArea,
       position = this.selectionStart;
@@ -208,6 +285,16 @@ ME = function ($) {
       textArea[0].setSelectionRange(position, position + string.length);
       textArea.focus();
     },
+    /**
+     * Extend the right selection with a regexp. Everything matched will be added
+     * to the selection. Useful for special cases like toggling parts of a bolded
+     * String in textile
+     * 
+     * @param {Regexp} regexp The regexp
+     * 
+     * @example
+     * extendRightSelection(/ +/)
+     */
     extendRightSelection: function(regexp){
       var match;
       regexp = new RegExp(regexp.source,'g');
@@ -219,6 +306,16 @@ ME = function ($) {
         return match[0];
       }
     },
+    /**
+     * Extend the left selection with a regexp. Everything matched will be added
+     * to the selection. Useful for special cases like toggling parts of a bolded
+     * String in textile
+     * 
+     * @param {Regexp} regexp The regexp.
+     * 
+     * @example
+     * extendLeftSelection(/[ .]+/)
+     */
     extendLeftSelection: function(regexp){
       var match, substring = this.textArea.val().slice(0,this.selectionStart);
       regexp = new RegExp(regexp.source + "$");
@@ -229,8 +326,16 @@ ME = function ($) {
         return match[0];
       }
     },
+    /**
+     * TODO write this
+     */
     replaceDivSelection: function(string) {
     },
+    /**
+     * A switch which selects the fitting selection to return.
+     * 
+     * TODO move selection functions to the mode and remove this
+     */
     getSelection: function(extendSelectionToWordBoundaries) {
       if(this.editor.is("wysiwyg")) {
         return this.getDivSelection(extendSelectionToWordBoundaries);
@@ -238,6 +343,9 @@ ME = function ($) {
         return this.getTextAreaSelection(extendSelectionToWordBoundaries);
       }
     },
+    /**
+     * @see replaceDivSelection
+     */
     replaceSelection: function(string) {
       if (this.editor.is("wysiwyg")) {
         this.replaceDivSelection(string);
@@ -245,6 +353,12 @@ ME = function ($) {
         this.replaceTextAreaSelection(string);
       }
     },
+    /**
+     * Execute the given action of the current mode
+     * 
+     * @param {String} action The action to execute
+     * @param {DomElement} target The target of the click
+     */
     runAction: function(action,target) {
       toolbarItems[action][this.editor.currentMode.id].clicked(this,target);
       // Update Preview in case something has changed
@@ -252,6 +366,11 @@ ME = function ($) {
         this.editor.currentMode.updatePreview();
       }
     },
+    /**
+     * Activate the buttons/selects of the given actions on the toolbar
+     * 
+     * @param {Object} actions The actions which should be active
+     */
     setActive: function( actions ) {
       // activate each action in actions
       if(actions) {
@@ -269,6 +388,17 @@ ME = function ($) {
     }
   }; // end Toolbar prototype
   
+  /**
+   * Create a new Editor
+   * 
+   * An editor has a current mode and a textarea mode. Both are the same if you 
+   * edit the textarea directly (e.g. textile). In the wysiwyg mode you edit the
+   * html directly. 
+   * @constructor
+   * 
+   * @param {jQuery} textArea The textarea
+   * @param {Object} settings Editor specific settings
+   */
   function Editor(textArea, settings) {
     var container, that = this;
 
@@ -295,6 +425,11 @@ ME = function ($) {
   } // Editor
 
   Editor.prototype = {
+    /**
+     * Change the current mode to the given id
+     * 
+     * @param {String} modeId The id of the mode (e.g. textile)
+     */
     changeMode: function(modeId) {
       var nextMode;
       if(!modeId || modeId === this.currentMode.id) {
@@ -305,6 +440,9 @@ ME = function ($) {
       nextMode.activate();
       this.currentMode = nextMode;
     },
+    /**
+     * @returns {Mode} The current datamode
+     */
     getDataMode: function() {
       return this.getMode(this.dataType);
     },
