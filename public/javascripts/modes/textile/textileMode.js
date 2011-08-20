@@ -2,6 +2,13 @@ ME.addMode("textile", function() {
   var text, selectionStart, startOfParagraphs, endOfParagraphs, oldExtendedSelectionLength, currentNodes = {},
   $ = jQuery;
 
+  /**
+   * Iterate over each paragraph and call the functor on it and set the paragraphs
+   * CONSIDER rename or move setParagraphs out of it
+   * 
+   * @param {Mode} mode The current mode
+   * @param {Function} functor The functor will be applied on each paragraph
+   */
   function eachParagraph(toolbar, functor) {
     var mode = toolbar.editor.currentMode, paragraphs = mode.getParagraphs(), paragraphsLength = paragraphs.length;
 
@@ -11,6 +18,12 @@ ME.addMode("textile", function() {
     mode.setParagraphs(paragraphs);
   }
 
+  /**
+   * Execute align command
+   * 
+   * @param {Mode} mode The current mode
+   * @param {String} orientation The orientation of the alignment
+   */
   function align(toolbar, orientation) {
     eachParagraph(toolbar, function(paragraph) {
       var classes, classesLength, newClasses = [];
@@ -32,6 +45,13 @@ ME.addMode("textile", function() {
     });
   }
 
+  /**
+   * Scan the textarea for the first match and set selection to it.
+   * This is useful e.g. for finding a link markup with a given source
+   * 
+   * @param {Mode} mode The current mode
+   * @param {RegExp} r The regexp to search for
+   */
   function scanForMatch(toolbar,r){
     match = r.exec(text);
     if(r.lastIndex === 0){
@@ -217,10 +237,18 @@ ME.addMode("textile", function() {
         }
       }
     },
+    /**
+     * Compile textile and update the preview div
+     */
     updatePreview: function() {
       var html = textileCompiler.compile(this.textArea.val());
       this.htmlDiv.html(html);
     },
+    /**
+     * Convert preview div to textile
+     * 
+     * @returns {String} A textile string
+     */
     toText: function(html) {
       if(!html){
         html = this.htmlDiv.html();
@@ -257,6 +285,11 @@ ME.addMode("textile", function() {
 
       return html;
     },
+    /**
+     * Get the states for the current selection
+     * 
+     * @return {Object} An object representing the states
+     */
     getStates: function() {
       var paragraphs = this.getExtendedSelection(),
       startTrace = selectionStart - startOfParagraphs,
@@ -265,6 +298,13 @@ ME.addMode("textile", function() {
 
       return this.buildStateObject(trace, currentNodes = {});
     },
+    /**
+     * Get the paragraphs containing the current selection
+     * 
+     * CONSIDER remove this? is it only needed for getParagraphs?
+     * 
+     * @returns {String} The paragraphs
+     */
     getExtendedSelection: function(){
       var paragraphIndex, searchIndex = 0, extendedSelection;
       selectionStart = this.textArea[0].selectionStart;
@@ -291,9 +331,17 @@ ME.addMode("textile", function() {
 
       return extendedSelection;
     },
+    /**
+     * @returns {String[]} An array of paragraphs
+     */
     getParagraphs: function() {
       return this.getExtendedSelection().split(/\n\n+/);
     },
+    /**
+     * Set the paragraphs and move the caret
+     * 
+     * @param {String[]} paragraphs An array of paragraphs
+     */
     setParagraphs: function(paragraphs) {
       paragraphs = paragraphs.join("\n\n");
 
@@ -305,11 +353,17 @@ ME.addMode("textile", function() {
       
       this.moveCaret(paragraphs.length - oldExtendedSelectionLength);
     },
-    moveCaret: function(offset) {
-      console.log("Moving caret: " + offset);
+    /**
+     * Move the caret by the given distance. Positive values move the caret to 
+     * the right, negative to the left.
+     * 
+     * @param {Integer} distance The distance to move the caret
+     */
+    moveCaret: function(distance) {
+      // console.log("Moving caret: " + distance);
 
-      if(Math.abs(selectionStart - startOfParagraphs) > Math.abs(offset)) {
-        selectionStart += offset;
+      if(Math.abs(selectionStart - startOfParagraphs) > Math.abs(distance)) {
+        selectionStart += distance;
       } else {
         selectionStart = startOfParagraphs;
       }

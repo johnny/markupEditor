@@ -1,4 +1,16 @@
-textileCompiler = (function (){
+(function (){
+  /**
+   * @name Builder
+   * 
+   * The builder compiles the textile. It can also trace the common nodes between
+   * a start and an end point.
+   * 
+   * Therefore it has two stacks: one for building and one for tracing
+   */
+  
+  /**
+   * @type Builder
+   */
   var builder = (function (){
     var stack, tracingStack, stackPosition, traceJustStarted, traceJustEnded, popping, pointer, sP, eP, tracing, lastTrace, unsuccessfulPush = false;
     definableAttributes = {
@@ -6,17 +18,31 @@ textileCompiler = (function (){
       a: ['href']
     };
 
-    function iterateOverAttributes(tag, callBack){
+    /**
+     * Iterate over the attributes of the given tag and call the callback.
+     * Used for comparison of the attributes of two nodes
+     * 
+     * @param {String} tag
+     * @param {Function} callback
+     */
+    function iterateOverAttributes(tag, callback){
       var attributes = ['class'],i;
       if(definableAttributes[tag]){
         attributes = attributes.concat(definableAttributes[tag]);
       }
       for(i = attributes.length;i--;){
-        callBack(attributes[i]);
+        callback(attributes[i]);
       }
     }
     
-    function moveStackUp(targetNode){
+    /**
+     * Test if the tracing stack can be moved down again with the given node.
+     * 
+     * @param {TraceNode} targetNode The node to test
+     * 
+     * @returns {Boolean}
+     */
+    function canMoveStackDown(targetNode){
       var equalTag = true, key, equalAttributes = true, blockTag = (stackPosition == -1), stackNode, i, l;
       if(blockTag){
         stackNode = tracingStack[0];
@@ -49,11 +75,24 @@ textileCompiler = (function (){
       return stackNode && (blockTag || equalAttributes);
     }
 
+    /**
+     * Create a new TraceNode form a given node
+     * @constructor
+     * 
+     * @param {object} node 
+     */
     function traceNode(node){
       return {tag: node.tag,
               attributes: node.attributes};
     }
 
+    /**
+     * Create a open-tag for the given node
+     * 
+     * @param {object} node
+     * 
+     * @return {String}
+     */
     function htmlOpenTag(node){
       var attributeString = "";
       for(attr in node.attributes){
@@ -64,6 +103,14 @@ textileCompiler = (function (){
       return "<" + node.tag + attributeString + ">";
     }
 
+    /**
+     * Warning! this supposes, that there is only one instance of any tag in
+     * the stack
+     * 
+     * @param {String} tag
+     * 
+     * @returns {Integer} The stack position of the given tag
+     */
     function getStackPositionOf(tag){
       var i;
       for(i = stack.length;i--; ){
@@ -73,6 +120,9 @@ textileCompiler = (function (){
       }
     }
 
+    /**
+     * Start the tracing
+     */
     function startTrace(){
       var length = stack.length, i;
       // console.log("################################## startTrace");
@@ -85,6 +135,9 @@ textileCompiler = (function (){
       stackPosition = tracingStack.length -1;
     }
     
+    /**
+     * End the tracing
+     */
     function endTrace(){
       // console.log("#################################### endTrace");
       // console.log(tracingStack.length);
@@ -92,10 +145,19 @@ textileCompiler = (function (){
       tracing = false;
     }
 
+    /**
+     * @lends Builder
+     */
     return {
+      /**
+       * Initialize Builder for normal operation
+       */
       init: function(){
         stack = [{content:""}];
       },
+      /**
+       * Initialize Builder for tracing operation
+       */
       initTrace: function(startPosition, endPosition){
         tracingStack = [];
         tracing = undefined;
@@ -103,11 +165,20 @@ textileCompiler = (function (){
         sP = startPosition;
         eP = endPosition;
       },
+      /**
+       * Definitly ends the trace
+       */
       finalizeTrace: function(){
         if(tracing){
           endTrace();
         }
       },
+      /**
+       * Advance the pointer by the given amount.
+       * Handles starting and ending of the trace
+       * 
+       * @param {Integer} advanceAmount
+       */
       advancePointer: function(advanceAmount){
         pointer += advanceAmount;
         // console.log("pointer",pointer,"endPointer", eP);
@@ -120,6 +191,12 @@ textileCompiler = (function (){
           lastTrace = true;
         }
       },
+      /**
+       * Push a tag to the build stack
+       * 
+       * @param {String} tag
+       * @param {Object} attributes
+       */
       pushTag: function(tag, attributes){
         var node = {tag: tag,
                     attributes: attributes || {},
@@ -133,7 +210,7 @@ textileCompiler = (function (){
             stackPosition += 1;
           }
           else if(tracingStack[stackPosition+1]){
-            if(moveStackUp(node)){
+            if(canMoveStackDown(node)){
               stackPosition += 1;
             } else {
               unsuccessfulPush = true;
@@ -142,6 +219,12 @@ textileCompiler = (function (){
           // console.log("stackPosition " + stackPosition);
         }
       },
+      /**
+       * Close a tag. If a tag is given find it and close it. Otherwise the top
+       * tag is closed
+       * 
+       * @param {String} [tag]
+       */
       closeTag: function(tag){
         var removedNode, i;
         if(tag){
@@ -175,6 +258,10 @@ textileCompiler = (function (){
         this.pushString("</"+removedNode.tag+">"); 
         popping = false;
       },
+      /**
+       * Closes all textile markup that ends at a line break.
+       * For example "*" or "_"
+       */
       popLineEnd: function(){
         var surpressLineBreak = false, partialMarkup = {b: "*", i: "_"}, node;
         // If the need arises to search deeper think of the correct
@@ -190,11 +277,20 @@ textileCompiler = (function (){
         }
         return surpressLineBreak;
       },
+      /**
+       * Closes all open tags
+       */
       popParagraphEnd: function(){
         while(stack.length > 1){
           this.closeTag();
         }
       },
+      /**
+       * Add a string to the given node or the top node.
+       * 
+       * @param {String} string
+       * @param {Object} [node] defaults to the top node in the stack
+       */
       pushString: function(string, node){
         if(!node){
           node = stack[stack.length - 1];
@@ -214,13 +310,26 @@ textileCompiler = (function (){
           }
         }
       },
+      /**
+       * Check if the given tag is open
+       * 
+       * @param {String} tag
+       * 
+       * @returns {Boolean}
+       */
       isOpen: function(tag){
         // console.log("check is Open", tag, stack.length);
         return typeof getStackPositionOf(tag) === 'number';
       },
+      /**
+       * @returns {Object} The trace stack
+       */
       getTrace: function(){
         return tracingStack;
       },
+      /**
+       * @returns {String} The compiled html
+       */
       toHtml: function(){
         // console.log(stack);
         return stack[0].content;
@@ -385,7 +494,7 @@ textileCompiler = (function (){
     }
   }
   
-  return {
+  textileCompiler = {
     compile: function(textToCompile){
       builder.init();
       text = textToCompile;
