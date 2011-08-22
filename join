@@ -2,7 +2,7 @@
 
 files = %w{plugins/isValid  markupEditor util plugins/enhanceTextfield plugins/combobox dialog modes/textile/textileMode modes/textile/bruteForceCompiler modes/wysiwygMode}
 
-File.open('public/javascripts/joined.js','w') do |file|
+File.open('source/javascripts/joined.js','w') do |file|
   files.each do |filename|
     regexp = /( # Match she-bang style C-comment
     \/\*[!*]   # Opening delimiter.
@@ -16,15 +16,15 @@ File.open('public/javascripts/joined.js','w') do |file|
     $\s*\/\/.*      # One line comments
     )/x
 
-    file.puts File.open('public/javascripts/' + filename + '.js').read #.gsub(regexp, '')
+    file.puts File.open('source/javascripts/' + filename + '.js').read #.gsub(regexp, '')
   end
 end
 
 require 'rubygems'
 require 'closure-compiler'
-File.open('public/javascripts/joined-min.js','w') do |file|
+File.open('source/javascripts/joined-min.js','w') do |file|
   # closure = Closure::Compiler.new(:compilation_level => 'ADVANCED_OPTIMIZATIONS')
   closure = Closure::Compiler.new
-  file.puts closure.compile(File.open('public/javascripts/joined.js', 'r'))
+  file.puts closure.compile(File.open('source/javascripts/joined.js', 'r'))
 end
 

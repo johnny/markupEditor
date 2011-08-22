@@ -1,4 +1,4 @@
-var ME = function ($) {
+(function ($) {
   var globalSettings = {}, availableModes = {}, toolbarItems = {}, toolbarHTML = "",
   availableItems = ['bold','italic','alignLeft','alignCenter','alignRight','unorderedList','orderedList','link','insertImage','save','wysiwyg','changeDataMode','formatBlock'],
   globalItems = [],
@@ -7,13 +7,15 @@ var ME = function ($) {
   /**
    * Create a new Mode
    * @constructor
+   * @name Mode
    * @param {Object} customFunctions these functions will be added to the Mode object
    */
   function Mode(customFunctions){
     $.extend(this, customFunctions);
     this.prototype = Mode.prototype;
   }
-  Mode.prototype = {
+  
+  Mode.prototype = /** @scope Mode.prototype */ {
     /**
      * This loads the mode for the current Editor
      * TODO this is ugly. why should every editor have every mode?
@@ -50,6 +52,8 @@ var ME = function ($) {
     },
     /**
      * Handle clicks on the textarea or html div
+     *
+     * @function
      */
     clicked: emptyFunction,
     /**
@@ -293,8 +297,10 @@ var ME = function ($) {
 
   /**
    * Create a button for the toolbar
+   *
    * @constructor
-   * 
+   * @name ToolbarButton
+   *
    * @param {String} name The class name of the button
    * @param {Function} [clicked] The default action if the button is clicked
    */
@@ -305,7 +311,7 @@ var ME = function ($) {
       globalItems.push(name);
     }
   }
-  ToolbarButton.prototype = {
+  ToolbarButton.prototype = /** @scope ToolbarButton.prototype */{
     /**
      * @returns {String} A html string of the button
      */
@@ -316,7 +322,9 @@ var ME = function ($) {
 
   /**
    * Create a select for the toolbar
+   *
    * @constructor
+   * @name ToolbarSelect
    * 
    * @param {String} name The class name of the button
    * @param {Array} [options] The options of the select dropdown
@@ -326,7 +334,7 @@ var ME = function ($) {
     ToolbarButton.apply(this, [name, clicked]);
     this.options = options || [];
   }
-  ToolbarSelect.prototype = {
+  ToolbarSelect.prototype = /** @scope ToolbarSelect.prototype */{
     /**
      * @returns {String} A html string of the button
      */
@@ -364,6 +372,7 @@ var ME = function ($) {
    * items of the toolbar can be defined on a per editor basis (save callback)
    *
    * @constructor
+   * @name Toolbar
    */
   function Toolbar(editor) {
 
@@ -415,7 +424,7 @@ var ME = function ($) {
     editor.container.prepend(toolbarDiv);
   } // end initToolbar
 
-  Toolbar.prototype = {
+  Toolbar.prototype = /** @scope Toolbar.prototype */{
     /**
      * Load the toolbar for the current mode. If a toolbar item is not
      * supported, it will be hidden.
@@ -491,8 +500,10 @@ var ME = function ($) {
    * 
    * An editor has a current mode and a textarea mode. Both are the same if you 
    * edit the textarea directly (e.g. textile). In the wysiwyg mode you edit the
-   * html directly. 
+   * html directly.
+   *
    * @constructor
+   * @name Editor
    * 
    * @param {jQuery} textArea The textarea
    * @param {Object} settings Editor specific settings
@@ -511,15 +522,15 @@ var ME = function ($) {
         if(isTextarea || editor.is('wysiwyg')){
           return editor.currentMode.pressed(e.keyCode);
         }
-        }).keyup(function(e){
-          if(isTextarea || editor.is('wysiwyg')){
-            return editor.currentMode.released(e.keyCode);
-          }
-        }).mouseup(function(){
-          if(isTextarea || editor.is('wysiwyg')){
-            return editor.currentMode.clicked();
-          }
-        });
+      }).keyup(function(e){
+        if(isTextarea || editor.is('wysiwyg')){
+          return editor.currentMode.released(e.keyCode);
+        }
+      }).mouseup(function(){
+        if(isTextarea || editor.is('wysiwyg')){
+          return editor.currentMode.clicked();
+        }
+      });
     }
     
     this.textArea = textArea.bind("mouseup keyup", function() {
@@ -534,10 +545,10 @@ var ME = function ($) {
     
     this.htmlDiv = $("<div class=\"preview\"></div>")
       .bind("mouseup keyup", function() {
-      // TODO check for specific mouse keys
-      if(editor.is("wysiwyg")) {
-        editor.checkState();
-      }
+        // TODO check for specific mouse keys
+        if(editor.is("wysiwyg")) {
+          editor.checkState();
+        }
       });
     addKeyListeners(this.htmlDiv);
     
@@ -547,7 +558,7 @@ var ME = function ($) {
     this.toolbar = new Toolbar(this);
   } // Editor
 
-  Editor.prototype = {
+  Editor.prototype = /** @scope Editor.prototype */{
     /**
      * Change the current mode to the given id
      * 
@@ -628,11 +639,19 @@ var ME = function ($) {
     }
   }; // end Editor prototype
 
+  /**
+   * Initialize the editor from a given HTML element
+   *
+   * @memberOf ME
+   * @inner
+   * @param {jQuery} container The element which will be editable
+   * @param {Option} settings Settings for this editor
+   */
   function initEditorFromHTML(container, settings){
     container.css("min-height", container.height());
     var editor,
     textarea = $("<textarea class=\"" + container[0].className + "\">")
-    .prependTo(container); // needs to be attached to DOM in firefox
+      .prependTo(container); // needs to be attached to DOM in firefox
     
     editor = initEditorFromTextarea(textarea, settings);
     editor.htmlDiv.append(editor.container.nextAll());
@@ -643,6 +662,14 @@ var ME = function ($) {
     container.append(editor.container);
   }
   
+  /**
+   * Initialize the editor from a given textarea
+   *
+   * @memberOf ME
+   * @inner
+   * @param {jQuery} textarea The textarea which will be enhanced
+   * @param {Option} instanceSettings Settings for this editor
+   */
   function initEditorFromTextarea(textarea,instanceSettings){
     var editor,settings = {};
     $.extend(settings,globalSettings,instanceSettings);
@@ -660,7 +687,18 @@ var ME = function ($) {
     return editor;
   }
 
-  var ME = {
+  /**
+   * @namespace Holds all public methods
+   */
+  ME = {
+    /**
+     * Add a mode
+     *
+     * TODO change spec to object
+     * @param {String} modeId The id of the mode as referenced
+     * internally
+     * @param {Function} spec The definiton of the mode
+     */
     addMode: function(modeId, spec) {
       var mode = spec(), items = mode.items, constructor, supportedItems = globalItems.slice();
       mode.id = modeId;
@@ -693,12 +731,39 @@ var ME = function ($) {
       };
       return mode;
     },
+    /**
+     * The global options of markup editor
+     *
+     * @class
+     * @property {Function} save The save callback. Takes the editor
+     * as parameter
+     */
     options: {},
+    /**
+     * Set the options
+     *
+     * @see ME#options for settable options
+     *
+     * @param {Object} options The options object
+     */
     setOptions: function(options){
       this.options = options;
     }
   };
 
+  /**
+   * @name jQuery
+   * @namespace The popular DOM utility
+   */
+
+  /**
+   * Create the markup editor
+   *
+   * @memberOf jQuery.prototype
+   *
+   * @param {Object} settings The specific settings for the editor
+   * @see ME#settings
+   */
   $.fn.initMarkupEditor = function(settings) {
     ME.settings = settings;
     this.each(function(index,element) {
@@ -737,4 +802,4 @@ var ME = function ($) {
   });
 
   return ME;
-}(jQuery);
+})(jQuery);

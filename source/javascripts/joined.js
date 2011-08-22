@@ -64,22 +64,24 @@
     removeLabelChar: '*'
   };
 })(jQuery);
-var ME = function ($) {
+(function ($) {
   var globalSettings = {}, availableModes = {}, toolbarItems = {}, toolbarHTML = "",
-  availableItems = ['bold','italic','alignLeft','alignCenter','alignRight','unorderedList','orderedList','link','insertImage','save','changeMode','formatBlock'],
+  availableItems = ['bold','italic','alignLeft','alignCenter','alignRight','unorderedList','orderedList','link','insertImage','save','wysiwyg','changeDataMode','formatBlock'],
   globalItems = [],
   emptyFunction = $.noop;
 
   /**
    * Create a new Mode
    * @constructor
+   * @name Mode
    * @param {Object} customFunctions these functions will be added to the Mode object
    */
   function Mode(customFunctions){
     $.extend(this, customFunctions);
     this.prototype = Mode.prototype;
   }
-  Mode.prototype = {
+  
+  Mode.prototype = /** @scope Mode.prototype */ {
     /**
      * This loads the mode for the current Editor
      * TODO this is ugly. why should every editor have every mode?
@@ -93,18 +95,14 @@ var ME = function ($) {
       console.log("loaded Mode " + this.name);
     },
     /**
-     * This is a placeholder. Each mode should define its version
-     * @returns {Object} an object that describes the states
-     * @see Toolbar#setActive
-     * @api
-     */
-    getStates: emptyFunction,
-    /**
      * The default pressed function to handle key combos (shift + x)
      */
     pressed: function(keyCode){
       if(keyCode === 16){
         this.holdShift = true;
+      }
+      if(ME.util.isNeutralKey(keyCode)){
+        this.holdNeutralKey = true;
       }
     },
     /**
@@ -114,7 +112,16 @@ var ME = function ($) {
       if(keyCode === 16){
         this.holdShift = false;
       }
+      if(ME.util.isNeutralKey(keyCode)){
+        this.holdNeutralKey = false;
+      }
     },
+    /**
+     * Handle clicks on the textarea or html div
+     *
+     * @function
+     */
+    clicked: emptyFunction,
     /**
      * Activate this mode for the editor
      */
@@ -153,8 +160,31 @@ var ME = function ($) {
       this.htmlDiv.attr("contentEditable",false);
     },
     /**
-     * Iterates over the given nodes and builds the state object which defines 
-     * the active buttons
+     * Get a state object which sets defines the states of the buttons
+     * and the selects.
+     * @returns {Object} an object that describes the states
+     */
+    getStates: function(){
+      var states = this.getSelectionStates();
+      if(this.id === 'wysiwyg'){
+        states.wysiwyg = true;
+      } else {
+        states.changeDataMode = this.id;
+      }
+      return states;
+    },
+    /**
+     * This is a placeholder. Each mode should define its version
+     * @returns {Object} an object that describes the states
+     * @see Toolbar#getStates
+     * @api
+     */
+    getSelectionStates: function(){
+      return {};
+    },
+    /**
+     * A helper function that builds a state object from the given
+     * nodes, that defines the active buttons
      * 
      * CONSIDER make currentNodes a property
      * @param {Array} nodes The active nodes (e.g. a,li). The highest node is on the right
@@ -327,13 +357,16 @@ var ME = function ($) {
         this.selectionStart -= match[0].length;
         return match[0];
       }
-    }
-  };
+    }};
+  
+  
 
   /**
    * Create a button for the toolbar
+   *
    * @constructor
-   * 
+   * @name ToolbarButton
+   *
    * @param {String} name The class name of the button
    * @param {Function} [clicked] The default action if the button is clicked
    */
@@ -344,7 +377,7 @@ var ME = function ($) {
       globalItems.push(name);
     }
   }
-  ToolbarButton.prototype = {
+  ToolbarButton.prototype = /** @scope ToolbarButton.prototype */{
     /**
      * @returns {String} A html string of the button
      */
@@ -355,17 +388,19 @@ var ME = function ($) {
 
   /**
    * Create a select for the toolbar
+   *
    * @constructor
+   * @name ToolbarSelect
    * 
    * @param {String} name The class name of the button
-   * @param {Array} [options] The options of the select
+   * @param {Array} [options] The options of the select dropdown
    * @param {Function} [clicked] The default action if the button is clicked
    */
   function ToolbarSelect(name, options, clicked){
     ToolbarButton.apply(this, [name, clicked]);
     this.options = options || [];
   }
-  ToolbarSelect.prototype = {
+  ToolbarSelect.prototype = /** @scope ToolbarSelect.prototype */{
     /**
      * @returns {String} A html string of the button
      */
@@ -403,6 +438,7 @@ var ME = function ($) {
    * items of the toolbar can be defined on a per editor basis (save callback)
    *
    * @constructor
+   * @name Toolbar
    */
   function Toolbar(editor) {
 
@@ -454,7 +490,7 @@ var ME = function ($) {
     editor.container.prepend(toolbarDiv);
   } // end initToolbar
 
-  Toolbar.prototype = {
+  Toolbar.prototype = /** @scope Toolbar.prototype */{
     /**
      * Load the toolbar for the current mode. If a toolbar item is not
      * supported, it will be hidden.
@@ -530,8 +566,10 @@ var ME = function ($) {
    * 
    * An editor has a current mode and a textarea mode. Both are the same if you 
    * edit the textarea directly (e.g. textile). In the wysiwyg mode you edit the
-   * html directly. 
+   * html directly.
+   *
    * @constructor
+   * @name Editor
    * 
    * @param {jQuery} textArea The textarea
    * @param {Object} settings Editor specific settings
@@ -545,6 +583,22 @@ var ME = function ($) {
 
     if(!this.dataType) { return ;}
 
+    function addKeyListeners(object, isTextarea){
+      object.keydown(function(e){
+        if(isTextarea || editor.is('wysiwyg')){
+          return editor.currentMode.pressed(e.keyCode);
+        }
+      }).keyup(function(e){
+        if(isTextarea || editor.is('wysiwyg')){
+          return editor.currentMode.released(e.keyCode);
+        }
+      }).mouseup(function(){
+        if(isTextarea || editor.is('wysiwyg')){
+          return editor.currentMode.clicked();
+        }
+      });
+    }
+    
     this.textArea = textArea.bind("mouseup keyup", function() {
       // TODO check for specific mouse keys
       editor.checkState();
@@ -552,21 +606,17 @@ var ME = function ($) {
       timer = setTimeout(function(){
         editor.currentMode.updatePreview();
       },1000);
-    }).keydown(function(e){
-      return editor.currentMode.pressed(e.keyCode);
-    }).keyup(function(e){
-      return editor.currentMode.released(e.keyCode);
     });
+    addKeyListeners(textArea,true);
     
     this.htmlDiv = $("<div class=\"preview\"></div>")
       .bind("mouseup keyup", function() {
-      // TODO check for specific mouse keys
-      if(editor.is("wysiwyg")) {
-        editor.checkState();
-      }
-      }).keydown(function(e){
-        return editor.currentMode.pressed(e.keyCode);
+        // TODO check for specific mouse keys
+        if(editor.is("wysiwyg")) {
+          editor.checkState();
+        }
       });
+    addKeyListeners(this.htmlDiv);
     
     this.container = textArea.wrap("<div class=\"markupEditor\"></div>")
       .parent().append(editor.htmlDiv);
@@ -574,7 +624,7 @@ var ME = function ($) {
     this.toolbar = new Toolbar(this);
   } // Editor
 
-  Editor.prototype = {
+  Editor.prototype = /** @scope Editor.prototype */{
     /**
      * Change the current mode to the given id
      * 
@@ -582,13 +632,25 @@ var ME = function ($) {
      */
     changeMode: function(modeId) {
       var nextMode;
-      if(!modeId || modeId === this.currentMode.id) {
-        return false;
-      }
       nextMode = this.getMode(modeId);
       this.commit();
       this.currentMode = nextMode;
       nextMode.activate();
+    },
+    /**
+     * Change the current underlying data format
+     * 
+     * @param {String} modeId The id of the mode (e.g. textile)
+     */
+    changeDataMode: function(modeId){
+      var isInWysiwyg = this.is('wysiwyg');
+      if(!modeId || modeId === this.currentMode.id) {
+        return false;
+      }
+      this.changeMode(modeId);
+      if(isInWysiwyg){
+        this.changeMode('wysywyg');
+      }
     },
     /**
      * @returns {Mode} The current datamode
@@ -596,6 +658,13 @@ var ME = function ($) {
     getDataMode: function() {
       return this.getMode(this.dataType);
     },
+    /**
+     * Get the specified mode. Loads it if necessary
+     *
+     * @param {String} modeId The id of the mode (e.g. textile)
+     *
+     * @returns {Mode} The initialized mode
+     */
     getMode: function(modeId) {
       if(this.loadedModes[modeId]) {
         return this.loadedModes[modeId];
@@ -636,21 +705,37 @@ var ME = function ($) {
     }
   }; // end Editor prototype
 
+  /**
+   * Initialize the editor from a given HTML element
+   *
+   * @memberOf ME
+   * @inner
+   * @param {jQuery} container The element which will be editable
+   * @param {Option} settings Settings for this editor
+   */
   function initEditorFromHTML(container, settings){
     container.css("min-height", container.height());
     var editor,
     textarea = $("<textarea class=\"" + container[0].className + "\">")
-    .prependTo(container); // needs to be attached to DOM in firefox
+      .prependTo(container); // needs to be attached to DOM in firefox
     
     editor = initEditorFromTextarea(textarea, settings);
     editor.htmlDiv.append(editor.container.nextAll());
     editor.currentMode.updateTextArea();
     editor.changeMode("wysiwyg");
-    editor.toolbar.setActive({changeMode: "wysiwyg"});
+    editor.checkState();
     
     container.append(editor.container);
   }
   
+  /**
+   * Initialize the editor from a given textarea
+   *
+   * @memberOf ME
+   * @inner
+   * @param {jQuery} textarea The textarea which will be enhanced
+   * @param {Option} instanceSettings Settings for this editor
+   */
   function initEditorFromTextarea(textarea,instanceSettings){
     var editor,settings = {};
     $.extend(settings,globalSettings,instanceSettings);
@@ -664,11 +749,22 @@ var ME = function ($) {
       editor.currentMode = editor.getMode("wysiwyg");
     }
     editor.currentMode.activate();
-    editor.toolbar.setActive({changeMode: editor.currentMode.id});
+    editor.checkState();
     return editor;
   }
 
-  var ME = {
+  /**
+   * @namespace Holds all public methods
+   */
+  ME = {
+    /**
+     * Add a mode
+     *
+     * TODO change spec to object
+     * @param {String} modeId The id of the mode as referenced
+     * internally
+     * @param {Function} spec The definiton of the mode
+     */
     addMode: function(modeId, spec) {
       var mode = spec(), items = mode.items, constructor, supportedItems = globalItems.slice();
       mode.id = modeId;
@@ -685,8 +781,10 @@ var ME = function ($) {
           }
         }
       }
-      
-      toolbarItems.changeMode.options.push([modeId, mode.name]);
+
+      if(modeId !== 'wysiwyg'){
+        toolbarItems.changeDataMode.options.push([modeId, mode.name]);
+      }
 
       mode.supportedItems = supportedItems;
       
@@ -699,12 +797,39 @@ var ME = function ($) {
       };
       return mode;
     },
+    /**
+     * The global options of markup editor
+     *
+     * @class
+     * @property {Function} save The save callback. Takes the editor
+     * as parameter
+     */
     options: {},
+    /**
+     * Set the options
+     *
+     * @see ME#options for settable options
+     *
+     * @param {Object} options The options object
+     */
     setOptions: function(options){
       this.options = options;
     }
   };
 
+  /**
+   * @name jQuery
+   * @namespace The popular DOM utility
+   */
+
+  /**
+   * Create the markup editor
+   *
+   * @memberOf jQuery.prototype
+   *
+   * @param {Object} settings The specific settings for the editor
+   * @see ME#settings
+   */
   $.fn.initMarkupEditor = function(settings) {
     ME.settings = settings;
     this.each(function(index,element) {
@@ -718,8 +843,8 @@ var ME = function ($) {
     return this;
   };
 
-  toolbarItems.changeMode = new ToolbarSelect("changeMode", [], function(editor, mode, target) {
-    editor.changeMode(target.value);
+  toolbarItems.changeDataMode = new ToolbarSelect("changeDataMode", [], function(editor, mode, target) {
+    editor.changeDataMode(target.value);
   });
 
   toolbarItems.formatBlock = new ToolbarSelect("formatBlock",[
@@ -734,8 +859,16 @@ var ME = function ($) {
     editor.settings.save(editor);
   });
 
+  toolbarItems.wysiwyg = new ToolbarButton("wysiwyg", function(editor, mode){
+    if(editor.is('wysiwyg')){
+      editor.changeMode(editor.dataType);
+    } else {
+      editor.changeMode('wysiwyg');
+    }
+  });
+
   return ME;
-}(jQuery);
+})(jQuery);
 (function(ME){
   // Do not include Enter, Backspace, Delete
   neutralKeys = "9.16.17.18.20.27.33.34.35.36.37.38.39.40.45.91.93.93";
@@ -747,7 +880,7 @@ var ME = function ($) {
     isRemovalKey: function (keyCode){
       return keyCode == 46 || keyCode == 8;
     }
-  }
+  };
 })(ME);
 (function($, ME){
   var isNeutralKey = ME.util.isNeutralKey,
@@ -1071,6 +1204,13 @@ ME.addMode("textile", function() {
   var text, selectionStart, startOfParagraphs, endOfParagraphs, oldExtendedSelectionLength, currentNodes = {},
   $ = jQuery;
 
+  /**
+   * Iterate over each paragraph and call the functor on it and set the paragraphs
+   * CONSIDER rename or move setParagraphs out of it
+   * 
+   * @param {Mode} mode The current mode
+   * @param {Function} functor The functor will be applied on each paragraph
+   */
   function eachParagraph(mode, functor) {
     var paragraphs = mode.getParagraphs(), paragraphsLength = paragraphs.length;
 
@@ -1118,6 +1258,12 @@ ME.addMode("textile", function() {
     return lines[0];
   }
 
+  /**
+   * Execute align command
+   * 
+   * @param {Mode} mode The current mode
+   * @param {String} orientation The orientation of the alignment
+   */
   function align(mode, orientation) {
     eachParagraph(mode, function(paragraph) {
       var classes, classesLength, newClasses = [];
@@ -1139,6 +1285,13 @@ ME.addMode("textile", function() {
     });
   }
 
+  /**
+   * Scan the textarea for the first match and set selection to it.
+   * This is useful e.g. for finding a link markup with a given source
+   * 
+   * @param {Mode} mode The current mode
+   * @param {RegExp} r The regexp to search for
+   */
   function scanForMatch(mode,r){
     var match = r.exec(text);
     if(r.lastIndex === 0){
@@ -1357,19 +1510,47 @@ ME.addMode("textile", function() {
         }
       }
     },
+    /**
+     * Compile textile and update the preview div
+     */
     updatePreview: function() {
       var html = textileCompiler.compile(this.textArea.val());
       this.htmlDiv.html(html);
     },
+    /**
+     * Convert preview div to textile
+     * 
+     * @returns {String} A textile string
+     */
     toText: function(html) {
       if(!html){
         html = this.htmlDiv.html();
       }
 
+      function eachRegexp(tags, callback){
+        var i, item,
+        items = {
+          b: [/<(?:b|strong)>((.|[\r\n])*?)<\/(?:b|strong)>/gi,'*'],
+          i: [ /<(?:i|em)>((.|[\r\n])*?)<\/(?:i|em)>/gi, '_'],
+          del: [ /<(?:strike|del)>((.|[\r\n])*?)<\/(?:strike|del)>/gi, '-'],
+          u: [ /<(?:u|ins)>((.|[\r\n])*?)<\/(?:u|ins)>/gi, '+']
+        };
+        for(i = tags.length; i; i--){
+          item = items[tags[i-1]];
+          callback(item[0], item[1]);
+        }
+      }
+
       html = html.replace(/\s*<(ul|ol)>((.|[\r\n])*?)<\/\1>\s*/gi, function(match, tag, items){
         var bullet = tag == 'ul' ? '*' : '#';
+        
+        eachRegexp(['b','i', 'u', 'del'], function(regexp, delimiter){
+          items = items.replace(regexp, delimiter + '$1' + delimiter);
+        });
+
         return items.replace(/\s*<li>((.|[\r\n])*?)<\/li>\s*/gi, bullet + " $1\n") + "\n";
       });
+      
       html = html.replace(/ *<(p|h[1-4])([^>]*)>((.|[\r\n])*?)<\/\1>\s*/gi, function(match, tag, attributes, content){
         var front = "", cssClass = attributes.match(/class=\"([^"]*)/);
         if(cssClass){
@@ -1377,12 +1558,16 @@ ME.addMode("textile", function() {
         } else if(tag != "p"){
           front = tag + ". ";
         }
+
+        eachRegexp(['b','i', 'u', 'del'], function(regexp, d){
+          content = content.replace(regexp, function(match, text){
+            return d + text.replace(/<br ?\/?>\s*/gi, d + "\n" + d) + d;
+          });
+        });
+        
         return front + content.replace(/<br ?\/?>\s*/gi, "\n") + "\n\n";
       });
-      html = html.replace(/<(?:b|strong)>((.|[\r\n])*?)<\/(?:b|strong)>/gi, '*$1*');
-      html = html.replace(/<(?:i|em)>((.|[\r\n])*?)<\/(?:i|em)>/gi, '_$1_');
-      html = html.replace(/<(?:strike|del)>((.|[\r\n])*?)<\/(?:strike|del)>/gi, '-$1-');
-      html = html.replace(/<(?:u|ins)>((.|[\r\n])*?)<\/(?:u|ins)>/gi, '+$1+');
+      
       html = html.replace(/<img[^>]*>/gi, function(match){
         var img = $(match),
         replacement = img.attr('src'),
@@ -1407,7 +1592,12 @@ ME.addMode("textile", function() {
 
       return html;
     },
-    getStates: function() {
+    /**
+     * Get the states for the current selection
+     * 
+     * @return {Object} An object representing the states
+     */
+    getSelectionStates: function() {
       var paragraphs = this.getExtendedSelection(),
       startTrace = selectionStart - startOfParagraphs,
       endTrace = selectionEnd - startOfParagraphs;
@@ -1415,6 +1605,13 @@ ME.addMode("textile", function() {
 
       return this.buildStateObject(trace, currentNodes = {});
     },
+    /**
+     * Get the paragraphs containing the current selection
+     * 
+     * CONSIDER remove this? is it only needed for getParagraphs?
+     * 
+     * @returns {String} The paragraphs
+     */
     getExtendedSelection: function(){
       var paragraphIndex, searchIndex = 0, extendedSelection;
       selectionStart = this.textArea[0].selectionStart;
@@ -1441,9 +1638,17 @@ ME.addMode("textile", function() {
 
       return extendedSelection;
     },
+    /**
+     * @returns {String[]} An array of paragraphs
+     */
     getParagraphs: function() {
       return this.getExtendedSelection().split(/\n\n+/);
     },
+    /**
+     * Set the paragraphs and move the caret
+     * 
+     * @param {String[]} paragraphs An array of paragraphs
+     */
     setParagraphs: function(paragraphs) {
       paragraphs = paragraphs.join("\n\n");
 
@@ -1455,11 +1660,17 @@ ME.addMode("textile", function() {
       
       this.moveCaret(paragraphs.length - oldExtendedSelectionLength);
     },
-    moveCaret: function(offset) {
-      console.log("Moving caret: " + offset);
+    /**
+     * Move the caret by the given distance. Positive values move the caret to 
+     * the right, negative to the left.
+     * 
+     * @param {Integer} distance The distance to move the caret
+     */
+    moveCaret: function(distance) {
+      // console.log("Moving caret: " + distance);
 
-      if(Math.abs(selectionStart - startOfParagraphs) > Math.abs(offset)) {
-        selectionStart += offset;
+      if(Math.abs(selectionStart - startOfParagraphs) > Math.abs(distance)) {
+        selectionStart += distance;
       } else {
         selectionStart = startOfParagraphs;
       }
@@ -1478,7 +1689,19 @@ ME.addMode("textile", function() {
     }
   };
 });
-textileCompiler = (function (){
+(function (){
+  /**
+   * @name Builder
+   * 
+   * The builder compiles the textile. It can also trace the common nodes between
+   * a start and an end point.
+   * 
+   * Therefore it has two stacks: one for building and one for tracing
+   */
+  
+  /**
+   * @type Builder
+   */
   var builder = (function (){
     var stack, tracingStack, stackPosition, traceJustStarted, traceJustEnded, popping, pointer, sP, eP, tracing, lastTrace, unsuccessfulPush = false, stringLength,
     ignoredTags = ['li'],
@@ -1487,17 +1710,31 @@ textileCompiler = (function (){
       a: ['href']
     };
 
-    function iterateOverAttributes(tag, callBack){
+    /**
+     * Iterate over the attributes of the given tag and call the callback.
+     * Used for comparison of the attributes of two nodes
+     * 
+     * @param {String} tag
+     * @param {Function} callback
+     */
+    function iterateOverAttributes(tag, callback){
       var attributes = ['class'],i;
       if(definableAttributes[tag]){
         attributes = attributes.concat(definableAttributes[tag]);
       }
       for(i = attributes.length;i--;){
-        callBack(attributes[i]);
+        callback(attributes[i]);
       }
     }
     
-    function moveStackUp(targetNode){
+    /**
+     * Test if the tracing stack can be moved down again with the given node.
+     * 
+     * @param {TraceNode} targetNode The node to test
+     * 
+     * @returns {Boolean}
+     */
+    function canMoveStackDown(targetNode){
       var equalTag = true, key, equalAttributes = true, blockTag = (stackPosition == -1), stackNode, i, l;
       if(blockTag){
         // List nodes should be weaker than a paragraph node
@@ -1538,11 +1775,24 @@ textileCompiler = (function (){
       return stackNode && (blockTag || equalAttributes);
     }
 
+    /**
+     * Create a new TraceNode form a given node
+     * @constructor
+     * 
+     * @param {object} node 
+     */
     function TraceNode(node){
       this.tag = node.tag;
       this.attributes = node.attributes;
     }
 
+    /**
+     * Create a open-tag for the given node
+     * 
+     * @param {object} node
+     * 
+     * @return {String}
+     */
     function htmlOpenTag(node){
       var attributeString = "";
       for(attr in node.attributes){
@@ -1553,6 +1803,14 @@ textileCompiler = (function (){
       return "<" + node.tag + attributeString + ">";
     }
 
+    /**
+     * Warning! this supposes, that there is only one instance of any tag in
+     * the stack
+     * 
+     * @param {String} tag
+     * 
+     * @returns {Integer} The stack position of the given tag
+     */
     function getStackPositionOf(tag){
       var i;
       for(i = stack.length;i--; ){
@@ -1562,6 +1820,9 @@ textileCompiler = (function (){
       }
     }
 
+    /**
+     * Start the tracing
+     */
     function startTrace(){
       var length = stack.length, i, numberOfIgnoredTags = 0;
       // console.log("################################## startTrace");
@@ -1578,6 +1839,9 @@ textileCompiler = (function (){
       stackPosition = tracingStack.length -1;
     }
     
+    /**
+     * End the tracing
+     */
     function endTrace(){
       // console.log("#################################### endTrace");
       // console.log(tracingStack.length);
@@ -1585,10 +1849,19 @@ textileCompiler = (function (){
       tracing = false;
     }
 
+    /**
+     * @lends Builder
+     */
     return {
+      /**
+       * Initialize Builder for normal operation
+       */
       init: function(){
         stack = [{content:""}];
       },
+      /**
+       * Initialize Builder for tracing operation
+       */
       initTrace: function(startPosition, endPosition, lengthOfString){
         tracingStack = [];
         tracing = undefined;
@@ -1597,11 +1870,21 @@ textileCompiler = (function (){
         eP = endPosition;
         stringLength = lengthOfString;
       },
+      /**
+       * Definitly ends the trace
+       */
       finalizeTrace: function(){
         if(tracing){
           endTrace();
         }
       },
+      /**
+       * Advance the pointer by the given amount.
+       * Handles starting and ending of the trace
+       * 
+       * @param {Integer} advanceAmount
+       * @param {Boolean} forceEndTrace wether to forcably end the trace
+       */
       advancePointer: function(advanceAmount, forceEndTrace){
         pointer += advanceAmount;
         // console.log("pointer",pointer,"startPointer", sP, "endPointer", eP);
@@ -1617,6 +1900,12 @@ textileCompiler = (function (){
           }
         }
       },
+      /**
+       * Push a tag to the build stack
+       * 
+       * @param {String} tag
+       * @param {Object} attributes
+       */
       pushTag: function(tag, attributes){
         var node = {tag: tag,
                     attributes: attributes || {},
@@ -1630,7 +1919,7 @@ textileCompiler = (function (){
             stackPosition += 1;
           }
           else if(tracingStack[stackPosition+1]){
-            if(moveStackUp(node)){
+            if(canMoveStackDown(node)){
               stackPosition += 1;
             } else {
               unsuccessfulPush = true;
@@ -1639,6 +1928,12 @@ textileCompiler = (function (){
           // console.log("stackPosition " + stackPosition);
         }
       },
+      /**
+       * Close a tag. If a tag is given find it and close it. Otherwise the top
+       * tag is closed
+       * 
+       * @param {String} [tag]
+       */
       closeTag: function(tag){
         var removedNode, i;
         if(tag){
@@ -1672,6 +1967,10 @@ textileCompiler = (function (){
         this.pushString("</"+removedNode.tag+">"); 
         popping = false;
       },
+      /**
+       * Closes all textile markup that ends at a line break.
+       * For example "*" or "_"
+       */
       popLineEnd: function(){
         var surpressLineBreak = false, partialMarkup = {b: "*", i: "_"}, node;
         // If the need arises to search deeper think of the correct
@@ -1687,11 +1986,20 @@ textileCompiler = (function (){
         }
         return surpressLineBreak;
       },
+      /**
+       * Closes all open tags
+       */
       popParagraphEnd: function(){
         while(stack.length > 1){
           this.closeTag();
         }
       },
+      /**
+       * Add a string to the given node or the top node.
+       * 
+       * @param {String} string
+       * @param {Object} [node] defaults to the top node in the stack
+       */
       pushString: function(string, node){
         if(!node){
           node = stack[stack.length - 1];
@@ -1711,6 +2019,13 @@ textileCompiler = (function (){
           }
         }
       },
+      /**
+       * Check if the given tag is open
+       * 
+       * @param {String} tag
+       * 
+       * @returns {Boolean}
+       */
       isOpen: function(tag){
         // console.log("check is Open", tag, stack.length);
         return typeof getStackPositionOf(tag) === 'number';
@@ -1723,9 +2038,15 @@ textileCompiler = (function (){
           this.closeTag();
         }
       },
+      /**
+       * @returns {Object} The trace stack
+       */
       getTrace: function(){
         return tracingStack;
       },
+      /**
+       * @returns {String} The compiled html
+       */
       toHtml: function(){
         // console.log(stack);
         return stack[0].content;
@@ -1894,7 +2215,7 @@ textileCompiler = (function (){
     }
   }
   
-  return {
+  textileCompiler = {
     compile: function(textToCompile){
       builder.init();
       text = textToCompile;
@@ -1977,16 +2298,7 @@ ME.addMode("wysiwyg",function() {
     var contents, lines, $p, $list;
     
     if(/ on$/.test(target.className)){
-      // get list items and detach them from the dom
-      contents = mode.getSelection('li');
-
-      lines = [];
-      // insert their contents into a paragraph tag and seperate
-      // them by and <br>
-      addListItems(lines, contents.firstChild);
-      $p = $("<p>").html(lines.join("<br>"));
-
-      mode.replaceSelection(editor, $p);
+      disableList(editor, mode);
     } else {
       contents = mode.getSelection('br');
       
@@ -2000,6 +2312,19 @@ ME.addMode("wysiwyg",function() {
     }
   }
 
+  function disableList(editor, mode){
+    // get list items and detach them from the dom
+    contents = mode.getSelection('li');
+
+    lines = [];
+    // insert their contents into a paragraph tag and seperate
+    // them by and <br>
+    addListItems(lines, contents.firstChild);
+    $p = $("<p>").html(lines.join("<br>"));
+
+    mode.replaceSelection(editor, $p);
+  }
+
   /**
    * Create a new Border with the following properties
    *
@@ -2009,7 +2334,10 @@ ME.addMode("wysiwyg",function() {
    * @property {HTMLElement} block
    * @property {HTMLElement} safeBlock
    * @property {HTMLElement} borderNode
+   * Is null when border node is not found. That means the node has no
+   * more siblings
    * @property {HTMLElement} node
+   * Equals borderNode if it exists, otherwise its the last sibling
    *
    * @param {HTMLElement} node
    * @param {String} borderType The nodeName of the border node
@@ -2023,7 +2351,7 @@ ME.addMode("wysiwyg",function() {
     this.borderNode = this.ancestors[this.ancestors.length -2] || node[0];
     while(this.borderNode){
       this.node = this.borderNode;
-      if(this.borderNode.nodeName.toLowerCase() === borderType){
+      if(!borderType || this.borderNode.nodeName.toLowerCase() === borderType){
         break;
       }
       this.borderNode = this.borderNode[nextProperty];
@@ -2056,6 +2384,7 @@ ME.addMode("wysiwyg",function() {
         pushItem();
         createList(list, node.firstChild);
       } else if(/(o|u)l/i.test(node.nodeName)) {
+        pushItem();
         $(node).children().appendTo(list);
       } else if(/li/i.test(node.nodeName)) {
         pushItem();
@@ -2107,6 +2436,39 @@ ME.addMode("wysiwyg",function() {
     }
   }
 
+
+  /**
+   * Check the position of the caret and adjust the container the
+   * caret is in when necessary
+   *
+   * @param {Integer} adjustment Adjust the current offset (needed for
+   * arrow keys
+   */
+  function checkCaret(adjustment){
+    var range = selection.getRangeAt(0),node, text;
+    function checkSibling(property, collapse){
+      while(!node[property]){
+        node = node.parentNode;
+      }
+      node = node[property];
+      if(node && !/br|h\d|p/i.test(node.nodeName)){
+        selectNodes([node], collapse);
+        return false;
+      }
+    }
+    if(range.collapsed){
+      node = range.startContainer;
+      if(node.nodeType == 3){ // Its a textnode
+        text = node.nodeValue;
+        if(range.startOffset + adjustment === 0 && /^ /.test(text)){
+          return checkSibling('previousSibling', false);
+        } else if(range.startOffset + adjustment === node.length && / $/.test(text)){
+          return checkSibling('nextSibling', true);
+        }
+      }
+    }
+  }
+
   /**
    * @browserbug Firefox and Chrome
    */
@@ -2142,51 +2504,113 @@ ME.addMode("wysiwyg",function() {
   }
 
   /**
+   * Handle the backspace key within lists and fixes a bug in Chrome.
+   *
    * @browserbug Chrome
+   * Chrome tries to keep the styles whilst backspacing from say a
+   * paragraph to a heading. The content of the paragraph looks like a
+   * paragraph, but is a heading
    */
-  function pressedBackspace(htmlDiv){
+  function pressedBackspace(mode, htmlDiv, editor){
     if(checkIfDeletedAll(htmlDiv,8) === false){
       return false;
     }
-    if(!$.browser.webkit){
+    var children, atBeginningOfLI,
+    inFirstSibling = true,
+    block = currentNodes.block,
+    list = currentNodes.list,
+    prev = (list || block).previousSibling,
+    range = selection.getRangeAt(0),
+    node = range.startContainer;
+
+    if(!range.collapsed || !prev || range.startOffset !== 0){
       return true;
     }
-    var inFirstSibling = true, node, children, prev, range,
-    block = currentNodes.block;
-
-    range = selection.getRangeAt(0);
-    node = range.startContainer;
 
     // only the first sibling
     while(node.parentNode !== htmlDiv[0]){
       if(node.previousSibling){
         inFirstSibling = false;
+        if(/li/i.test(node.nodeName)){
+          atBeginningOfLI = true;
+        } else {
+          return true;
+        }
         break;
       }
       node = node.parentNode;
     }
 
-    if(inFirstSibling
-       && range.startOffset === 0 // at the beginning
-      ){
-      node = $(block);
-      children = node.contents();
-      prev = node.prev();
-      if(prev[0]){
-        prev.append(children);
-        node.remove();
-        selectNodes([children[0]], true);
-        return false;
+    if(inFirstSibling){
+      if(list){
+        node = node.firstChild;
       }
+      node = $(node);
+      children = node.contents();
+
+      $(prev).append(children);
+      node.remove();
+      selectNodes([children[0]], true);
+    } else if(list && atBeginningOfLI){
+      disableList(editor,mode);
     }
+    
+    return false;
+  }
+
+  /**
+   * @browserbug Chrome
+   * bring Chrome to a normal behaviour
+   */
+  function pressedDelete(mode, htmlDiv, editor){
+    if(checkIfDeletedAll(htmlDiv,46) === false){
+      return false;
+    }
+    if(!$.browser.webkit){
+      return true;
+    }
+    var children,
+    block = currentNodes.block,
+    list = currentNodes.list,
+    next = (list || block).nextSibling,
+    range = selection.getRangeAt(0),
+    node = range.startContainer;
+
+    if(!range.collapsed || !next || range.startOffset !== node.length){
+      return true;
+    }
+
+    // only the first sibling
+    while(node.parentNode !== htmlDiv[0]){
+      if(node.nextSibling){
+        return true;
+      }
+      node = node.parentNode;
+    }
+
+    if(list){
+      // append to last list item
+      node = node.lastChild;
+    }
+    if(/(u|o)l/i.test(next.nodeName)){
+      // swallow only the first list item
+      next = next.firstChild;
+    }
+    next = $(next);
+    children = next.contents();
+
+    $(node).append(children);
+    next.remove();
+
+    return false;
   }
 
   /**
    * @browserbug Firefox
    */
-  function checkIfDeletedAll(htmlDiv, keyCode){
+  function checkIfDeletedAll(htmlDiv, keyCode, holdNeutralKey){
     var range = selection.getRangeAt(0);
-    if(!$.browser.mozilla || range.collapsed || ME.util.isNeutralKey(keyCode)){
+    if(!$.browser.mozilla || holdNeutralKey || range.collapsed || ME.util.isNeutralKey(keyCode)){
       return true;
     }
     var node, content;
@@ -2212,21 +2636,7 @@ ME.addMode("wysiwyg",function() {
     items: {
       "default": {
         clicked: function(editor, mode, target) {
-          var range = selection.getRangeAt(0), newNode;
-
-          if(/ on$/.test(target.className)){
-            document.execCommand(this.name, false, null);
-          } else {
-            // TODO try to shrink the selection in firefox instead of this
-            // Firefox needs this speciality. Pure execCommand wont
-            // work: The selection is too large and the bold button
-            // isnt on
-            newNode = document.createElement(this.tag);
-            range.surroundContents(newNode);
-            // This is neccessary for chrome. Otherwise the orange is gone
-            selection.removeAllRanges();
-            selection.addRange(range);
-          }
+          document.execCommand(this.name, false, null);
         }
       },
       bold: {
@@ -2391,12 +2801,21 @@ ME.addMode("wysiwyg",function() {
     },
     getSelection: function(nodeType){
       var range = selection.getRangeAt(0);
-      
-      this.leftBorder = new Border(startNode(), 'li', 'previousSibling');
-      this.rightBorder = new Border(endNode(), 'li', 'nextSibling');
+
+      this.collapsed = range.collapsed;
+
+      this.leftBorder = new Border(startNode(), nodeType, 'previousSibling');
+      this.rightBorder = new Border(endNode(), nodeType, 'nextSibling');
       
       range.setStartBefore(this.leftBorder.node);
       range.setEndAfter(this.rightBorder.node);
+
+      // split node if there are other nodes after the selection
+      if(this.rightBorder.borderNode){
+        $(this.rightBorder.borderNode).nextAll()
+          .appendTo('<' + this.rightBorder.block.nodeName + '>').parent()
+          .insertAfter(this.rightBorder.block);
+      }
 
       return range.extractContents();
     },
@@ -2406,7 +2825,12 @@ ME.addMode("wysiwyg",function() {
       } else {
         editor.htmlDiv.prepend(nodes);
       }
-      selectNodes(nodes);
+      
+      if(this.collapsed){
+        selectNodes(nodes, true);
+      } else {
+        selectNodes(nodes);
+      }
       
       // remove empty block tags
       // OPTIMIZE
@@ -2426,15 +2850,19 @@ ME.addMode("wysiwyg",function() {
         document.execCommand("styleWithCSS",null, false);
       }
     },
-    getStates: function() {
+    getSelectionStates: function() {
       if(!$(document.activeElement).is(".preview")){
-        return;
+        return {};
       }
 
       function getParents(node, content){
         // TODO document me! why is this here?
-        if(content && content.nodeName != "#text" && node[0].nodeName != "#text"){
-          node = node.find(content.nodeName.toLowerCase());
+        if(content){
+          var contentNodeName = content.nodeName,
+          nodeNodeName = node[0].nodeName;
+          if(contentNodeName != "#text" && nodeNodeName != "#text" && nodeNodeName != contentNodeName){
+            node = node.find(content.nodeName.toLowerCase());
+          }
         }
 
         return node.parentsUntil(".preview").add(node);
@@ -2442,7 +2870,7 @@ ME.addMode("wysiwyg",function() {
       
       var nodes = [], startNodes, endNodes,
       content = selection.getRangeAt(0).cloneContents().firstChild;
-      
+
       startNodes = getParents(startNode(), content);
       endNodes = getParents(endNode(), content);
 
@@ -2454,14 +2882,24 @@ ME.addMode("wysiwyg",function() {
       }
       return this.buildStateObject(nodes, currentNodes = {});
     },
+    clicked: function(){
+      checkCaret(0);
+    },
     pressed: function(keyCode){
+      this.prototype.pressed.apply(this, [keyCode]);
       switch(keyCode){
       case 13: // enter
         return pressedEnter(this.htmlDiv);
       case 8: // Backspace
-        return pressedBackspace(this.htmlDiv);
+        return pressedBackspace(this, this.htmlDiv, this.editor);
+      case 46: // Delete
+        return pressedDelete(this, this.htmlDiv, this.editor);
+      case 37: // left arrow
+        return checkCaret(-1);
+      case 39: // right arrow
+        return checkCaret(1);
       default:
-        return checkIfDeletedAll(this.htmlDiv, keyCode);
+        return checkIfDeletedAll(this.htmlDiv, keyCode, this.holdNeutralKey);
       }
     },
     toText: function() {

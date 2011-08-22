@@ -1,7 +1,7 @@
 #!/bin/sh
 
 cp README.mkd ..
-mm-build
+middleman build
 git commit -am 'Update joined files'
 git checkout gh-pages
 rm -R javascripts/ stylesheets/

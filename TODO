@@ -1,11 +1,4 @@
-* [17/29] Further improvements
-  - [-] publish project
-    - [ ] documentation
-    - [X] better static files handling:
-    - [X] package files
-      - [X] join and compress js files
-    - [X] push to github
-  - [X] decouple preview and data-modes
+* [18/29] Further improvements
   - [-] wysiwyg
     - [ ] Toolbar should work only if there is a range inside the preview
           (also the state checking)
@@ -63,6 +56,13 @@
     - [ ] fire native events (not supported in awesome, try in kde or windows)
   - [ ] clean and parse pasted html
   - [ ] handle blocktags within lists
+  - [X] decouple preview and data-modes
+  - [X] publish project
+    - [X] documentation
+    - [X] better static files handling:
+    - [X] package files
+      - [X] join and compress js files
+    - [X] push to github
   - [X] list functionality
     - [X] wysiwyg
       - [X] button click
