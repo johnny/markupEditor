@@ -1,7 +1,6 @@
 (function($) {
   // TODO cache fields
-  var opts, errorMsgType, initialized, methods;
-
+  var opts, errorMsgType, initialized,
   methods = {
     check: function(options) {
       var $this = this, valid = true;
@@ -43,6 +42,13 @@
     }
   };
 
+  /**
+   * Validates forms
+   *
+   * @memberOf jQuery.prototype
+   *
+   * @param {String} [method="init"] The method to call
+   */
   $.fn.isValid = function(method) {
     if (!methods[method]) {
       method = 'check';

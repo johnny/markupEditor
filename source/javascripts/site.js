@@ -1,14 +1,12 @@
 $(document).ready(function(){
-  $(".markup").initMarkupEditor({
+  $(".markup").markupEditor({
   });
 
-  $(".markupClick").one("click", function(){
-    $(this).initMarkupEditor({
-      save: function(editor){
-        console.log(editor);
-        console.log(editor.textArea.val());
-      }
-    });
+  $(".markupClick").markupEditor("prepare",{
+    save: function(editor){
+      console.log(editor);
+      console.log(editor.textArea.val());
+    }
   });
 
   ME.setOptions({uri: ['www.google.com','www.example.com','index.html']});

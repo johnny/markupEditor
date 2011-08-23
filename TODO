@@ -1,4 +1,5 @@
-* [18/29] Further improvements
+* [21/30] Further improvements
+  - [ ] flexible toolbar, which stays on top
   - [-] wysiwyg
     - [ ] Toolbar should work only if there is a range inside the preview
           (also the state checking)
@@ -26,12 +27,8 @@
         - [X] enter in the middle of a heading does not move the rest of the heading down
         - [X] selecting all by hand and deleting it leaves empty tags
               this is a result of the current implementation of checkIfDeletedAll
-  - [ ] textile
-    - [ ] replace this.tag
-  - [ ] add close editor
-  - [ ] flexible toolbar, which stays on top
-  - [ ] support haml
   - [ ] provide support for external mode select
+  - [ ] support haml
   - [-] Better Dialogs (for inspiration see gollum)
     - [ ] display errors as tooltips
     - [X] reset errors on open
@@ -56,6 +53,13 @@
     - [ ] fire native events (not supported in awesome, try in kde or windows)
   - [ ] clean and parse pasted html
   - [ ] handle blocktags within lists
+  - [X] click in blank area should not raise error
+  - [X] add close editor
+    - [X] basics
+    - [X] show only if configured
+    - [X] reopen should be possible
+  - [X] textile
+    - [X] replace this.tag
   - [X] decouple preview and data-modes
   - [X] publish project
     - [X] documentation

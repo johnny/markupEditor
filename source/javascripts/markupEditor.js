@@ -1,6 +1,6 @@
 (function ($) {
   var globalSettings = {}, availableModes = {}, toolbarItems = {}, toolbarHTML = "",
-  availableItems = ['bold','italic','alignLeft','alignCenter','alignRight','unorderedList','orderedList','link','insertImage','save','wysiwyg','changeDataMode','formatBlock'],
+  availableItems = ['bold','italic','alignLeft','alignCenter','alignRight','unorderedList','orderedList','link','insertImage','save','wysiwyg','close','changeDataMode','formatBlock'],
   globalItems = [],
   emptyFunction = $.noop;
 
@@ -108,10 +108,13 @@
       return states;
     },
     /**
-     * This is a placeholder. Each mode should define its version
-     * @returns {Object} an object that describes the states
+     * Get the state of the current selection. This is a placeholder.
+     * Each mode should define its version
+     *
      * @see Toolbar#getStates
      * @api
+     * 
+     * @returns {Object} an object that describes the states
      */
     getSelectionStates: function(){
       return {};
@@ -256,7 +259,7 @@
      * to the selection. Useful for special cases like toggling parts of a bolded
      * String in textile
      * 
-     * @param {Regexp} regexp The regexp
+     * @param {RegExp} regexp The regexp
      * 
      * @example
      * extendRightSelection(/ +/)
@@ -277,7 +280,7 @@
      * to the selection. Useful for special cases like toggling parts of a bolded
      * String in textile
      * 
-     * @param {Regexp} regexp The regexp.
+     * @param {RegExp} regexp The regexp.
      * 
      * @example
      * extendLeftSelection(/[ .]+/)
@@ -302,10 +305,13 @@
    * @name ToolbarButton
    *
    * @param {String} name The class name of the button
-   * @param {Function} [clicked] The default action if the button is clicked
+   * @param {Function} [clicked] The action if the button is clicked
+   * @param {Function} [isAvailable] Returns true if the the function
+   * is available in the current editer
    */
-  function ToolbarButton(name, clicked){
+  function ToolbarButton(name, clicked, isAvailable){
     this.name = name;
+    this.isAvailable = isAvailable;
     if(clicked){
       this.clicked = clicked;
       globalItems.push(name);
@@ -391,7 +397,7 @@
     toolbarDiv.mouseup(function(e) { // Trigger on button click
       var target = e.target;
 
-      if(!(/(select|option)/i).test(target.nodeName)) {
+      if((/(a|span)/i).test(target.nodeName)) {
         // When the span is clicked change the Target to the
         // containing div
         if(/span/i.test(target.nodeName)) {
@@ -420,8 +426,6 @@
       that.runAction(target.className, target);
       return false;
     }).click(function(e){return false; }); //
-
-    editor.container.prepend(toolbarDiv);
   } // end initToolbar
 
   Toolbar.prototype = /** @scope Toolbar.prototype */{
@@ -431,15 +435,15 @@
      */
     loadModeToolbar: function(){
       var supportedItems = this.editor.currentMode.supportedItems,
-      hasSave = this.editor.settings.save,
+      editor = this.editor,
       oldVisibleItems = this.visibleItems,
       newVisibleItems = [];
       
       // Optimize: better scheme. Calculate the differences between
       // the modes once and use them here
       this.div.children().each(function(){
-        var item = this.className;
-        if(supportedItems.indexOf(item) != -1 && (item !== "save" || hasSave)){
+        var item = this.className.split(' ')[0], isAvailable = toolbarItems[item].isAvailable;
+        if(supportedItems.indexOf(item) != -1 && (!isAvailable || isAvailable(editor))){
           if(!oldVisibleItems || oldVisibleItems.indexOf(item) == -1){
             $(this).show();
           }
@@ -509,7 +513,7 @@
    * @param {Object} settings Editor specific settings
    */
   function Editor(textArea, settings) {
-    var container, editor = this, timer = 0;
+    var editor = this, timer = 0, htmlDiv = settings.htmlDiv;
 
     this.loadedModes = {};
     this.setDataType(textArea.attr("class"));
@@ -542,9 +546,13 @@
       },1000);
     });
     addKeyListeners(textArea,true);
-    
-    this.htmlDiv = $("<div class=\"preview\"></div>")
-      .bind("mouseup keyup", function() {
+
+    if(htmlDiv){
+      htmlDiv.addClass('preview');
+    } else {
+      htmlDiv = $("<div class=\"preview\"></div>");
+    }
+    this.htmlDiv = htmlDiv.bind("mouseup keyup", function() {
         // TODO check for specific mouse keys
         if(editor.is("wysiwyg")) {
           editor.checkState();
@@ -552,10 +560,11 @@
       });
     addKeyListeners(this.htmlDiv);
     
-    this.container = textArea.wrap("<div class=\"markupEditor\"></div>")
-      .parent().append(editor.htmlDiv);
-    textArea.wrap("<div class=\"textarea\">");
     this.toolbar = new Toolbar(this);
+    this.container = textArea.wrap("<div class=\"markupEditor\"></div>")
+      .parent().append(editor.htmlDiv).
+      prepend(this.toolbar.div);
+    textArea.wrap("<div class=\"textarea\">");
   } // Editor
 
   Editor.prototype = /** @scope Editor.prototype */{
@@ -636,56 +645,17 @@
     checkState: function () {
       // check if the current Selection is inside a bold/italic etc.
       this.toolbar.setActive(this.currentMode.getStates());
+    },
+    close: function() {
+      var replacement = this.settings.htmlDiv || this.textArea;
+      this.commit();
+      
+      this.container.replaceWith(replacement);
+      replacement.removeClass('preview').unbind()
+        .attr('contentEditable',false).show()
+        .markupEditor('prepare', this.settings);
     }
   }; // end Editor prototype
-
-  /**
-   * Initialize the editor from a given HTML element
-   *
-   * @memberOf ME
-   * @inner
-   * @param {jQuery} container The element which will be editable
-   * @param {Option} settings Settings for this editor
-   */
-  function initEditorFromHTML(container, settings){
-    container.css("min-height", container.height());
-    var editor,
-    textarea = $("<textarea class=\"" + container[0].className + "\">")
-      .prependTo(container); // needs to be attached to DOM in firefox
-    
-    editor = initEditorFromTextarea(textarea, settings);
-    editor.htmlDiv.append(editor.container.nextAll());
-    editor.currentMode.updateTextArea();
-    editor.changeMode("wysiwyg");
-    editor.checkState();
-    
-    container.append(editor.container);
-  }
-  
-  /**
-   * Initialize the editor from a given textarea
-   *
-   * @memberOf ME
-   * @inner
-   * @param {jQuery} textarea The textarea which will be enhanced
-   * @param {Option} instanceSettings Settings for this editor
-   */
-  function initEditorFromTextarea(textarea,instanceSettings){
-    var editor,settings = {};
-    $.extend(settings,globalSettings,instanceSettings);
-    editor = new Editor(textarea, settings);
-
-    editor.currentMode = editor.getDataMode();
-
-    if(textarea.hasClass("wysiwyg")) {
-      // TODO better flow here
-      editor.currentMode.activate();
-      editor.currentMode = editor.getMode("wysiwyg");
-    }
-    editor.currentMode.activate();
-    editor.checkState();
-    return editor;
-  }
 
   /**
    * @namespace Holds all public methods
@@ -737,6 +707,10 @@
      * @class
      * @property {Function} save The save callback. Takes the editor
      * as parameter
+     * @property {Boolean} closable If true, the close button is
+     * visible
+     * @property {jQuery} htmlDiv The htmlDiv the editor has been
+     * loaded from
      */
     options: {},
     /**
@@ -749,32 +723,6 @@
     setOptions: function(options){
       this.options = options;
     }
-  };
-
-  /**
-   * @name jQuery
-   * @namespace The popular DOM utility
-   */
-
-  /**
-   * Create the markup editor
-   *
-   * @memberOf jQuery.prototype
-   *
-   * @param {Object} settings The specific settings for the editor
-   * @see ME#settings
-   */
-  $.fn.initMarkupEditor = function(settings) {
-    ME.settings = settings;
-    this.each(function(index,element) {
-      var $element = $(element);
-      if($element.is("textarea")) {
-        initEditorFromTextarea($element, settings);
-      } else {
-        initEditorFromHTML($element, settings);
-      }
-    });
-    return this;
   };
 
   toolbarItems.changeDataMode = new ToolbarSelect("changeDataMode", [], function(editor, mode, target) {
@@ -791,6 +739,8 @@
   toolbarItems.save = new ToolbarButton("save", function(editor){
     editor.commit();
     editor.settings.save(editor);
+  }, function(editor){
+    return editor.settings.save;
   });
 
   toolbarItems.wysiwyg = new ToolbarButton("wysiwyg", function(editor, mode){
@@ -801,5 +751,110 @@
     }
   });
 
-  return ME;
+  toolbarItems.close = new ToolbarButton('close', function(editor){
+    editor.close();
+  }, function(editor) {
+    var settings = editor.settings;
+    return settings.htmlDiv || settings.closable;
+  });
+
+  /**
+   * @name jQuery
+   * @namespace The popular DOM utility
+   */
+
+  var methods = {
+    /**
+     * Create the markup editor
+     *
+     * @param {Object} settings The specific settings for the editor
+     * @see ME#settings
+     */
+    init: function(settings) {
+      ME.settings = settings;
+      return this.each(function(index,element) {
+        var $element = $(element), editor;
+        if($element.is("textarea")) {
+          initEditorFromTextarea($element, settings);
+        } else {
+          initEditorFromHTML($element, settings);
+        }
+      });
+    },
+    close: function(){
+      // find ta and get number of editor
+      // execute editor.close
+    },
+    prepare: function(settings) {
+      return this.one('click', function(){
+        $(this).markupEditor(settings);
+      });
+    }
+  };
+  
+  /**
+   * Markupeditor method.
+   *
+   * @memberOf jQuery.prototype
+   *
+   * @param {String} [method="init"] The method to call
+   */
+  $.fn.markupEditor= function(method) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    if(typeof method === 'object'){
+      args.push(method);
+    }
+    if (!methods[method]) {
+      method = 'init';
+    }
+    return methods[method].apply(this, args);
+  };
+  
+  /**
+   * Initialize the editor from a given HTML element
+   *
+   * @memberOf ME
+   * @inner
+   * @param {jQuery} container The element which will be editable
+   * @param {Option} settings Settings for this editor
+   */
+  function initEditorFromHTML(container, settings){
+    container.css("min-height", container.height());
+    var editor,
+    textarea = $("<textarea class=\"" + container[0].className + "\">");
+    container.before(textarea); // needs to be attached to DOM in firefox
+
+    settings = settings || {};
+    settings.htmlDiv = container;
+    editor = initEditorFromTextarea(textarea, settings);
+    editor.currentMode.updateTextArea();
+    editor.changeMode("wysiwyg");
+    editor.checkState();
+  }
+  
+  /**
+   * Initialize the editor from a given textarea
+   *
+   * @memberOf ME
+   * @inner
+   * @param {jQuery} textarea The textarea which will be enhanced
+   * @param {Option} instanceSettings Settings for this editor
+   */
+  function initEditorFromTextarea(textarea,instanceSettings){
+    var editor,settings = {};
+    $.extend(settings,globalSettings,instanceSettings);
+    editor = new Editor(textarea, settings);
+
+    editor.currentMode = editor.getDataMode();
+
+    if(textarea.hasClass("wysiwyg")) {
+      // TODO better flow here
+      editor.currentMode.activate();
+      editor.currentMode = editor.getMode("wysiwyg");
+    }
+    editor.currentMode.activate();
+    editor.checkState();
+    return editor;
+  }
+  
 })(jQuery);

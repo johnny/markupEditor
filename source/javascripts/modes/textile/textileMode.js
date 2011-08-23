@@ -138,10 +138,6 @@ ME.addMode("textile", function() {
     }
   }
 
-  regexpes = {
-    "*": [/^(\w+\. )?\s*\*/, /\*([\.]*)$/],
-    "_": [/^(\w+\. )?\s*_/, /_([\.]*)$/]
-  };
   return {
     name: "Textile Mode",
     items: {
@@ -153,7 +149,7 @@ ME.addMode("textile", function() {
             if(/ on$/.test(target.className)){
               
               // first handle the left part
-              match = line.match(regexpes[that.delimiter][0]);
+              match = line.match(that.leftRegExp);
               if(match){
                 line = (match[1] || "") + line.slice(match[0].length);
               } else {
@@ -162,7 +158,7 @@ ME.addMode("textile", function() {
               }
 
               // Then handle the right
-              match = line.match(regexpes[that.delimiter][1]);
+              match = line.match(that.rightRegExp);
               if(match){
                 line = line.slice(0, - match[0].length) + (match[1] || ""); 
               } else {
@@ -179,10 +175,14 @@ ME.addMode("textile", function() {
         }
       },
       bold: {
-        delimiter: "*"
+        delimiter: "*",
+        leftRegExp: /^(\w+\. )?\s*\*/,
+        rightRegExp: /\*([\.]*)$/
       },
       italic: {
-        delimiter: "_"
+        delimiter: "_",
+        leftRegExp: /^(\w+\. )?\s*_/,
+        rightRegExp: /_([\.]*)$/
       },
       alignLeft: {
         clicked: function(editor, mode) {
