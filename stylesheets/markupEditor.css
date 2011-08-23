@@ -1,30 +1,38 @@
-/* line 3, ../../views/stylesheets/markupEditor.css.sass */
-form {
-  float: left; }
-  /* line 6, ../../views/stylesheets/markupEditor.css.sass */
-  form textarea {
-    clear: both;
-    height: 300px;
-    width: 500px; }
-    /* line 10, ../../views/stylesheets/markupEditor.css.sass */
-    form textarea.markup {
-      width: 490px;
-      border-top-width: 1px;
-      padding: 2px; }
-  /* line 16, ../../views/stylesheets/markupEditor.css.sass */
-  form .markupEditor {
-    -moz-border-radius: 1em 1em 1em 1em;
+.markupEditor {
+  margin-bottom: 10px; }
+  .markupEditor .textarea {
     background: none repeat scroll 0 0 #f9f9f9;
     border: 1px solid #e4e4e4;
-    margin: 1em 0 5em;
-    overflow: hidden;
-    padding: 1em;
-    width: 500px; }
-    /* line 24, ../../views/stylesheets/markupEditor.css.sass */
-    form .markupEditor .preview {
-      margin: 2em 0 0; }
-    /* line 27, ../../views/stylesheets/markupEditor.css.sass */
-    form .markupEditor .toolbar a {
+    width: 650px;
+    border-width: 0 1px 1px;
+    padding: 5px; }
+    .markupEditor .textarea textarea {
+      height: 300px;
+      width: 490px; }
+  .markupEditor .preview {
+    min-height: 300px;
+    padding: 0;
+    border: 1px dotted #e4e4e4;
+    background-color: #eeeeee;
+    background-image: -webkit-repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8) 20px, rgba(255, 255, 255, 0.5) 20px, rgba(255, 255, 255, 0.5) 40px);
+    background-image: -moz-repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8) 20px, rgba(255, 255, 255, 0.5) 20px, rgba(255, 255, 255, 0.5) 40px); }
+    .markupEditor .preview .left {
+      text-align: left; }
+    .markupEditor .preview .right {
+      text-align: right; }
+    .markupEditor .preview .center {
+      text-align: center; }
+    .markupEditor .preview h1, .markupEditor .preview h2, .markupEditor .preview h3, .markupEditor .preview h4, .markupEditor .preview p {
+      display: block; }
+    .markupEditor .preview p {
+      min-height: 1em; }
+  .markupEditor .toolbar {
+    background: none repeat scroll 0 0 #f9f9f9;
+    border: 1px solid #e4e4e4;
+    width: 650px;
+    padding: 3px 5px;
+    height: 32px; }
+    .markupEditor .toolbar a {
       -moz-border-radius: 0.3em;
       -webkit-border-radius: 0.3em;
       -o-border-radius: 0.3em;
@@ -44,12 +52,14 @@ form {
       overflow: hidden;
       text-shadow: 0 1px 0 white;
       width: 25px; }
-      /* line 42, ../../views/stylesheets/markupEditor.css.sass */
-      form .markupEditor .toolbar a.on {
+      .markupEditor .toolbar a.on {
         background: -webkit-gradient(linear, left top, left bottom, from(#599bdc), to(#3072b3));
         background: -moz-linear-gradient(top, #599bdc, #3072b3); }
-      /* line 45, ../../views/stylesheets/markupEditor.css.sass */
-      form .markupEditor .toolbar a:hover {
+      .markupEditor .toolbar a.disabled, .markupEditor .toolbar a.disabled:hover {
+        background: -webkit-gradient(linear, left top, left bottom, from(#fefefe), to(#f9f9f9));
+        background: -moz-linear-gradient(top, #fefefe, #f9f9f9);
+        cursor: default; }
+      .markupEditor .toolbar a:hover {
         background: -webkit-gradient(linear, left top, left bottom, from(#599bdc), to(#3072b3));
         background: -moz-linear-gradient(top, #599bdc, #3072b3);
         filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr='#599bdc', endColorstr='#3072b3');
@@ -57,12 +67,10 @@ form {
         color: white;
         text-decoration: none;
         text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3); }
-      /* line 53, ../../views/stylesheets/markupEditor.css.sass */
-      form .markupEditor .toolbar a.on:hover {
+      .markupEditor .toolbar a.on:hover {
         background: -webkit-gradient(linear, left top, left bottom, from(#f4f4f4), to(#ececec));
         background: -moz-linear-gradient(top, #f4f4f4, #ececec); }
-      /* line 56, ../../views/stylesheets/markupEditor.css.sass */
-      form .markupEditor .toolbar a span {
+      .markupEditor .toolbar a span {
         background-repeat: no-repeat;
         background-position: center;
         display: block;
@@ -70,36 +78,35 @@ form {
         overflow: hidden;
         text-indent: -5000px;
         width: 25px; }
-      /* line 64, ../../views/stylesheets/markupEditor.css.sass */
-      form .markupEditor .toolbar a.bold span {
+      .markupEditor .toolbar a.bold span {
         background-image: url("images/icons/text_bold.png"); }
-      /* line 66, ../../views/stylesheets/markupEditor.css.sass */
-      form .markupEditor .toolbar a.italic span {
+      .markupEditor .toolbar a.italic span {
         background-image: url("images/icons/text_italic.png"); }
-      /* line 68, ../../views/stylesheets/markupEditor.css.sass */
-      form .markupEditor .toolbar a.alignLeft span {
+      .markupEditor .toolbar a.alignLeft span {
         background-image: url("images/icons/text_align_left.png"); }
-      /* line 70, ../../views/stylesheets/markupEditor.css.sass */
-      form .markupEditor .toolbar a.alignRight span {
+      .markupEditor .toolbar a.alignRight span {
         background-image: url("images/icons/text_align_right.png"); }
-      /* line 72, ../../views/stylesheets/markupEditor.css.sass */
-      form .markupEditor .toolbar a.alignCenter span {
+      .markupEditor .toolbar a.alignCenter span {
         background-image: url("images/icons/text_align_center.png"); }
-      /* line 74, ../../views/stylesheets/markupEditor.css.sass */
-      form .markupEditor .toolbar a.link span {
+      .markupEditor .toolbar a.unorderedList span {
+        background-image: url("images/icons/text_list_bullets.png"); }
+      .markupEditor .toolbar a.orderedList span {
+        background-image: url("images/icons/text_list_numbers.png"); }
+      .markupEditor .toolbar a.link span {
         background-image: url("images/icons/link.png"); }
-      /* line 76, ../../views/stylesheets/markupEditor.css.sass */
-      form .markupEditor .toolbar a.insertImage span {
+      .markupEditor .toolbar a.insertImage span {
         background-image: url("images/icons/image.png"); }
-    /* line 78, ../../views/stylesheets/markupEditor.css.sass */
-    form .markupEditor .toolbar select {
+      .markupEditor .toolbar a.save span {
+        background-image: url("images/icons/disk.png"); }
+      .markupEditor .toolbar a.wysiwyg span {
+        background-image: url("images/icons/layout.png"); }
+    .markupEditor .toolbar select {
       background-color: #f9f9f9;
       border: 1px solid #f9f9f9;
       float: right;
       margin-bottom: 0;
       padding: 0.5em 0.7em; }
-      /* line 84, ../../views/stylesheets/markupEditor.css.sass */
-      form .markupEditor .toolbar select:hover {
+      .markupEditor .toolbar select:hover {
         -moz-border-radius: 0.5em;
         -webkit-border-radius: 0.5em;
         -o-border-radius: 0.5em;
@@ -108,31 +115,50 @@ form {
         border-radius: 0.5em;
         background-color: white;
         border: 1px solid #dddddd; }
-    /* line 89, ../../views/stylesheets/markupEditor.css.sass */
-    form .markupEditor .preview {
-      min-height: 300px; }
-      /* line 90, ../../views/stylesheets/markupEditor.css.sass */
-      form .markupEditor .preview .left {
-        text-align: left; }
-      /* line 92, ../../views/stylesheets/markupEditor.css.sass */
-      form .markupEditor .preview .right {
-        text-align: right; }
-      /* line 94, ../../views/stylesheets/markupEditor.css.sass */
-      form .markupEditor .preview .center {
-        text-align: center; }
 
-/* line 98, ../../views/stylesheets/markupEditor.css.sass */
 #link-dialog, #insertImage-dialog {
   display: none; }
-  /* line 101, ../../views/stylesheets/markupEditor.css.sass */
   #link-dialog label, #insertImage-dialog label {
+    display: block;
     float: left;
-    clear: left; }
-  /* line 104, ../../views/stylesheets/markupEditor.css.sass */
-  #link-dialog input, #insertImage-dialog input {
     clear: left;
+    width: 130px;
+    padding: 0.53em 0;
+    margin: 0 0.4em;
+    text-align: right; }
+  #link-dialog span.clearButton, #insertImage-dialog span.clearButton {
+    display: block;
+    float: left;
+    width: 300px;
+    margin: 0 0 0.4em;
+    border: 1px solid #d3d3d3; }
+    #link-dialog span.clearButton.focus, #insertImage-dialog span.clearButton.focus {
+      border: 1px solid #eec77c; }
+    #link-dialog span.clearButton.error, #insertImage-dialog span.clearButton.error {
+      color: #666666;
+      border: 1px solid red; }
+    #link-dialog span.clearButton.ui-corner-all, #insertImage-dialog span.clearButton.ui-corner-all {
+      width: 342px; }
+      #link-dialog span.clearButton.ui-corner-all input, #insertImage-dialog span.clearButton.ui-corner-all input {
+        width: 312px; }
+    #link-dialog span.clearButton input, #insertImage-dialog span.clearButton input {
+      width: 270px;
+      border: none;
+      padding: 0.49em 0;
+      margin: 0 0.4em; }
+      #link-dialog span.clearButton input:focus, #insertImage-dialog span.clearButton input:focus {
+        border: none;
+        outline: none; }
+    #link-dialog span.clearButton span, #insertImage-dialog span.clearButton span {
+      width: 10px;
+      cursor: pointer; }
+  #link-dialog input, #link-dialog select, #insertImage-dialog input, #insertImage-dialog select {
+    width: 300px;
+    padding: 0.6em 0;
+    margin: 0.4em 0; }
+  #link-dialog .ui-button, #insertImage-dialog .ui-button {
+    margin: 0;
+    margin-left: -1px;
     float: left; }
-  /* line 107, ../../views/stylesheets/markupEditor.css.sass */
-  #link-dialog select, #insertImage-dialog select {
-    clear: left;
-    float: left; }
+  #link-dialog .ui-button-icon-only .ui-button-text, #insertImage-dialog .ui-button-icon-only .ui-button-text {
+    padding: 0.36em; }

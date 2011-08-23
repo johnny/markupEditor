@@ -58,20 +58,26 @@ $(document).ready(function(){
               ]);
 
   textileTest("Unordered List",
-              ["* List", "<p><ul><li>List</li></ul></p>",
-               "  * List", "<p><ul><li>List</li></ul></p>",
-               "* List\n* ListItem2\n\n", "<p><ul><li>List</li><li>ListItem2</li></ul></p>",
-               "* List 1\nText between\n* List 2", "<p><ul><li>List 1</li></ul>Text between<ul><li>List 2</li></ul></p>",
+              ["* List", "<ul><li>List</li></ul>",
+               "  * List", "<ul><li>List</li></ul>",
+               "* List\n* ListItem2\n\n", "<ul><li>List</li><li>ListItem2</li></ul>",
+               "Text before\n* List 1\nText between\n* List 2\nText after", "<p>Text before</p><ul><li>List 1</li></ul><p>Text between</p><ul><li>List 2</li></ul><p>Text after</p>",
+               "* List 1\n\n* List 2", "<ul><li>List 1</li></ul><ul><li>List 2</li></ul>",
                "*No List", "<p>*No List</p>"
               ]);
 
   textileTest("Ordered List",
-              ["# List", "<p><ol><li>List</li></ol></p>",
-               "  # List", "<p><ol><li>List</li></ol></p>",
-               "# List\n# ListItem2\n\n", "<p><ol><li>List</li><li>ListItem2</li></ol></p>",
-               "# List 1\nText between\n# List 2", "<p><ol><li>List 1</li></ol>Text between<ol><li>List 2</li></ol></p>",
+              ["# List", "<ol><li>List</li></ol>",
+               "  # List", "<ol><li>List</li></ol>",
+               "# List\n# ListItem2\n\n", "<ol><li>List</li><li>ListItem2</li></ol>",
+               "Text before\n# List 1\nText between\n# List 2\nText after", "<p>Text before</p><ol><li>List 1</li></ol><p>Text between</p><ol><li>List 2</li></ol><p>Text after</p>",
+               "# List 1\n\n# List 2", "<ol><li>List 1</li></ol><ol><li>List 2</li></ol>",
                "#No List", "<p>#No List</p>"
               ]);
+
+  textileTest("Mixed List",
+              ["# List 1\n* List 2", "<ol><li>List 1</li></ol><ul><li>List 2</li></ul>"
+             ]);
 
   textileTest("Hyperlink",
               [" \"Title\":link", "<p> <a href=\"link\">Title</a></p>",
@@ -85,7 +91,8 @@ $(document).ready(function(){
               [" !src!", "<p> <img src=\"src\"></img></p>",
                "!src!:link", "<p><a href=\"link\"><img src=\"src\"></img></a></p>",
                "!src(title)!", "<p><img src=\"src\" title=\"title\"></img></p>",
-               "!src(title)!:link", "<p><a href=\"link\"><img src=\"src\" title=\"title\"></img></a></p>"
+               "!src(title)!:link", "<p><a href=\"link\"><img src=\"src\" title=\"title\"></img></a></p>",
+               "!src(title)!:link\n\nh2. Subheading", "<p><a href=\"link\"><img src=\"src\" title=\"title\"></img></a></p><h2>Subheading</h2>"
               ]);
 
   function parseParam(textile, param, end){
@@ -110,7 +117,11 @@ $(document).ready(function(){
       }
       for(; i<l ; i += 3 ){
         startTrace = parseParam(textile,selections[i]);
-        endTrace = parseParam(textile,selections[i+1],true);
+        if(typeof selections[i] === "string" && typeof selections[i+1] === "number"){
+          endTrace = startTrace + selections[i+1];
+        } else {
+          endTrace = parseParam(textile,selections[i+1],true);
+        }
         results = selections[i+2];
         trace = textileCompiler.trace(textile, startTrace, endTrace);
         console.log(trace);
@@ -201,6 +212,16 @@ $(document).ready(function(){
     ":link",":",['p','a',{tag: 'img', attr: {src: 'src2',title: 'Title'}}],
     "3!", "3", ['p','a',{tag: 'img', attr: {src: 'src3'}}]
     // Do some more specs with cursors over single entry
+  ]);
+
+  tracingTest("lists", "Text before\n# List1\n# List2\nText between\n* List3\n\n* List4\n# List5", [
+    "before", "between", ['p'],
+    "List1", "List2", ['ol'],
+    "List3", "List4", ['ul'],
+    "List2", "between", ['p'],
+    "List4", "List5", ['p'],
+    "List5", 0, ['ol'],
+    65, 65, ['ol']
   ]);
 });
 

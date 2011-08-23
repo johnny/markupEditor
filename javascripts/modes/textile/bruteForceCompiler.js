@@ -1,25 +1,60 @@
-textileCompiler = (function (){
+(function (){
+  /**
+   * @name Builder
+   * 
+   * The builder compiles the textile. It can also trace the common nodes between
+   * a start and an end point.
+   * 
+   * Therefore it has two stacks: one for building and one for tracing
+   */
+  
+  /**
+   * @type Builder
+   */
   var builder = (function (){
-    var stack, tracingStack, stackPosition, traceJustStarted, traceJustEnded, popping, pointer, sP, eP, tracing, lastTrace, unsuccessfulPush = false;
+    var stack, tracingStack, stackPosition, traceJustStarted, traceJustEnded, popping, pointer, sP, eP, tracing, lastTrace, unsuccessfulPush = false, stringLength,
+    ignoredTags = ['li'],
     definableAttributes = {
       img: ['title','src'],
       a: ['href']
     };
 
-    function iterateOverAttributes(tag, callBack){
+    /**
+     * Iterate over the attributes of the given tag and call the callback.
+     * Used for comparison of the attributes of two nodes
+     * 
+     * @param {String} tag
+     * @param {Function} callback
+     */
+    function iterateOverAttributes(tag, callback){
       var attributes = ['class'],i;
       if(definableAttributes[tag]){
         attributes = attributes.concat(definableAttributes[tag]);
       }
       for(i = attributes.length;i--;){
-        callBack(attributes[i]);
+        callback(attributes[i]);
       }
     }
     
-    function moveStackUp(targetNode){
+    /**
+     * Test if the tracing stack can be moved down again with the given node.
+     * 
+     * @param {TraceNode} targetNode The node to test
+     * 
+     * @returns {Boolean}
+     */
+    function canMoveStackDown(targetNode){
       var equalTag = true, key, equalAttributes = true, blockTag = (stackPosition == -1), stackNode, i, l;
       if(blockTag){
-        stackNode = tracingStack[0];
+        // List nodes should be weaker than a paragraph node
+        if(/(o|u)l/.test(tracingStack[0].tag)){
+          if(/(o|u)l/.test(targetNode.tag) && targetNode.tag != tracingStack[0].tag){
+            targetNode = {tag: 'p'};
+          }
+          stackNode = tracingStack[0] = targetNode;
+        } else {
+          stackNode = tracingStack[0];
+        }
       } else {
         for(i = stackPosition + 1, l = tracingStack.length; i < l; i++ ){
           if(tracingStack[i].tag === targetNode.tag){
@@ -49,11 +84,24 @@ textileCompiler = (function (){
       return stackNode && (blockTag || equalAttributes);
     }
 
-    function traceNode(node){
-      return {tag: node.tag,
-              attributes: node.attributes};
+    /**
+     * Create a new TraceNode form a given node
+     * @constructor
+     * 
+     * @param {object} node 
+     */
+    function TraceNode(node){
+      this.tag = node.tag;
+      this.attributes = node.attributes;
     }
 
+    /**
+     * Create a open-tag for the given node
+     * 
+     * @param {object} node
+     * 
+     * @return {String}
+     */
     function htmlOpenTag(node){
       var attributeString = "";
       for(attr in node.attributes){
@@ -64,6 +112,14 @@ textileCompiler = (function (){
       return "<" + node.tag + attributeString + ">";
     }
 
+    /**
+     * Warning! this supposes, that there is only one instance of any tag in
+     * the stack
+     * 
+     * @param {String} tag
+     * 
+     * @returns {Integer} The stack position of the given tag
+     */
     function getStackPositionOf(tag){
       var i;
       for(i = stack.length;i--; ){
@@ -73,18 +129,28 @@ textileCompiler = (function (){
       }
     }
 
+    /**
+     * Start the tracing
+     */
     function startTrace(){
-      var length = stack.length, i;
+      var length = stack.length, i, numberOfIgnoredTags = 0;
       // console.log("################################## startTrace");
       tracing = true;
       traceJustStarted = true;
       for(i=1;i<length;i++){
-        tracingStack[i-1] = traceNode(stack[i]);
+        if(ignoredTags.indexOf(stack[i].tag) == -1){
+          tracingStack[i-1 - numberOfIgnoredTags] = new TraceNode(stack[i]);
+        } else {
+          numberOfIgnoredTags += 1;
+        }
       }
       // console.log(tracingStack.length);
       stackPosition = tracingStack.length -1;
     }
     
+    /**
+     * End the tracing
+     */
     function endTrace(){
       // console.log("#################################### endTrace");
       // console.log(tracingStack.length);
@@ -92,48 +158,77 @@ textileCompiler = (function (){
       tracing = false;
     }
 
+    /**
+     * @lends Builder
+     */
     return {
+      /**
+       * Initialize Builder for normal operation
+       */
       init: function(){
         stack = [{content:""}];
       },
-      initTrace: function(startPosition, endPosition){
+      /**
+       * Initialize Builder for tracing operation
+       */
+      initTrace: function(startPosition, endPosition, lengthOfString){
         tracingStack = [];
         tracing = undefined;
         pointer = 0;
         sP = startPosition;
         eP = endPosition;
+        stringLength = lengthOfString;
       },
+      /**
+       * Definitly ends the trace
+       */
       finalizeTrace: function(){
         if(tracing){
           endTrace();
         }
       },
-      advancePointer: function(advanceAmount){
+      /**
+       * Advance the pointer by the given amount.
+       * Handles starting and ending of the trace
+       * 
+       * @param {Integer} advanceAmount
+       * @param {Boolean} forceEndTrace wether to forcably end the trace
+       */
+      advancePointer: function(advanceAmount, forceEndTrace){
         pointer += advanceAmount;
-        // console.log("pointer",pointer,"endPointer", eP);
-        if(tracing === undefined && pointer > sP){
+        // console.log("pointer",pointer,"startPointer", sP, "endPointer", eP);
+        if(tracing === undefined && (pointer > sP || pointer == stringLength)){
           startTrace();
         }
-        if(lastTrace){
-          endTrace();
-        } else if(tracing && pointer > eP){
-          lastTrace = true;
+        if(tracing && pointer > eP){
+          if(lastTrace || forceEndTrace){
+            endTrace();
+          } else {
+            // console.log("set last trace");
+            lastTrace = true;
+          }
         }
       },
+      /**
+       * Push a tag to the build stack
+       * 
+       * @param {String} tag
+       * @param {Object} attributes
+       */
       pushTag: function(tag, attributes){
         var node = {tag: tag,
                     attributes: attributes || {},
                     content: ""};
         // console.log("open tag", node);
         stack.push(node);
-        if(tracing){
+        if(tracing && ignoredTags.indexOf(tag) == -1){
           if(traceJustStarted){
             // console.log("inserting node ", node);
-            tracingStack[stackPosition+1] = traceNode(node);
+            tracingStack[stackPosition+1] = new TraceNode(node);
             stackPosition += 1;
           }
           else if(tracingStack[stackPosition+1]){
-            if(moveStackUp(node)){
+            if(canMoveStackDown(node)){
               stackPosition += 1;
             } else {
               unsuccessfulPush = true;
@@ -142,6 +237,12 @@ textileCompiler = (function (){
           // console.log("stackPosition " + stackPosition);
         }
       },
+      /**
+       * Close a tag. If a tag is given find it and close it. Otherwise the top
+       * tag is closed
+       * 
+       * @param {String} [tag]
+       */
       closeTag: function(tag){
         var removedNode, i;
         if(tag){
@@ -152,7 +253,7 @@ textileCompiler = (function (){
         }
 
         // console.log("closing", removedNode);
-        if(tracing){
+        if(tracing && ignoredTags.indexOf(tag) == -1){
           traceJustStarted = false;
           if(unsuccessfulPush){
             // console.log("slicing because of difference "+stackPosition);
@@ -175,6 +276,10 @@ textileCompiler = (function (){
         this.pushString("</"+removedNode.tag+">"); 
         popping = false;
       },
+      /**
+       * Closes all textile markup that ends at a line break.
+       * For example "*" or "_"
+       */
       popLineEnd: function(){
         var surpressLineBreak = false, partialMarkup = {b: "*", i: "_"}, node;
         // If the need arises to search deeper think of the correct
@@ -190,11 +295,20 @@ textileCompiler = (function (){
         }
         return surpressLineBreak;
       },
+      /**
+       * Closes all open tags
+       */
       popParagraphEnd: function(){
         while(stack.length > 1){
           this.closeTag();
         }
       },
+      /**
+       * Add a string to the given node or the top node.
+       * 
+       * @param {String} string
+       * @param {Object} [node] defaults to the top node in the stack
+       */
       pushString: function(string, node){
         if(!node){
           node = stack[stack.length - 1];
@@ -214,13 +328,34 @@ textileCompiler = (function (){
           }
         }
       },
+      /**
+       * Check if the given tag is open
+       * 
+       * @param {String} tag
+       * 
+       * @returns {Boolean}
+       */
       isOpen: function(tag){
         // console.log("check is Open", tag, stack.length);
         return typeof getStackPositionOf(tag) === 'number';
       },
+      blockTagIsOpen: function(){
+        return !!stack[1];
+      },
+      closeBlockTag: function(){
+        while(stack[1]){
+          this.closeTag();
+        }
+      },
+      /**
+       * @returns {Object} The trace stack
+       */
       getTrace: function(){
         return tracingStack;
       },
+      /**
+       * @returns {String} The compiled html
+       */
       toHtml: function(){
         // console.log(stack);
         return stack[0].content;
@@ -236,7 +371,7 @@ textileCompiler = (function (){
       whitespaceLength = /^\s*/.exec(match[0])[0].length;
       matchLength = match[0].length;
       if(whitespaceLength){
-        builder.advancePointer(whitespaceLength);
+        builder.advancePointer(whitespaceLength, true);
       }
       if(matchLength - whitespaceLength){
         builder.advancePointer(matchLength - whitespaceLength);
@@ -264,8 +399,6 @@ textileCompiler = (function (){
         }
 
         builder.pushTag(match[1], attributes);
-      } else {
-        builder.pushTag("p");
       }
       parseLines();
       builder.popParagraphEnd();
@@ -279,20 +412,26 @@ textileCompiler = (function (){
   }
   
   function parseLineStart(){
+    var match;
     if(advance(/^ *\* /)){
       if(!builder.isOpen("ul")){ // this won't work for nested uls,
         // solve with lookahead
+        builder.closeBlockTag();
         builder.pushTag("ul");
       }
       builder.pushTag("li");
     } else if(advance(/^ *# /)){
       if(!builder.isOpen("ol")){ // this won't work for nested uls
+        builder.closeBlockTag();
         builder.pushTag("ol");
       }
       builder.pushTag("li");
     } else {
       while(builder.isOpen("ul") || builder.isOpen("ol")){
         builder.closeTag();
+      }
+      if(!builder.blockTagIsOpen()){
+        builder.pushTag("p");
       }
     }
     // Eat Whitespace at the beginning of the Line after the tag
@@ -349,7 +488,7 @@ textileCompiler = (function (){
         builder.closeTag();
       }
       // Image
-      else if(match = advance(/^( *)!([^!\(]+)(\(([^\)]*)\))?!(:([^ ]+))?/)) {
+      else if(match = advance(/^( *)!([^!\(]+)(\(([^\)]*)\))?!(:([^ \n]+))?/)) {
         builder.pushString(match[1]);
         if(match[6]){
           builder.pushTag("a", {href: match[6]});
@@ -385,7 +524,7 @@ textileCompiler = (function (){
     }
   }
   
-  return {
+  textileCompiler = {
     compile: function(textToCompile){
       builder.init();
       text = textToCompile;
@@ -393,10 +532,9 @@ textileCompiler = (function (){
       return builder.toHtml();
     },
     trace: function(textToCompile, startTrace, endTrace){
-      builder.initTrace(startTrace, endTrace);
+      builder.initTrace(startTrace, endTrace, textToCompile.length);
       this.compile(textToCompile);
       builder.finalizeTrace();
-      // console.log(builder.toHtml());
       return builder.getTrace();
     }
   };

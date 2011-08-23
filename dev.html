@@ -5,56 +5,34 @@
     <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame -->
     <meta content='IE=edge,chrome=1' http-equiv='X-UA-Compatible' />
     <link type="text/css" href="/markupEditor/stylesheets/markupEditor.css" rel="stylesheet" media="screen" />
-    <link type="text/css" href="/markupEditor/stylesheets/smoothness/jquery-ui-1.8.9.custom.css" rel="stylesheet" media="screen" />
+    <link type="text/css" href="/markupEditor/stylesheets/smoothness/jquery-ui-1.8.13.custom.css" rel="stylesheet" media="screen" />
     <link type="text/css" href="/markupEditor/stylesheets/qunit.css" rel="stylesheet" media="screen" />
     <title>MarkupEditor Development</title>
   </head>
   <body class='dev'>
     <h1>MarkupEditor</h1>
     <form id='textile'>
-      <textarea class='markup textile'>h1. Test&#x000A;&#x000A;This is _a Test_ of the *textile* capabilities of ME.&#x000A;It should be "quite":http://example.com capable of handling many "major":http://example.com features.&#x000A;&#x000A;h2. Subheading&#x000A;&#x000A;lorem</textarea>
+      <textarea class='markup textile wysiwyg' name='textile'>h1. Test&#x000A;&#x000A;This is _a Test_ of the *textile* capabilities of ME.&#x000A;It should be "quite":example.com capable of handling many "major":example.com features.&#x000A;&#x000A;h2. Features&#x000A;&#x000A;* (un) ordered lists&#x000A;* links&#x000A;* images&#x000A;&#x000A;h2. Supported Markup Languages&#x000A;&#x000A;# textile&#x000A;# more to follow</textarea>
     </form>
-    <form id='html'>
-      <textarea class='markup html'><h1>Test</h1><p>This is <i>a</i> <i>Test</i> of the <b>textile</b> capabilities of ME.<br>It should be <a href="http://example.com">quite</a> capable of handling many <a href="http://example.com">major</a> features.<br>Test<br>test</p><p>test test test<br>asdf asdf sadf<br>asdfasdf saf saf saf asf asf<br>asdf asdf<br>bla</p><h2>Test 2</h2><p>hallo<br>bla<br>soso</p></textarea>
-    </form>
-    <form id='wysiwyg'>
-      <textarea class='markup html wysiwyg'><h1>Test</h1><p>This is <i>a</i> <i>Test</i> of the <b>textile</b> capabilities of ME.<br>It should be <a href="http://example.com">quite</a> capable of handling many <a href="http://example.com">major</a> features.<br>Test<br>test</p><p>test test test<br>asdf asdf sadf<br>asdfasdf saf saf saf asf asf<br>asdf asdf<br>bla</p><h2>Test 2</h2><p>hallo<br>bla<br>soso</p></textarea>
-    </form>
-    <form id='none'>
-      <textarea><h1>Test</h1><p>This is <i>a</i> <i>Test</i> of the <b>textile</b> capabilities of ME.<br>It should be <a href="http://example.com">quite</a> capable of handling many <a href="http://example.com">major</a> features.<br>Test<br>test</p><p>test test test<br>asdf asdf sadf<br>asdfasdf saf saf saf asf asf<br>asdf asdf<br>bla</p><h2>Test 2</h2><p>hallo<br>bla<br>soso</p></textarea>
-    </form>
-    <form id='not_present'>
-      <textarea class='markup unknownMode wysiwyg'><h1>Test</h1><p>This is <i>a</i> <i>Test</i> of the <b>textile</b> capabilities of ME.<br>It should be <a href="http://example.com">quite</a> capable of handling many <a href="http://example.com">major</a> features.<br>Test<br>test</p><p>test test test<br>asdf asdf sadf<br>asdfasdf saf saf saf asf asf<br>asdf asdf<br>bla</p><h2>Test 2</h2><p>hallo<br>bla<br>soso</p></textarea>
-    </form>
-    <div id='link-dialog' title='Link'>
-      <form>
-        <fieldset>
-          <label for="title">Title</label><input type="text" class="title" name="title" />
-          <label for="uri">Enter uri</label><input type="text" class="uri" name="uri" />
-          <select class="uri" name="uri-select">
-          <option value="">or select uri</option>
-          <option value="http://www.example.com">Example Link</option>
-          <option value="http://www.google.com">Google</option>
-          <option value="index.html">relative uri</option></select>
-        </fieldset>
-      </form>
+    <div class='markup textile'>
+      <h1>Test</h1><p>This is <i>a Test</i> of the <b>textile</b> capabilities of ME.<br>It should be <a href="example.com">quite</a> capable of handling many <a href="example.com">major</a> features.</p><h2>Subheading</h2><p>lorem</p>
     </div>
-    <div id='insertImage-dialog' title='Insert Image'>
-      <form>
-        <fieldset>
-          <label for="imageUri">Enter image uri</label><input type="text" class="imageUri" name="imageUri" />
-          <label for="title">Title</label><input type="text" class="title" name="title" />
-          <label for="uri">Enter uri</label><input type="text" class="uri" name="uri" />
-        </fieldset>
-      </form>
+    <div class='markupClick textile'>
+      <h1>Test</h1><p>This is <i>a Test</i> of the <b>textile</b> capabilities of ME.<br>It should be <a href="example.com">quite</a> capable of handling many <a href="example.com">major</a> features.</p><h2>Subheading</h2><p>lorem</p>
     </div>
     <script type="text/javascript" src="/markupEditor/javascripts/vendor/jquery.js"></script>
-    <script type="text/javascript" src="/markupEditor/javascripts/vendor/jquery-ui-1.8.9.custom.min.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/vendor/jquery-ui.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/plugins/isValid.js"></script>
     <script type="text/javascript" src="/markupEditor/javascripts/markupEditor.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/util.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/plugins/combobox.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/plugins/enhanceTextfield.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/dialog.js"></script>
     <script type="text/javascript" src="/markupEditor/javascripts/modes/textile/textileMode.js"></script>
     <script type="text/javascript" src="/markupEditor/javascripts/modes/textile/bruteForceCompiler.js"></script>
-    <script type="text/javascript" src="/markupEditor/javascripts/modes/htmlMode.js"></script>
+    <!-- / = javascript_include_tag "modes/htmlMode" -->
     <script type="text/javascript" src="/markupEditor/javascripts/modes/wysiwygMode.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/site.js"></script>
     
   </body>
 </html>

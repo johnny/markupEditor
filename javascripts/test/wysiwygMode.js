@@ -3,291 +3,382 @@ $(document).ready(function(){
   var form = $("form#wysiwyg"),
   textArea = form.find("textarea"),
   preview = form.find(".preview"),
-  cache = {},
   selection = window.getSelection(),
   range = document.createRange();
-  range.selectNodeContents(preview[0]);
+
+  range.selectNodeContents(preview.focus()[0]);
   selection.addRange(range);
-  preview.focus();
 
-  function DialogHelper(d){
-    this.dialog = d;
-  }
-  
-  DialogHelper.prototype = {
-    click: function(id){
-      this.dialog.find("button:eq("+id+")").click();
-    },
-    set: function(field, value){
-      this.dialog.find('input.'+field).val(value);
-    }
-  };
 
-  function set(textile){
-    var $html = $(textileCompiler.compile(textile));
-    preview.html($html);
-    range.selectNodeContents(preview[0]);
-    range.collapse(false);
-
-    selection.removeAllRanges();
-    selection.addRange(range);
-    
-    // reset Toolbar
-    click('.preview');
-  }
-
-  function select(identifier){
-    node = preview.find(identifier);
-
-    if(node.is("img")){
-      range.selectNode(node[0]);
-    } else {
-      if(node.length > 1){
-        range.setStart(node[0],0);
-        range.setEnd(node.last()[0],node.last()[0].childNodes.length);
-      } else {
-        range.selectNodeContents(node[0]);
-      }
-    }
-    selection.removeAllRanges();
-    selection.addRange(range);
-
-    // set toolbar items active
-    click('.preview');
-  }
-
-  function find(identifier){
-    return cache[identifier] || (cache[identifier] = form.find(identifier));
-  }
-
-  function click(identifier){
-    var item = find(identifier);
-    if(item.is("select")){
-      item.change();
-    } else {
-      item.mouseup();
-    }
-  }
-
-  function change(identifier,value){
-    var $select = find(identifier);
-    $select.val(value);
-    click(identifier);
-  }
-
-  function match(identifier){
-    ok(preview.find(identifier)[0], identifier + " should match " + preview.html());
-  }
-
-  function notMatch(identifier){
-    ok(!preview.find(identifier)[0], identifier + " should not match " + preview.html());
-  }
-
-  function on(identifier){
-    ok(find("."+identifier).is('.on'), identifier + " should be active");
-  }
-
-  function notOn(identifier){
-    ok(!find("."+identifier).is('.on'), identifier + " should not be active");
-  }
-
-  function dialog(name, callback){
-    click('.'+name); // put this here, so the dialog has been initialized
-    var identifier = '#'+name+'-dialog',
-    d = cache[identifier] || (cache[identifier] = $(identifier).parent());
-
-    if(callback){
-      callback(new DialogHelper(d));
-    } else {
-      return d;
-    }
-  }
+  var w = new WysiwygHelper({
+    form: form,
+    textArea: textArea,
+    preview: preview,
+    selection: selection,
+    range: range
+  });
 
   module("wysiwyg");
-  
+
+  test("default paragraph", function(){
+    w.match("p");
+  });
+
   test("Image remove", function(){
-    set("!remove(Title)!");
-    select("img");
-    on('insertImage');
-    dialog('insertImage', function(d){
-      d.click(1);
-    });
-    notMatch("img");
-    notOn('insertImage');
+    w.set("!remove(Title)!")
+      .select("img")
+      .on('insertImage')
+      .dialog('insertImage', function(d){
+        d.click("Remove");
+      })
+      .notMatch("img")
+      .off('insertImage');
   });
 
   test("Image update", function(){
-    set("!src(Title)!");
-    select("img");
-    on('insertImage');
-    dialog('insertImage', function(d){
-      d.set('uri', 'uri');
-      d.click(2);
-    });
-    match("a[href=uri]");
-    on('insertImage');
-    dialog('insertImage', function(d){
-      d.set('title', '');
-      d.click(2);
-    });
-    notMatch("img[title=Title]");
-    dialog('insertImage', function(d){
-      d.set('uri', '');
-      d.click(2);
-    });
-    notMatch("a");
+    w.set("!src(Title)!")
+      .select("img")
+      .on('insertImage')
+      .dialog('insertImage', function(d){
+        d.set('uri', 'uri');
+        d.click("Update");
+      })
+      .match("a[href=uri]")
+      .on('insertImage')
+      .dialog('insertImage', function(d){
+        d.set('title', '');
+        d.click("Update");
+      })
+      .notMatch("img[title=Title]")
+      .dialog('insertImage', function(d){
+        d.set('uri', '');
+        d.click("Update");
+      })
+      .notMatch("a");
   });
 
   test("Image create", function(){
-    set("This is an image: ");
-    dialog('insertImage', function(d){
-      d.set('imageUri', 'src');
-      d.click(1);
-    });
-    match('img');
-    on("insertImage");
+    w.set("This is an image: ")
+      .dialog('insertImage', function(d){
+        d.set('imageUri', 'src');
+        d.click("Create");
+      })
+      .match('img')
+      .on("insertImage");
   });
 
   test("Image create with Title", function(){
-    set("This is an image: ");
-    dialog('insertImage', function(d){
-      d.set('imageUri', 'src');
-      d.set('title', 'Title');
-      d.click(1);
-    });
-    match("img[title=Title]");
-    on("insertImage");
+    w.set("This is an image: ")
+      .dialog('insertImage', function(d){
+        d.set('imageUri', 'src');
+        d.set('title', 'Title');
+        d.click("Create");
+      })
+      .match("img[title=Title]")
+      .on("insertImage");
   });
 
   test("Image create with Title and uri", function(){
-    set("This is an image: ");
-    dialog('insertImage', function(d){
-      d.set('imageUri', 'src');
-      d.set('title', 'Title');
-      d.set('uri', 'uri');
-      d.click(1);
-    });
-    match("a[href=uri] img[title=Title]");
-    on("insertImage");
+    w.set("This is an image: ")
+      .dialog('insertImage', function(d){
+        d.set('imageUri', 'src');
+        d.set('title', 'Title');
+        d.set('uri', 'uri');
+        d.click("Create");
+      })
+      .match("a[href=uri] img[title=Title]")
+      .on("insertImage");
   });
 
   test("Bold toggle", function(){
-    set("This");
-    select("p");
-    click(".bold");
-    match("b");
-    on('bold');
-    select("b");
-    click(".bold");
-    notOn('bold');
-    notMatch("b");
+    w.set("This")
+      .select("p")
+      .click(".bold")
+      .match("b")
+      .on('bold')
+      .select("b")
+      .click(".bold")
+      .off('bold')
+      .notMatch("b");
   });
 
   test("Bold select", function(){
-    set("*This*");
-    select("b");
-    on('bold');
+    w.set("*This*")
+      .select("b")
+      .on('bold');
   });
 
   test("Italic toggle", function(){
-    set("This");
-    select("p");
-    click(".italic");
-    match("i");
-    on('italic');
-    select("i");
-    click(".italic");
-    notOn('italic');
+    w.set("This")
+      .select("p")
+      .click(".italic")
+      .match("i")
+      .on('italic')
+      .select("i")
+      .click(".italic")
+      .off('italic');
   });
 
   test("Italic select", function(){
-    set("_This_");
-    select("i");
-    on('italic');
+    w.set("_This_")
+      .select("i")
+      .on('italic');
   });
 
   test("Bold italic mixed", function(){
-    set("This");
-    select("p");
-    click(".italic");
-    match("i");
-    on('italic');
-    select("i");
-    click(".bold");
-    on('italic');
-    on('bold');
-    click(".italic");
-    notOn("italic");
-    on("bold");
+    w.set("This")
+      .select("p")
+      .click(".italic")
+      .match("i")
+      .on('italic')
+      .select("i")
+      .click(".bold")
+      .on('italic')
+      .on('bold')
+      .click(".italic")
+      .off("italic")
+      .on("bold");
   });
 
   test("Reset test should work", function(){
-    set("This is not bold");
-    notOn('bold');
+    w.set("This is not bold")
+      .off('bold');
   });
 
   test("Link select and remove", function(){
-    set("\"This\":uri");
-    select("a");
-    on('link');
-    dialog('link').find("button:eq(1)").click();
-    notMatch("a");
-    notOn('link');
+    w.set("\"This\":uri")
+      .select("a")
+      .on('link')
+      .dialog('link', function(d){
+        d.click("Remove");
+      })
+      .notMatch("a")
+      .off('link');
   });
 
   test("Link select and update", function(){
-    set("\"This\":uri");
-    select("a");
-    on('link');
-    dialog('link', function(d){
-      d.set('uri','src');
-      d.click(2);
-    });
-    match("a[href=src]");
-    on('link');
+    w.set("\"This\":uri")
+      .select("a")
+      .on('link')
+      .dialog('link', function(d){
+        d.set('uri','src');
+        d.click("Update");
+      })
+      .match("a[href=src]")
+      .on('link');
   });
   
   test("Link create", function(){
-    set("This");
-    select("p");
-    notOn('link');
-    dialog('link', function(d){
-      d.set('uri','src');
-      d.click(1);
-    });
-    match("a");
-    on('link');
+    w.set("This")
+      .select("p")
+      .off('link')
+      .dialog('link', function(d){
+        d.set('uri','src');
+        d.click("Create");
+      })
+      .match("a")
+      .on('link');
   });
 
   test("Paragraph multiple", function(){
-    set("This\n\nThat");
-    select("p");
-    change(".formatBlock", "h1");
-    notMatch("p");
+    w.set("This\n\nThat")
+      .select("p")
+      .change(".formatBlock", "h1")
+      .notMatch("p");
   });
 
-  function checkConversion(value){
-    set(value);
-    change(".changeMode", "textile");
-    equal(textArea.val(),value);
-    change(".changeMode", "wysiwyg");
+  function testListType(listType, spec){
+    var bullet = spec.bullet, tag = spec.tag;
+
+    test("List " + listType + " enable across paragraphs", function(){
+      w.set("test\ntest2\n\nh1. test3\n\n* item1\n* item2")
+        .selectAll()
+        .off(listType)
+        .click("."+ listType)
+        .match(tag,1)
+        .match("li",5)
+        .notMatch("h1")
+        .notMatch('p')
+        .on(listType);
+    });
+
+    test("List " + listType + " join adjacent lists", function(){
+      w.set(bullet + " firstList\n\ntest\n\n" + bullet + " secondList")
+        .select("p")
+        .off(listType)
+        .click("."+listType)
+        .match(tag,1)
+        .match(tag + " :first-child:contains(firstList)")
+        .match("li",3)
+        .notMatch('p')
+        .on(listType);
+    });
+
+    test("List " + listType + " toggle", function(){
+      w.set(bullet + " list")
+        .select(tag)
+        .on(listType)
+        .disabled("formatBlock")
+        .click("."+ listType)
+        .notMatch(tag)
+        .off(listType)
+        .enabled("formatBlock");
+    });
+
+    test("List " + listType + " on with new lines", function(){
+      w.set("item1\nitem2")
+        .selectAll()
+        .off(listType)
+        .click("."+listType)
+        .notMatch("p")
+        .on(listType)
+        .click("."+ listType)
+        .off(listType)
+        .notMatch(tag);
+    });
+
+    test("List " + listType + " partial on", function(){
+      w.set("item1\n" + bullet + " item2")
+        .selectAll()
+        .off(listType)
+        .click("."+listType)
+        .notMatch("p")
+        .on(listType)
+        .click("."+ listType)
+        .off(listType)
+        .notMatch(tag);
+
+      // other way
+      w.set(bullet + " item1\nitem2")
+        .selectAll()
+        .off(listType)
+        .click("."+listType)
+        .notMatch("p")
+        .on(listType)
+        .click("."+ listType)
+        .off(listType)
+        .notMatch(tag);
+    });
+
+    test("List " + listType + " partial off", function(){
+      w.set(bullet + " item1\n" + bullet + " item2\n" + bullet + " item3")
+        .select("li:eq(1)")
+        .on(listType)
+        .click("."+ listType)
+        .notMatch("li:contains(item2)")
+        .match('p', function(node){
+          return !/^\s*$/.test(node.next().text());
+        })
+        .off(listType);
+    });
+
+    test("List " + listType + " off should join lists", function(){
+      w.set(bullet + " item1\n\n" + bullet + " item2")
+        .selectAll()
+        .on(listType)
+        .click("."+ listType)
+        .match("p",1)
+        .notMatch(tag)
+        .off(listType);
+    });
   }
   
-  test("Conversion", function(){
-    checkConversion("This\n\nThat");
-    checkConversion("h1. This\n\nh2. That");
-    checkConversion("p(left). This");
-    checkConversion("h2(right). This");
-    checkConversion("*bold*");
-    checkConversion(" *bold* ");
-    checkConversion("_italic_");
-    checkConversion(" _italic_ ");
-    checkConversion("\"This\":uri");
-    checkConversion(" \"This\":uri ");
-    checkConversion("!src!");
-    checkConversion("!src!:uri");
-    checkConversion("!src(Title)!");
-    checkConversion("!src(Title)!:uri");
+  var listTypes = {
+    unorderedList: {
+      bullet: "*",
+      tag: "ul"
+    },
+    orderedList: {
+      bullet: "#",
+      tag: 'ol'
+    }
+  }, listType, bullet;
+  
+  for(listType in listTypes){
+    if(listTypes.hasOwnProperty(listType)){
+      testListType(listType, listTypes[listType]);
+    }
+  }
+
+
+  // I have mixed feelings about this test
+  // test("List mixed", function(){
+  //   w.set("* item1\n# item2")
+  //     .selectAll()
+  //     .off("orderedList")
+  //     .off("unorderedList")
+  //     .click(".orderedList")
+  //     .match("ol")
+  //     .notMatch("ul")
+  //     .select("ol :first-child")
+  //     .on("orderedList")
+  //     .click(".unorderedList")
+  //     .match("ul",1)
+  //     .match("ol",1)
+  //     .selectAll()
+  //     .off("unorderedList")
+  //     .click(".unorderedList")
+  //     .match("ul",2);
+  // });
+
+  test("List -> align", function(){
+    w.set("* item1\n* item2")
+      .select("ul")
+      .disabled("alignCenter")
+      .disabled("alignRight")
+      .disabled("alignLeft")
+      .click(".alignCenter")
+      .match("ul",2);
   });
 
+  test("List -> italic", function(){
+    w.set("* item1\n# item2")
+      .select("ul :first-child")
+      .click(".italic")
+      .match("ul i:first-child")
+      .click(".italic")
+      .notMatch("i")
+      .selectAll()
+      .click(".italic")
+      .click(".italic")
+      .notMatch("b");
+  });
+
+  test("List -> link", function(){
+    w.set("* item1\n# item2")
+      .select("ul :first-child")
+      .dialog("link", function(d){
+        d.set('uri','src');
+        d.click("Create");
+      })
+      .match("ul li a")
+      .dialog("link", function(d){
+        d.click("Remove");
+      })
+      .notMatch("a");
+  });
+
+  test("List -> image", function(){
+    w.set("* item1\n# item2")
+      .select("ul :first-child")
+      .dialog("insertImage", function(d){
+        d.set('imageUri','src');
+        d.click("Create");
+      })
+      .match("ul li img")
+      .dialog("insertImage", function(d){
+        d.click("Remove");
+      })
+      .notMatch("img");
+  });
+
+  test("List -> paragraph", function(){
+    w.set("paragraph\n\n* item1\n\nparagraph")
+      .selectAll()
+      .change(".formatBlock", "h1")
+      .match("h1")
+      .notMatch("p")
+      .match("ul")
+      .notMatch("ul h1, h1 ul");
+  });
 });

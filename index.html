@@ -6,46 +6,27 @@
     <meta content='IE=edge,chrome=1' http-equiv='X-UA-Compatible' />
     <!-- Comment in layout -->
     <link type="text/css" href="/markupEditor/stylesheets/markupEditor.css" rel="stylesheet" media="screen" />
-    <link type="text/css" href="/markupEditor/stylesheets/smoothness/jquery-ui-1.8.9.custom.css" rel="stylesheet" media="screen" />
-    <script type="text/javascript" src="/markupEditor/javascripts/vendor/jquery.js"></script>
-    <script type="text/javascript" src="/markupEditor/javascripts/vendor/jquery-ui-1.8.9.custom.min.js"></script>
-    <script type="text/javascript" src="/markupEditor/javascripts/joined.js"></script>
+    <link type="text/css" href="/markupEditor/stylesheets/smoothness/jquery-ui-1.8.13.custom.css" rel="stylesheet" media="screen" />
     <title>MarkupEditor</title>
   </head>
   <body class='index'>
     <div id='main' role='main'>
       <h1>MarkupEditor</h1>
       <p>
-        is a small editor whith a strong support for textile. Other markup languages will follow.
-        It has an impressive
+        is a small editor with a strong support for textile. Other markup languages will follow.
+        It has an extensive
         <a href="test.html">test suite</a>
+        . Documentation can be found
+        <a href="doc/index.html">here</a>
         .
       </p>
       <form id='textile'>
-        <textarea class='markup textile'>h1. Test&#x000A;&#x000A;This is _a Test_ of the *textile* capabilities of ME.&#x000A;It should be "quite":http://example.com capable of handling many "major":http://example.com features.&#x000A;&#x000A;h2. Subheading&#x000A;&#x000A;lorem</textarea>
+        <textarea class='markup textile'>h1. Test&#x000A;&#x000A;This is _a Test_ of the *textile* capabilities of ME.&#x000A;It should be "quite":example.com capable of handling many "major":example.com features.&#x000A;&#x000A;h2. Features&#x000A;&#x000A;* (un) ordered lists&#x000A;* links&#x000A;* images&#x000A;&#x000A;h2. Supported Markup Languages&#x000A;&#x000A;# textile&#x000A;# more to follow</textarea>
       </form>
     </div>
-    <div id='link-dialog' title='Link'>
-      <form>
-        <fieldset>
-          <label for="title">Title</label><input type="text" class="title" name="title" />
-          <label for="uri">Enter uri</label><input type="text" class="uri" name="uri" />
-          <select class="uri" name="uri-select">
-          <option value="">or select uri</option>
-          <option value="http://www.example.com">Example Link</option>
-          <option value="http://www.google.com">Google</option>
-          <option value="index.html">relative uri</option></select>
-        </fieldset>
-      </form>
-    </div>
-    <div id='insertImage-dialog' title='Insert Image'>
-      <form>
-        <fieldset>
-          <label for="imageUri">Enter image uri</label><input type="text" class="imageUri" name="imageUri" />
-          <label for="title">Title</label><input type="text" class="title" name="title" />
-          <label for="uri">Enter uri</label><input type="text" class="uri" name="uri" />
-        </fieldset>
-      </form>
-    </div>
+    <script type="text/javascript" src="/markupEditor/javascripts/vendor/jquery.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/vendor/jquery-ui.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/joined.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/site.js"></script>
   </body>
 </html>
