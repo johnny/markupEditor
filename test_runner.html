@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8' />
+    <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame -->
+    <meta content='IE=edge,chrome=1' http-equiv='X-UA-Compatible' />
+    <link type="text/css" href="/markupEditor/stylesheets/markupEditor.css" rel="stylesheet" media="screen" />
+    <link type="text/css" href="/markupEditor/stylesheets/smoothness/jquery-ui-1.8.13.custom.css" rel="stylesheet" media="screen" />
+    <link type="text/css" href="/markupEditor/stylesheets/qunit.css" rel="stylesheet" media="screen" />
+    <title>MarkupEditor's test suite</title>
+  </head>
+  <body class='test_runner'>
+    <h1 id='qunit-header'>MarkupEditor's test suite</h1>
+    <h2 id='qunit-banner'></h2>
+    <div id='qunit-testrunner-toolbar'></div>
+    <div id='qunit-userAgent'></div>
+    <ol id='qunit-tests'></ol>
+    <div id='qunit-fixture'>
+      will be hidden
+    </div>
+    <form id='textile'>
+      <textarea class='markup textile'></textarea>
+    </form>
+    <form id='wysiwyg'>
+      <textarea class='markup textile wysiwyg'></textarea>
+    </form>
+    <div class='markupClick textile'>
+      <h1>Test</h1><p>This is <i>a Test</i> of the <b>textile</b> capabilities of ME.<br>It should be <a href="example.com">quite</a> capable of handling many <a href="example.com">major</a> features.</p><h2>Subheading</h2><p>lorem</p>
+    </div>
+    <script type="text/javascript" src="/markupEditor/javascripts/vendor/jquery.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/vendor/jquery-ui.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/plugins/isValid.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/markupEditor.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/util.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/plugins/combobox.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/plugins/enhanceTextfield.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/dialog.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/modes/textile/textileMode.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/modes/textile/bruteForceCompiler.js"></script>
+    <!-- / = javascript_include_tag "modes/htmlMode" -->
+    <script type="text/javascript" src="/markupEditor/javascripts/modes/wysiwygMode.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/site.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/vendor/qunit.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/test/testHelper.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/test/markupEditor.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/test/wysiwygMode.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/test/textileMode.js"></script>
+    <script type="text/javascript" src="/markupEditor/javascripts/test/textileCompiler.js"></script>
+  </body>
+</html>
