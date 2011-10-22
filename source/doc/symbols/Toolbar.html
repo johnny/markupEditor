@@ -38,6 +38,8 @@
 				
 					<li><a href="../symbols/_global_.html">_global_</a></li>
 				
+					<li><a href="../symbols/Builder.html">Builder</a></li>
+				
 					<li><a href="../symbols/Editor.html">Editor</a></li>
 				
 					<li><a href="../symbols/jQuery.html">jQuery</a></li>
@@ -48,11 +50,17 @@
 				
 					<li><a href="../symbols/Mode.html">Mode</a></li>
 				
+					<li><a href="../symbols/textileCompiler.html">textileCompiler</a></li>
+				
+					<li><a href="../symbols/textileMode.html">textileMode</a></li>
+				
 					<li><a href="../symbols/Toolbar.html">Toolbar</a></li>
 				
 					<li><a href="../symbols/ToolbarButton.html">ToolbarButton</a></li>
 				
 					<li><a href="../symbols/ToolbarSelect.html">ToolbarSelect</a></li>
+				
+					<li><a href="../symbols/wysiwygMode.html">wysiwygMode</a></li>
 				
 			</ul>
 		</nav>
@@ -61,7 +69,7 @@
 		
 		Documentation generator: <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0<br />
 		Template: <a href="http://www.thebrightlines.com/2010/05/06/new-template-for-jsdoctoolkit-codeview/" target="_blank">Codeview</a> 1.2<br />
-		Generated on: 2011-7-23 20:43
+		Generated on: 2011-9-22 13:19
 	</div>
 </div>
 
@@ -143,7 +151,7 @@
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Toolbar.html#loadModeToolbar">loadModeToolbar</a></b>()
+										<div class="fixedFont"><b><a href="../symbols/Toolbar.html#loadModeToolbar">loadModeToolbar</a></b>(editor)
 										</div>
 										<div class="description">Load the toolbar for the current mode.</div>
 									</td>
@@ -154,7 +162,7 @@
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Toolbar.html#runAction">runAction</a></b>(action, target)
+										<div class="fixedFont"><b><a href="../symbols/Toolbar.html#runAction">runAction</a></b>(action, target, target)
 										</div>
 										<div class="description">Execute the given action of the current mode</div>
 									</td>
@@ -238,7 +246,7 @@ items of the toolbar can be defined on a per editor basis (save callback)
 									
 									
 									
-									<b>loadModeToolbar</b>()
+									<b>loadModeToolbar</b>(editor)
 								</div>
 								
 								<div class="description">
@@ -252,6 +260,17 @@ supported, it will be hidden.
 								
 								
 								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<b>editor</b>
+												
+											</dt>
+											<dd></dd>
+										
+									</dl>
 								
 								
 								
@@ -268,7 +287,7 @@ supported, it will be hidden.
 									
 									
 									
-									<b>runAction</b>(action, target)
+									<b>runAction</b>(action, target, target)
 								</div>
 								
 								<div class="description">
@@ -296,6 +315,12 @@ supported, it will be hidden.
 												
 											</dt>
 											<dd>The target of the click</dd>
+										
+											<dt>
+												<b>target</b>
+												
+											</dt>
+											<dd></dd>
 										
 									</dl>
 								

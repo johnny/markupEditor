@@ -38,6 +38,8 @@
 				
 					<li><a href="../symbols/_global_.html">_global_</a></li>
 				
+					<li><a href="../symbols/Builder.html">Builder</a></li>
+				
 					<li><a href="../symbols/Editor.html">Editor</a></li>
 				
 					<li><a href="../symbols/jQuery.html">jQuery</a></li>
@@ -48,11 +50,17 @@
 				
 					<li><a href="../symbols/Mode.html">Mode</a></li>
 				
+					<li><a href="../symbols/textileCompiler.html">textileCompiler</a></li>
+				
+					<li><a href="../symbols/textileMode.html">textileMode</a></li>
+				
 					<li><a href="../symbols/Toolbar.html">Toolbar</a></li>
 				
 					<li><a href="../symbols/ToolbarButton.html">ToolbarButton</a></li>
 				
 					<li><a href="../symbols/ToolbarSelect.html">ToolbarSelect</a></li>
+				
+					<li><a href="../symbols/wysiwygMode.html">wysiwygMode</a></li>
 				
 			</ul>
 		</nav>
@@ -61,7 +69,7 @@
 		
 		Documentation generator: <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0<br />
 		Template: <a href="http://www.thebrightlines.com/2010/05/06/new-template-for-jsdoctoolkit-codeview/" target="_blank">Codeview</a> 1.2<br />
-		Generated on: 2011-7-23 20:43
+		Generated on: 2011-9-22 13:19
 	</div>
 </div>
 
@@ -106,7 +114,7 @@
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription" >
 								<div class="fixedFont">
-									<b><a href="../symbols/ToolbarButton.html#constructor">ToolbarButton</a></b>(name, clicked)
+									<b><a href="../symbols/ToolbarButton.html#constructor">ToolbarButton</a></b>(name, clicked, isAvailable)
 								</div>
 								<div class="description">Create a button for the toolbar</div>
 							</td>
@@ -116,6 +124,59 @@
 			</div>
 		
 		
+		
+			
+			
+				<div class="props">
+					<table class="summaryTable" cellspacing="0" summary="A summary of the fields documented in the class ToolbarButton.">
+						<caption class="sectionTitle">Field Summary</caption>
+						
+						<thead>
+							<tr>
+								<th scope="col">Field Attributes</th>
+								<th scope="col">Field Name and Description</th>
+							</tr>
+						</thead>
+						
+						<tbody>
+							
+								<tr>
+									<td class="attributes">&nbsp;</td>
+									<td class="nameDescription">
+										<div class="fixedFont">
+										<b><a href="../symbols/ToolbarButton.html#clicked">clicked</a></b>
+										</div>
+										<div class="description">The action if the button is clicked upon</div>
+									</td>
+								</tr>
+							
+								<tr>
+									<td class="attributes">&nbsp;</td>
+									<td class="nameDescription">
+										<div class="fixedFont">
+										<b><a href="../symbols/ToolbarButton.html#isAvailable">isAvailable</a></b>
+										</div>
+										<div class="description">Returns true if the the function
+is available in the current editer</div>
+									</td>
+								</tr>
+							
+								<tr>
+									<td class="attributes">&nbsp;</td>
+									<td class="nameDescription">
+										<div class="fixedFont">
+										<b><a href="../symbols/ToolbarButton.html#name">name</a></b>
+										</div>
+										<div class="description">The class name of the button</div>
+									</td>
+								</tr>
+							
+						</tbody>
+					</table>
+				</div>
+			
+			
+			
 		
 <!--
 #### METHODS SUMMARY
@@ -172,7 +233,7 @@
 					</h2>
 					
 					<div class="fixedFont">
-						<b>ToolbarButton</b>(name, clicked)
+						<b>ToolbarButton</b>(name, clicked, isAvailable)
 					</div>
 					
 					<div class="description">
@@ -196,7 +257,14 @@
 									<span class="light fixedFont">{Function}</span>  <b>clicked</b>
 									<i>Optional</i>
 								</dt>
-								<dd>The default action if the button is clicked</dd>
+								<dd>The action if the button is clicked</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Function}</span>  <b>isAvailable</b>
+									<i>Optional</i>
+								</dt>
+								<dd>Returns true if the the function
+is available in the current editer</dd>
 							
 						</dl>
 					
@@ -208,6 +276,83 @@
 <!--
 #### FIELD DETAILS
 -->
+		
+			<div class="details props">
+				<div class="innerProps">
+					<h2 class="sectionTitle">
+						Field Detail
+					</h2>
+					
+					
+						<div class="fixedFont heading" id="clicked">
+							<span class='lighter'>
+							
+							</span>
+							
+							<span class="light">{Function}</span>
+							
+							<b>clicked</b>							
+						</div>
+						
+						<div class="description">
+							The action if the button is clicked upon
+							
+							
+							
+						</div>
+						
+						
+							
+						
+						<div class="hr"></div>
+					
+						<div class="fixedFont heading" id="isAvailable">
+							<span class='lighter'>
+							
+							</span>
+							
+							<span class="light">{Function}</span>
+							
+							<b>isAvailable</b>							
+						</div>
+						
+						<div class="description">
+							Returns true if the the function
+is available in the current editer
+							
+							
+							
+						</div>
+						
+						
+							
+						
+						<div class="hr"></div>
+					
+						<div class="fixedFont heading" id="name">
+							<span class='lighter'>
+							
+							</span>
+							
+							<span class="light">{String}</span>
+							
+							<b>name</b>							
+						</div>
+						
+						<div class="description">
+							The class name of the button
+							
+							
+							
+						</div>
+						
+						
+							
+						
+						
+					
+				</div>
+			</div>
 		
 <!--
 #### METHOD DETAILS

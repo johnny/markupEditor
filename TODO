@@ -1,5 +1,7 @@
-* [21/30] Further improvements
+* [22/32] Further improvements
   - [ ] flexible toolbar, which stays on top
+  - [ ] textileCompiler
+    - [ ] "* item1":src should compile as a link
   - [-] wysiwyg
     - [ ] Toolbar should work only if there is a range inside the preview
           (also the state checking)
@@ -53,6 +55,12 @@
     - [ ] fire native events (not supported in awesome, try in kde or windows)
   - [ ] clean and parse pasted html
   - [ ] handle blocktags within lists
+  - [X] Decouple mode and editor
+    - [X] fix all specs
+    - [X] add link error: place cursor at the end of a word and click link -> add uri -> ok -> link is after word
+    - [X] remove mode param in textileMode / wysiwygMode
+    - [X] holdShift should live on a global object
+    - [X] fix selection on link creation. currently it selects the whole paragraph
   - [X] click in blank area should not raise error
   - [X] add close editor
     - [X] basics
@@ -139,10 +147,11 @@
   - [ ] set cursor between _a and click italic two times -> not the
     same situation as before. Such two clicks should be idempotent
 
-* [0/5] Consider
+* [0/6] Consider
   - [ ] Partial list change should either
         change the whole list (currently wysiwyg)
         change part off the list (currently textile and the norm)
+  - [ ] Delay checkState on mouseup/keyup
   - [ ] turn off url display in bottom (consider accessability, gollum
     has the same construct)
   - [ ] double click should work: use hover to change contentEditable

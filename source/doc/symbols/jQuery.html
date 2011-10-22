@@ -38,6 +38,8 @@
 				
 					<li><a href="../symbols/_global_.html">_global_</a></li>
 				
+					<li><a href="../symbols/Builder.html">Builder</a></li>
+				
 					<li><a href="../symbols/Editor.html">Editor</a></li>
 				
 					<li><a href="../symbols/jQuery.html">jQuery</a></li>
@@ -48,11 +50,17 @@
 				
 					<li><a href="../symbols/Mode.html">Mode</a></li>
 				
+					<li><a href="../symbols/textileCompiler.html">textileCompiler</a></li>
+				
+					<li><a href="../symbols/textileMode.html">textileMode</a></li>
+				
 					<li><a href="../symbols/Toolbar.html">Toolbar</a></li>
 				
 					<li><a href="../symbols/ToolbarButton.html">ToolbarButton</a></li>
 				
 					<li><a href="../symbols/ToolbarSelect.html">ToolbarSelect</a></li>
+				
+					<li><a href="../symbols/wysiwygMode.html">wysiwygMode</a></li>
 				
 			</ul>
 		</nav>
@@ -61,7 +69,7 @@
 		
 		Documentation generator: <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0<br />
 		Template: <a href="http://www.thebrightlines.com/2010/05/06/new-template-for-jsdoctoolkit-codeview/" target="_blank">Codeview</a> 1.2<br />
-		Generated on: 2011-7-23 20:43
+		Generated on: 2011-9-22 13:19
 	</div>
 </div>
 
@@ -143,9 +151,20 @@
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/jQuery.html#$.fn.initMarkupEditor">$.fn.initMarkupEditor</a></b>(settings)
+										<div class="fixedFont"><b><a href="../symbols/jQuery.html#$.fn.isValid">$.fn.isValid</a></b>(method)
 										</div>
-										<div class="description">Create the markup editor</div>
+										<div class="description">Validates forms</div>
+									</td>
+								</tr>
+							
+								<tr
+									 class='item1'
+								>
+									<td class="attributes">&nbsp;</td>
+									<td class="nameDescription">
+										<div class="fixedFont"><b><a href="../symbols/jQuery.html#$.fn.markupEditor">$.fn.markupEditor</a></b>(method)
+										</div>
+										<div class="description">Markupeditor method.</div>
 									</td>
 								</tr>
 							
@@ -208,18 +227,61 @@
 							<li 
 								 class='item0'
 							>
-								<div class="fixedFont heading" id="$.fn.initMarkupEditor">
+								<div class="fixedFont heading" id="$.fn.isValid">
 									<span class='lighter'>
 									
 									</span>
 									
 									
 									
-									<b>$.fn.initMarkupEditor</b>(settings)
+									<b>$.fn.isValid</b>(method)
 								</div>
 								
 								<div class="description">
-									Create the markup editor
+									Validates forms
+									
+									
+										<br />
+										<i>Defined in: </i> <a href="../symbols/src/source_javascripts_plugins_isValid.js.html">isValid.js</a>.
+									
+									
+									
+								</div>
+								
+								
+								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<span class="light fixedFont">{String}</span> <b>method</b>
+												<i>Optional, Default: "init"</i>
+											</dt>
+											<dd>The method to call</dd>
+										
+									</dl>
+								
+								
+								
+								<div class="hr"></div>
+							</li>
+						
+							<li 
+								 class='item1'
+							>
+								<div class="fixedFont heading" id="$.fn.markupEditor">
+									<span class='lighter'>
+									
+									</span>
+									
+									
+									
+									<b>$.fn.markupEditor</b>(method)
+								</div>
+								
+								<div class="description">
+									Markupeditor method.
 									
 									
 									
@@ -233,35 +295,14 @@
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<span class="light fixedFont">{Object}</span> <b>settings</b>
-												
+												<span class="light fixedFont">{String}</span> <b>method</b>
+												<i>Optional, Default: "init"</i>
 											</dt>
-											<dd>The specific settings for the editor</dd>
+											<dd>The method to call</dd>
 										
 									</dl>
 								
 								
-								
-									<dl class="detailList nomargin">
-									
-										
-										
-										
-										
-										
-										
-										
-										
-										
-										
-										
-											<dt class="heading">See:</dt>
-											
-												<dd>ME#settings</dd>
-											
-										
-									
-									</dl>
 								
 								
 							</li>

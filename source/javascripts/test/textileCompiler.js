@@ -84,7 +84,8 @@ $(document).ready(function(){
                "\"Title\":http://example.com", "<p><a href=\"http://example.com\">Title</a></p>",
                "\"Title\":http://example.com features", "<p><a href=\"http://example.com\">Title</a> features</p>",
                "\"Title\":http://example.com\nfeatures", "<p><a href=\"http://example.com\">Title</a><br/>features</p>",
-               " \"This\":uri ", "<p> <a href=\"uri\">This</a> </p>"
+               " \"This\":uri ", "<p> <a href=\"uri\">This</a> </p>",
+               "\"* This\":uri ", "<p><a href=\"uri\">* This</a> </p>"
               ]);
 
   textileTest("Image",
@@ -124,7 +125,7 @@ $(document).ready(function(){
         }
         results = selections[i+2];
         trace = textileCompiler.trace(textile, startTrace, endTrace);
-        console.log(trace);
+        // console.log(trace);
         equals(trace.length, results.length, "Sequence: " + textile.slice(startTrace, endTrace));
         for(j=0; j<results.length;j++){
           result = results[j];

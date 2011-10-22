@@ -1,23 +1,29 @@
-ME.addMode("textile", function() {
-  var text, selectionStart, startOfParagraphs, endOfParagraphs, oldExtendedSelectionLength, currentNodes = {},
-  $ = jQuery;
+(function() {
+  var $ = jQuery, textileMode;
 
   /**
    * Iterate over each paragraph and call the functor on it and set the paragraphs
    * CONSIDER rename or move setParagraphs out of it
-   * 
-   * @param {Mode} mode The current mode
+   *
+   * @param {Editor} editor The editor to work on
    * @param {Function} functor The functor will be applied on each paragraph
    */
-  function eachParagraph(mode, functor) {
-    var paragraphs = mode.getParagraphs(), paragraphsLength = paragraphs.length;
+  function eachParagraph(editor, functor) {
+    var paragraphs = textileMode.getParagraphs(editor), paragraphsLength = paragraphs.length;
 
     for(i = 0; i < paragraphsLength; i++) {
       paragraphs[i] = functor(paragraphs[i]);
     }
-    mode.setParagraphs(paragraphs);
+    textileMode.setParagraphs(editor, paragraphs);
   }
 
+  /**
+   * Apply the functor to each given line
+   *
+   * @param {String[]} lines The line array
+   * @param {Function} functor The function which will be applied to
+   * each line
+   */
   function eachLine(lines, functor){
     var linesLength = lines.length,
     i, line, lineStart, match;
@@ -35,22 +41,40 @@ ME.addMode("textile", function() {
     }
   }
 
-  function replaceEachLine(mode, boundary, functor){
-    var lines = mode.getSelection(boundary).split("\n");
+  /**
+   * Apply the functor to each line of the current selection.
+   *
+   * @param {Editor} editor The editor to work on
+   * @param {String} boundary The boundary to which the Selection will
+   * be extended e.g. '\n', ' '
+   * @param {Function} functor The function to apply to each line
+   */
+  function replaceEachLine(editor, boundary, functor){
+    var lines = textileMode.extendSelection(editor, boundary).split("\n");
 
     eachLine(lines, function(i, lineStart, line){
       lines[i] = functor(lineStart, line);
     });
     
-    mode.replaceSelection(lines.join("\n"));
+    textileMode.replaceSelection(editor, lines.join("\n"));
   }
 
-  function firstLine(mode){
-    var lines = mode.getSelection("\n").split("\n").slice(0,1),
+  /**
+   * Get the first line of the selection, without the special textile
+   * tokens which might be at the start of the line.
+   *
+   * @param {Editor} editor The editor to work on
+   *
+   * @returns {String} The first line of the selection
+   */
+  function firstLine(editor, boundary){
+    // lines has only one element
+    var lines = textileMode.extendSelection(editor, boundary).split("\n").slice(0,1),
     lineLength = lines[0].length;
-    mode.selectionEnd = mode.selectionStart + lineLength;
+    editor.selectionEnd = editor.selectionStart + lineLength;
+    // Ignore special textile tokens at the beginnig of the line
     eachLine(lines, function(i, lineStart, line){
-      mode.selectionStart += lineStart.length;
+      editor.setSelectionRange( editor.selectionStart + lineStart.length, editor.selectionEnd);
       lines[i] = line;
     });
     return lines[0];
@@ -59,11 +83,11 @@ ME.addMode("textile", function() {
   /**
    * Execute align command
    * 
-   * @param {Mode} mode The current mode
+   * @param {Editor} editor The editor to work on
    * @param {String} orientation The orientation of the alignment
    */
-  function align(mode, orientation) {
-    eachParagraph(mode, function(paragraph) {
+  function align(editor, orientation) {
+    eachParagraph(editor, function(paragraph) {
       var classes, classesLength, newClasses = [];
       if(/^\w+\([^)]+\)\./.test(paragraph)) {
         classes = jQuery.trim(paragraph.slice(paragraph.indexOf("(") + 1, paragraph.indexOf(")"))).split(/\s+/);
@@ -87,26 +111,34 @@ ME.addMode("textile", function() {
    * Scan the textarea for the first match and set selection to it.
    * This is useful e.g. for finding a link markup with a given source
    * 
-   * @param {Mode} mode The current mode
+   * @param {Editor} editor The editor to work on
    * @param {RegExp} r The regexp to search for
    */
-  function scanForMatch(mode,r){
-    var match = r.exec(text);
+  function scanForMatch(editor, r){
+    var text = editor.textArea.val(),
+    match = r.exec(text);
     if(r.lastIndex === 0){
       return;   // TODO escalate this return to break the caller too
     }
-    while(r.lastIndex < selectionStart){
+    while(r.lastIndex < editor.selectionStart){
       match = r.exec(text);
     }
 
     // needed for the replaceSelection call
-    mode.selectionStart = r.lastIndex - match[0].length;
-    mode.selectionEnd = r.lastIndex;
+    editor.setSelectionRange(r.lastIndex - match[0].length, r.lastIndex);
+
     return match;
   }
 
-  function toggleList(mode, target, bullet){
-    replaceEachLine(mode, "\n", function(lineStart, line){
+  /**
+   * Toggle lists on and of
+   *
+   * @param {Editor} editor The editor to work on
+   * @param {HTMLElement} target The clicked button
+   * @param {String} bullet The bullet string e.g. '*'
+   */
+  function toggleList(editor, target, bullet){
+    replaceEachLine(editor, "\n", function(lineStart, line){
       if(!/ on$/.test(target.className)){
         line = bullet + " " + line;
       }
@@ -114,38 +146,62 @@ ME.addMode("textile", function() {
     });
   }
 
+  /**
+   * The available types of lists in Textile
+   */
   var listTypes = {
     ul: '*',
     ol: '#'
   };
 
   /**
-   * @returns {Boolean} return false to prevent browser
-   * CONSIDER move to object or remove mode parameter
+   * Handles enter inside lists, so that list are continued
+   * 
+   * @param {Editor} editor The editor to work on
+   *
+   * @returns {Boolean} Returns false to prevent the default browser behaviour
    */
-  function pressedEnter(mode){
-    var list = currentNodes.list, replacement;
+  function pressedEnter(editor){
+    var list = editor.currentNodes.list, replacement;
 
     if(list && /(u|o)l/i.test(list.tag)){ // only headings
-      mode.getSelection();
-      if(mode.holdShift){
+      textileMode.getSelection(editor);
+      if(ME.holdShift){
         replacement = " <br> ";
       } else {
         replacement = "\n" + listTypes[list.tag] + " ";
       }
-      mode.replaceSelection(replacement, false);
+      textileMode.replaceSelection(editor, replacement, false);
       return false;
     }
   }
-
-  return {
+  /**
+   * @name textileMode
+   * @namespace holds the methods from the textile mode
+   * @augments Mode
+   */
+  textileMode = ME.addMode('textile', /** @scope textileMode.prototype */{
+    /**
+     * The long name of the mode
+     * @property
+     */
     name: "Textile Mode",
+    /**
+     * Holds the supported toolbaritems
+     * @property
+     */
     items: {
       "default": {
-        clicked: function(editor, mode, target) {
+        /**
+         * The default action for the buttons. With textile this works
+         * for the same delimiters right and left
+         *
+         * @param {Editor} editor The editor to work on
+         */
+        clicked: function(editor, target) {
           // TODO find left and right boundaries that are valid
           var match, that = this;
-          replaceEachLine(mode, " ", function(lineStart, line){
+          replaceEachLine(editor, " ", function(lineStart, line){
             if(/ on$/.test(target.className)){
               
               // first handle the left part
@@ -154,7 +210,7 @@ ME.addMode("textile", function() {
                 line = (match[1] || "") + line.slice(match[0].length);
               } else {
                 // place delimiter left and extend selection
-                line = that.delimiter + mode.extendLeftSelection(/[ .]+/) + line;
+                line = that.delimiter + textileMode.extendLeftSelection(editor, /[ .]+/) + line;
               }
 
               // Then handle the right
@@ -162,7 +218,7 @@ ME.addMode("textile", function() {
               if(match){
                 line = line.slice(0, - match[0].length) + (match[1] || ""); 
               } else {
-                line += mode.extendRightSelection(/ +/) + that.delimiter;
+                line += textileMode.extendRightSelection(editor, / +/) + that.delimiter;
               }
               
             } else {
@@ -185,59 +241,58 @@ ME.addMode("textile", function() {
         rightRegExp: /_([\.]*)$/
       },
       alignLeft: {
-        clicked: function(editor, mode) {
-          align(mode, "left");
+        clicked: function(editor) {
+          align(editor, "left");
         }
       },
       alignRight: {
-        clicked: function(editor, mode) {
-          align(mode, "right");
+        clicked: function(editor) {
+          align(editor, "right");
         }
       },
       alignCenter: {
-        clicked: function(editor, mode) {
-          align(mode, "center");
+        clicked: function(editor) {
+          align(editor, "center");
         }
       },
       unorderedList: {
-        clicked: function(editor, mode, target) {
-          toggleList(mode, target, "*");
+        clicked: function(editor, target) {
+          toggleList(editor, target, "*");
         }
       },
       orderedList: {
-        clicked: function(editor, mode, target) {
-          toggleList(mode, target, "#");
+        clicked: function(editor, target) {
+          toggleList(editor, target, "#");
         }
       },
       link: {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
           var dialog, callback, titleString, href, r, match;
           
           callback = {
             submit: function(title,uri){
-              mode.replaceSelection("\"" + title + "\":" + uri);
+              textileMode.replaceSelection(editor, "\"" + title + "\":" + uri);
             },
             remove: function(){
-              mode.replaceSelection(match[1]);
+              textileMode.replaceSelection(editor, match[1]);
             },
             close: function(){
-              mode.updatePreview();
+              textileMode.updatePreview(editor);
               editor.checkState();
             }
           };
 
           if(/ on$/.test(target.className)){
             dialog = ME.dialog.link(['Update','Remove','Cancel']);
-            href = currentNodes.a.attributes.href;
+            href = editor.currentNodes.a.attributes.href;
 
-            match = scanForMatch(mode,new RegExp('\"([^\"]*)\":'+href,'g'));
-
+            match = scanForMatch(editor, new RegExp('\"([^\"]*)\":'+href,'g'));
             titleString = match[1];
             dialog.val('input.uri', href);
           }
           else {
             dialog = ME.dialog.link(['Create','Cancel']);
-            titleString = firstLine(mode);
+            titleString = firstLine(editor, " ");
           }
           
           if(!/^\s*$/.test(titleString)){
@@ -248,7 +303,7 @@ ME.addMode("textile", function() {
         }
       },
       insertImage: {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
           var dialog, callback, href, src, r;
 
           callback = {
@@ -262,41 +317,41 @@ ME.addMode("textile", function() {
                 replacement = replacement + ":" + uri;
               }
 
-              mode.replaceSelection(replacement);
+              textileMode.replaceSelection(editor, replacement);
             },
             remove: function(){
-              mode.replaceSelection("");
+              textileMode.replaceSelection(editor, "");
             },
             close: function(){
-              mode.updatePreview();
+              textileMode.updatePreview(editor);
               editor.checkState();
             }
           };
           
           if(/ on$/.test(target.className)){
             dialog = ME.dialog.insertImage(['Update','Remove','Cancel']);
-            src = currentNodes.img.attributes.src;
+            src = editor.currentNodes.img.attributes.src;
 
-            scanForMatch(mode, new RegExp('!' + src + "(\\([^\\)]*\\))?!(:[^ \n]*)?",'g'));
+            scanForMatch(editor, new RegExp('!' + src + "(\\([^\\)]*\\))?!(:[^ \n]*)?",'g'));
             
-            if(currentNodes.a){
-              href = currentNodes.a.attributes.href;
+            if(editor.currentNodes.a){
+              href = editor.currentNodes.a.attributes.href;
             }
             dialog.val('input.uri', href);
             dialog.val('input.imageUri', src);
-            dialog.val('input.title', currentNodes.img.attributes.title);
+            dialog.val('input.title', editor.currentNodes.img.attributes.title);
           }
           else {
             dialog = ME.dialog.insertImage(['Create','Cancel']);
-            firstLine(mode);
+            firstLine(editor, " ");
           }
 
           dialog.dialog('open', callback);
         }
       },
       formatBlock: {
-        clicked: function(editor, mode, target) {
-          eachParagraph(mode, function(paragraph) {
+        clicked: function(editor, target) {
+          eachParagraph(editor, function(paragraph) {
             if(/^\w+(\([\w ]+\))?\./.test(paragraph)) {
               return paragraph.replace(/^\w+(\([\w ]+\))?\.\s+/, target.value + "$1. ");
             } else if(/^[\*#] /.test(paragraph)){ // ignore lists
@@ -310,21 +365,31 @@ ME.addMode("textile", function() {
     },
     /**
      * Compile textile and update the preview div
+     *
+     * @param {Editor} editor The editor to work on
      */
-    updatePreview: function() {
-      var html = textileCompiler.compile(this.textArea.val());
-      this.htmlDiv.html(html);
+    updatePreview: function(editor) {
+      var html = textileCompiler.compile(editor.textArea.val());
+      editor.htmlDiv.html(html);
     },
     /**
      * Convert preview div to textile
      * 
+     * @param {Editor} editor The editor to work on
+     *
      * @returns {String} A textile string
      */
-    toText: function(html) {
+    toText: function(editor, html) {
       if(!html){
-        html = this.htmlDiv.html();
+        html = editor.htmlDiv.html();
       }
 
+      /**
+       * Fetch the regexps for the given tags and call the given
+       * callback
+       *
+       * TODO get rid of the tags parameter?
+       */
       function eachRegexp(tags, callback){
         var i, item,
         items = {
@@ -393,79 +458,55 @@ ME.addMode("textile", function() {
     /**
      * Get the states for the current selection
      * 
+     * @param {Editor} editor The editor to work on
+     *
      * @return {Object} An object representing the states
      */
-    getSelectionStates: function() {
-      var paragraphs = this.getExtendedSelection(),
-      startTrace = selectionStart - startOfParagraphs,
-      endTrace = selectionEnd - startOfParagraphs;
+    getSelectionStates: function(editor) {
+      var paragraphs = this.getSelection(editor, "\n\n"),
+      startTrace = editor.selectionStart - editor.boundaryStart,
+      endTrace = editor.selectionEnd - editor.boundaryStart,
       trace = textileCompiler.trace(paragraphs, startTrace, endTrace);
-
-      return this.buildStateObject(trace, currentNodes = {});
-    },
-    /**
-     * Get the paragraphs containing the current selection
-     * 
-     * CONSIDER remove this? is it only needed for getParagraphs?
-     * 
-     * @returns {String} The paragraphs
-     */
-    getExtendedSelection: function(){
-      var paragraphIndex, searchIndex = 0, extendedSelection;
-      selectionStart = this.textArea[0].selectionStart;
-      selectionEnd = this.textArea[0].selectionEnd;
-      text = this.textArea.val();
-      startOfParagraphs = 0; endOfParagraphs = -1;
-
-      while((paragraphIndex = text.indexOf("\n\n",searchIndex) + 2 ) !== 1) {
-        if(selectionStart > paragraphIndex) {
-          startOfParagraphs = paragraphIndex;
-        } else if (selectionEnd < paragraphIndex) {
-          endOfParagraphs = paragraphIndex - 2;
-          break;
-        }
-        searchIndex = paragraphIndex;
-      }
       
-      if(endOfParagraphs === -1) {
-        extendedSelection = text.slice(startOfParagraphs);
-      } else {
-        extendedSelection = text.slice(startOfParagraphs, endOfParagraphs);
-      }
-      oldExtendedSelectionLength = extendedSelection.length;
-
-      return extendedSelection;
+      return this.buildStateObject(trace, editor.currentNodes = {});
     },
     /**
+     * @param {Editor} editor The editor to work on
+     *
      * @returns {String[]} An array of paragraphs
      */
-    getParagraphs: function() {
-      return this.getExtendedSelection().split(/\n\n+/);
+    getParagraphs: function(editor) {
+      return this.getSelection(editor, "\n\n").split(/\n\n+/);
     },
     /**
      * Set the paragraphs and move the caret
      * 
+     * @param {Editor} editor The editor to work on
      * @param {String[]} paragraphs An array of paragraphs
      */
-    setParagraphs: function(paragraphs) {
+    setParagraphs: function(editor, paragraphs) {
+      var text = editor.textArea.val();
       paragraphs = paragraphs.join("\n\n");
 
-      if(endOfParagraphs === -1) {
-        this.textArea.val(text.slice(0,startOfParagraphs) + paragraphs);
+      if(editor.rightBoundary === -1) {
+        editor.textArea.val(text.slice(0,editor.leftBoundary) + paragraphs);
       } else {
-        this.textArea.val(text.slice(0,startOfParagraphs) + paragraphs + text.slice(endOfParagraphs));
+        editor.textArea.val(text.slice(0,editor.leftBoundary) + paragraphs + text.slice(editor.rightBoundary));
       }
       
-      this.moveCaret(paragraphs.length - oldExtendedSelectionLength);
+      this.moveCaret(editor, paragraphs.length - editor.boundaryDistance);
     },
     /**
      * Move the caret by the given distance. Positive values move the caret to 
      * the right, negative to the left.
      * 
+     * @param {Editor} editor The editor to work on
      * @param {Integer} distance The distance to move the caret
      */
-    moveCaret: function(distance) {
+    moveCaret: function(editor, distance) {
       // console.log("Moving caret: " + distance);
+      var selectionStart = editor.selectionStart,
+      startOfParagraphs = editor.startOfParagraphs;
 
       if(Math.abs(selectionStart - startOfParagraphs) > Math.abs(distance)) {
         selectionStart += distance;
@@ -473,17 +514,23 @@ ME.addMode("textile", function() {
         selectionStart = startOfParagraphs;
       }
       
-      this.textArea.focus();
-      this.textArea[0].setSelectionRange(selectionStart, selectionStart);
+      editor.textArea.focus();
+      editor.setSelectionRange(selectionStart, selectionStart);
     },
-    pressed: function(keyCode){
+    /**
+     * Handle special keyevents or standard keys that need fixing
+     *
+     * @param {Editor} editor The editor to work on
+     * @param {Integer} keyCode
+     */
+    pressed: function(editor, keyCode){
       // console.log("pressed", keyCode);
       switch(keyCode){
       case 13: // enter
-        return pressedEnter(this);
+        return pressedEnter(editor, this);
       default: // handle keyCombos
         this.prototype.pressed.apply(this, [keyCode]);
       }
     }
-  };
-});
+  });
+})();

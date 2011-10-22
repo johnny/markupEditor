@@ -148,7 +148,7 @@ $(document).ready(function(){
   });
   
   test("Link create", function(){
-    textile.set("This")
+    textile.set("This is a paragraph.")
       .select("This")
       .off('link')
       .dialog('link', function(d){

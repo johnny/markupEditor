@@ -9,7 +9,11 @@
    */
   
   /**
-   * @type Builder
+   * Builds the html tree and traces the common nodes inside a
+   * selection
+   *
+   * @name Builder
+   * @namespace
    */
   var builder = (function (){
     var stack, tracingStack, stackPosition, traceJustStarted, traceJustEnded, popping, pointer, sP, eP, tracing, lastTrace, unsuccessfulPush = false, stringLength,
@@ -523,14 +527,38 @@
       }
     }
   }
-  
+
+  /**
+   * The Compiler for textile
+   *
+   * @name textileCompiler
+   * @namespace
+   */
   textileCompiler = {
+    /**
+     * Compile the given text to html
+     *
+     * @param {String} textToCompile A textile string
+     *
+     * @returns {String} The html
+     */
     compile: function(textToCompile){
       builder.init();
       text = textToCompile;
       parseParagraphs();
       return builder.toHtml();
     },
+    /**
+     * Trace the common nodes between the given boundaries
+     *
+     * @param {String} textToCompile A textile string
+     * @param {Integer} startTrace Index of textToCompile where to
+     * start the trace
+     * @param {Integer} endTrace Index of textToCompile where to
+     * end the trace
+     *
+     * @returns {Object} A stack of the common nodes
+     */
     trace: function(textToCompile, startTrace, endTrace){
       builder.initTrace(startTrace, endTrace, textToCompile.length);
       this.compile(textToCompile);
