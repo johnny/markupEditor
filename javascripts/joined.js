@@ -1,7 +1,6 @@
 (function($) {
   // TODO cache fields
-  var opts, errorMsgType, initialized, methods;
-
+  var opts, errorMsgType, initialized,
   methods = {
     check: function(options) {
       var $this = this, valid = true;
@@ -43,6 +42,13 @@
     }
   };
 
+  /**
+   * Validates forms
+   *
+   * @memberOf jQuery.prototype
+   *
+   * @param {String} [method="init"] The method to call
+   */
   $.fn.isValid = function(method) {
     if (!methods[method]) {
       method = 'check';
@@ -66,9 +72,14 @@
 })(jQuery);
 (function ($) {
   var globalSettings = {}, availableModes = {}, toolbarItems = {}, toolbarHTML = "",
-  availableItems = ['bold','italic','alignLeft','alignCenter','alignRight','unorderedList','orderedList','link','insertImage','save','wysiwyg','changeDataMode','formatBlock'],
+  availableItems = ['bold','italic','alignLeft','alignCenter','alignRight','unorderedList','orderedList','link','insertImage','save','wysiwyg','close','changeDataMode','formatBlock'],
   globalItems = [],
-  emptyFunction = $.noop;
+  emptyFunction = $.noop,
+  // keep the editors for things like checking which needs saving,
+  // which has focus etc.
+  activeEditors = [],
+  numberOfEditors = 0,
+  focusedEditor;
 
   /**
    * Create a new Mode
@@ -78,31 +89,20 @@
    */
   function Mode(customFunctions){
     $.extend(this, customFunctions);
+    // allow direct access of prototype methods from the mode instances
     this.prototype = Mode.prototype;
   }
   
   Mode.prototype = /** @scope Mode.prototype */ {
     /**
-     * This loads the mode for the current Editor
-     * TODO this is ugly. why should every editor have every mode?
-     * @param {Editor} editor
-     */
-    load: function(editor) {
-      this.editor = editor;
-      this.htmlDiv = editor.htmlDiv;
-      this.textArea = editor.textArea;
-
-      console.log("loaded Mode " + this.name);
-    },
-    /**
      * The default pressed function to handle key combos (shift + x)
      */
     pressed: function(keyCode){
       if(keyCode === 16){
-        this.holdShift = true;
+        ME.holdShift = true;
       }
       if(ME.util.isNeutralKey(keyCode)){
-        this.holdNeutralKey = true;
+        ME.holdNeutralKey = true;
       }
     },
     /**
@@ -110,10 +110,10 @@
      */
     released: function(keyCode){
       if(keyCode === 16){
-        this.holdShift = false;
+        ME.holdShift = false;
       }
       if(ME.util.isNeutralKey(keyCode)){
-        this.holdNeutralKey = false;
+        ME.holdNeutralKey = false;
       }
     },
     /**
@@ -125,47 +125,49 @@
     /**
      * Activate this mode for the editor
      */
-    activate: function() {
-      if(this.htmlDiv.is(":empty")) {
-        this.updatePreview();
+    activate: function(editor) {
+      if(editor.htmlDiv.is(":empty")) {
+        this.updatePreview(editor);
       } else {
-        this.updateTextArea();
+        this.updateTextArea(editor);
       }
-      this.editor.toolbar.loadModeToolbar();
-      this.afterActivation();
+      editor.toolbar.loadModeToolbar(editor);
+      this.afterActivation(editor);
     },
     /**
-     * Update the preview html div with the html representation of the mode
+     * Update the preview html div with the html representation of the
+     *mode
+     * CONSIDER move to editor
      */
-    updatePreview: function() {
+    updatePreview: function(editor) {
       console.log("updating preview in Mode " + this.name);
-      this.htmlDiv.html(this.toHTML() || "<p>&nbsp;</p>");
+      editor.htmlDiv.html(this.toHTML(editor) || "<p>&nbsp;</p>");
     },
     /**
      * Update the textarea with the text representation of the mode
      */
-    updateTextArea: function() {
+    updateTextArea: function(editor) {
       console.log("updating TA in Mode " + this.name);
-      this.textArea.val(this.toText());
+      editor.textArea.val(this.toText(editor));
     },
     /**
      * Run after activation. Default behaviour for text modes. wysiwyg mode has 
      * its own version
      */
-    afterActivation: function() {
-      this.textArea
+    afterActivation: function(editor) {
+      editor.textArea
         .parent().show()
         .find(":first-child").focus()[0]
         .setSelectionRange(0,0);
-      this.htmlDiv.attr("contentEditable",false);
+      editor.htmlDiv.attr("contentEditable",false);
     },
     /**
      * Get a state object which sets defines the states of the buttons
      * and the selects.
      * @returns {Object} an object that describes the states
      */
-    getStates: function(){
-      var states = this.getSelectionStates();
+    getStates: function(editor){
+      var states = this.getSelectionStates(editor);
       if(this.id === 'wysiwyg'){
         states.wysiwyg = true;
       } else {
@@ -174,12 +176,15 @@
       return states;
     },
     /**
-     * This is a placeholder. Each mode should define its version
-     * @returns {Object} an object that describes the states
+     * Get the state of the current selection. This is a placeholder.
+     * Each mode should define its version
+     *
      * @see Toolbar#getStates
      * @api
+     * 
+     * @returns {Object} an object that describes the states
      */
-    getSelectionStates: function(){
+    getSelectionStates: function(editor){
       return {};
     },
     /**
@@ -247,65 +252,70 @@
      * selection should be extended to
      * @returns {String} The currently selected string
      */
-    getSelection: function(boundary) {
-      var textArea = this.textArea, text = textArea.val(), boundaryPosition, subString;
+    getSelection: function(editor, boundary) {
+      var textArea = editor.textArea, text = textArea.val(), boundaryPosition, subString;
       textArea.focus();
 
       // gecko & webkit
-      this.scrollPosition = textArea.scrollTop;
-      this.selectionStart = textArea[0].selectionStart;
-      this.selectionEnd = textArea[0].selectionEnd;
+      editor.initSelectionProperties();
 
-      if(text[this.selectionEnd-1] === "\n"){
-        this.selectionEnd -= 1;
+      // TODO does this introduce some edgecases? Eating newlines
+      // move this to initSelectionProperties?
+      if(text[editor.selectionEnd-1] === "\n"){
+        editor.selectionEnd -= 1;
       }
 
       if(boundary) {
         // find left boundary
-        boundaryPosition = Math.max(text.lastIndexOf(boundary, this.selectionStart), text.lastIndexOf("\n", this.selectionStart));
+        boundaryPosition = Math.max(text.lastIndexOf(boundary, editor.selectionStart), text.lastIndexOf("\n", editor.selectionStart));
         if(boundaryPosition !== -1) {
-          this.selectionStart = boundaryPosition + 1;
+          editor.boundaryStart = boundaryPosition + 1;
         } else {
-          this.selectionStart = 0;
+          editor.boundaryStart = 0;
         }
         
         // find right boundary, first limit the text to the
         // next new line
-        boundaryPosition = text.indexOf("\n", this.selectionEnd); 
+        boundaryPosition = text.indexOf("\n", editor.selectionEnd); 
         if(boundaryPosition === -1) {
-          subString = text.slice(this.selectionStart);
+          subString = text.slice(editor.boundaryStart);
         } else {
-          subString = text.slice(this.selectionStart, boundaryPosition);
+          subString = text.slice(editor.boundaryStart, boundaryPosition);
         }
 
         // Then find the next boundary
         boundaryPosition = 0;
         do{
           boundaryPosition = subString.indexOf(boundary, boundaryPosition + 1);
-        } while(boundaryPosition !== -1 && this.selectionEnd > this.selectionStart + boundaryPosition);
+        } while(boundaryPosition !== -1 && editor.selectionEnd > editor.boundaryStart + boundaryPosition);
 
         // when it doesn't exist, extend the selection to the
         // paragraph end
         if(boundaryPosition === -1) {
           boundaryPosition = subString.length;
         }
-        this.selectionEnd = this.selectionStart + boundaryPosition;
+        editor.boundaryEnd = editor.boundaryStart + boundaryPosition;
       }
-      this.selection = text.slice(this.selectionStart, this.selectionEnd);
-      return this.selection;
+      editor.boundaryDistance = boundaryPosition;
+      return text.slice(editor.boundaryStart, editor.boundaryEnd);
+    },
+    extendSelection: function(editor, boundary){
+      var selection = this.getSelection(editor, boundary);
+      editor.setSelectionRange(editor.boundaryStart, editor.boundaryEnd);
+      return selection;
     },
     /**
      * Replace the current selection with the given string
      * @param {String} string The replacement string
      * @param {Boolean} collapseToStart If the selection should collapse
      */
-    replaceSelection: function(string, collapseToStart) {
-      var textArea = this.textArea,
-      newSelectionStart = this.selectionStart,
-      newSelectionEnd = this.selectionStart + string.length;
+    replaceSelection: function(editor, string, collapseToStart) {
+      var textArea = editor.textArea,
+      newSelectionStart = editor.selectionStart,
+      newSelectionEnd = editor.selectionStart + string.length;
 
       // gecko & webkit
-      textArea.val(textArea.val().slice(0, this.selectionStart) + string + textArea.val().slice(this.selectionEnd, textArea.val().length));
+      textArea.val(textArea.val().slice(0, editor.selectionStart) + string + textArea.val().slice(editor.selectionEnd, textArea.val().length));
 
       // move caret gecko
       if(collapseToStart === true){
@@ -314,7 +324,7 @@
         newSelectionStart = newSelectionEnd;
       }
 
-      textArea[0].setSelectionRange(newSelectionStart, newSelectionEnd);
+      editor.setSelectionRange(newSelectionStart, newSelectionEnd);
       textArea.focus();
     },
     /**
@@ -322,19 +332,19 @@
      * to the selection. Useful for special cases like toggling parts of a bolded
      * String in textile
      * 
-     * @param {Regexp} regexp The regexp
+     * @param {RegExp} regexp The regexp
      * 
      * @example
      * extendRightSelection(/ +/)
      */
-    extendRightSelection: function(regexp){
+    extendRightSelection: function(editor, regexp){
       var match;
       regexp = new RegExp(regexp.source,'g');
-      regexp.lastIndex = this.selectionEnd;
-      match = regexp.exec(this.textArea.val());
+      regexp.lastIndex = editor.selectionEnd;
+      match = regexp.exec(editor.textArea.val());
 
-      if(match && regexp.lastIndex == this.selectionEnd + match[0].length){
-        this.selectionEnd += match[0].length;
+      if(match && regexp.lastIndex == editor.selectionEnd + match[0].length){
+        editor.selectionEnd += match[0].length;
         return match[0];
       }
     },
@@ -343,18 +353,18 @@
      * to the selection. Useful for special cases like toggling parts of a bolded
      * String in textile
      * 
-     * @param {Regexp} regexp The regexp.
+     * @param {RegExp} regexp The regexp.
      * 
      * @example
      * extendLeftSelection(/[ .]+/)
      */
-    extendLeftSelection: function(regexp){
-      var match, substring = this.textArea.val().slice(0,this.selectionStart);
+    extendLeftSelection: function(editor, regexp){
+      var match, substring = editor.textArea.val().slice(0,editor.selectionStart);
       regexp = new RegExp(regexp.source + "$");
       match = regexp.exec(substring);
       
       if(match){
-        this.selectionStart -= match[0].length;
+        editor.selectionStart -= match[0].length;
         return match[0];
       }
     }};
@@ -367,11 +377,19 @@
    * @constructor
    * @name ToolbarButton
    *
+   * @property {String} name The class name of the button
+   * @property {Function} clicked The action if the button is clicked upon
+   * @property {Function} isAvailable Returns true if the the function
+   * is available in the current editer
+   *
    * @param {String} name The class name of the button
-   * @param {Function} [clicked] The default action if the button is clicked
+   * @param {Function} [clicked] The action if the button is clicked
+   * @param {Function} [isAvailable] Returns true if the the function
+   * is available in the current editer
    */
-  function ToolbarButton(name, clicked){
+  function ToolbarButton(name, clicked, isAvailable){
     this.name = name;
+    this.isAvailable = isAvailable;
     if(clicked){
       this.clicked = clicked;
       globalItems.push(name);
@@ -391,7 +409,10 @@
    *
    * @constructor
    * @name ToolbarSelect
-   * 
+   * @augments ToolbarButton
+   *
+   * @property {Array} options The options of the select dropdown
+   *
    * @param {String} name The class name of the button
    * @param {Array} [options] The options of the select dropdown
    * @param {Function} [clicked] The default action if the button is clicked
@@ -418,6 +439,11 @@
     }
   };  // end ToolbarSelect
 
+  /**
+   * Create the HTML representation of the editors toolbar
+   *
+   * @returns {String} The toolbar
+   */
   function getToolbarHTML(){
     var i,l, item;
 
@@ -446,18 +472,15 @@
     var button, buttonTags = '',
     toolbarDiv = $("<div class=\"toolbar\"></div>"),
     that = this;
-    
-    this.textArea = editor.textArea;
-    this.htmlDiv = editor.htmlDiv;
-    this.editor = editor;
+
     this.div = toolbarDiv;
 
     toolbarDiv.html(getToolbarHTML());
-    
+
     toolbarDiv.mouseup(function(e) { // Trigger on button click
       var target = e.target;
 
-      if(!(/(select|option)/i).test(target.nodeName)) {
+      if((/(a|span)/i).test(target.nodeName)) {
         // When the span is clicked change the Target to the
         // containing div
         if(/span/i.test(target.nodeName)) {
@@ -475,7 +498,7 @@
         var action = target.className;
 
         action = action.split(" ")[0];
-        that.runAction(action, target);
+        that.runAction(editor, action, target);
         // TODO this does not work with dialogs
         // in dialogs this gets set manually, but perhaps there is a
         // more general way?
@@ -483,11 +506,9 @@
       }
     }).change(function(e) { // trigger on select change
       var target = e.target;
-      that.runAction(target.className, target);
+      that.runAction(editor, target.className, target);
       return false;
     }).click(function(e){return false; }); //
-
-    editor.container.prepend(toolbarDiv);
   } // end initToolbar
 
   Toolbar.prototype = /** @scope Toolbar.prototype */{
@@ -495,17 +516,16 @@
      * Load the toolbar for the current mode. If a toolbar item is not
      * supported, it will be hidden.
      */
-    loadModeToolbar: function(){
-      var supportedItems = this.editor.currentMode.supportedItems,
-      hasSave = this.editor.settings.save,
+    loadModeToolbar: function(editor){
+      var supportedItems = editor.currentMode.supportedItems,
       oldVisibleItems = this.visibleItems,
       newVisibleItems = [];
       
       // Optimize: better scheme. Calculate the differences between
       // the modes once and use them here
       this.div.children().each(function(){
-        var item = this.className;
-        if(supportedItems.indexOf(item) != -1 && (item !== "save" || hasSave)){
+        var item = this.className.split(' ')[0], isAvailable = toolbarItems[item].isAvailable;
+        if(supportedItems.indexOf(item) != -1 && (!isAvailable || isAvailable(editor))){
           if(!oldVisibleItems || oldVisibleItems.indexOf(item) == -1){
             $(this).show();
           }
@@ -524,14 +544,16 @@
      * @param {String} action The action to execute
      * @param {HTMLElement} target The target of the click
      */
-    runAction: function(action,target) {
+    runAction: function(editor,action,target) {
       var item = toolbarItems[action],
-      editor = this.editor,
       mode = editor.currentMode;
-      (item[mode.id] || item).clicked(editor, mode, target);
+
+      // execute buttons clicked action
+      (item[mode.id] || item).clicked(editor, target);
+      
       // Update Preview in case something has changed
       if(action != "changeMode" && !editor.is("wysiwyg")) {
-        mode.updatePreview();
+        mode.updatePreview(editor);
       }
     },
     /**
@@ -575,9 +597,8 @@
    * @param {Object} settings Editor specific settings
    */
   function Editor(textArea, settings) {
-    var container, editor = this, timer = 0;
+    var editor = this, timer = 0, htmlDiv = settings.htmlDiv;
 
-    this.loadedModes = {};
     this.setDataType(textArea.attr("class"));
     this.settings = settings;
 
@@ -586,42 +607,53 @@
     function addKeyListeners(object, isTextarea){
       object.keydown(function(e){
         if(isTextarea || editor.is('wysiwyg')){
-          return editor.currentMode.pressed(e.keyCode);
+          return editor.currentMode.pressed(editor, e.keyCode);
         }
       }).keyup(function(e){
         if(isTextarea || editor.is('wysiwyg')){
-          return editor.currentMode.released(e.keyCode);
+          return editor.currentMode.released(editor, e.keyCode);
         }
       }).mouseup(function(){
         if(isTextarea || editor.is('wysiwyg')){
-          return editor.currentMode.clicked();
+          editor.focus();
+          return editor.currentMode.clicked(editor);
         }
       });
     }
-    
+
+    // mouseup will catch all three mouse buttons. Since all keys move
+    // the cursor a check is necessary
     this.textArea = textArea.bind("mouseup keyup", function() {
-      // TODO check for specific mouse keys
       editor.checkState();
       clearTimeout(timer);
       timer = setTimeout(function(){
-        editor.currentMode.updatePreview();
+        editor.currentMode.updatePreview(editor);
       },1000);
     });
     addKeyListeners(textArea,true);
-    
-    this.htmlDiv = $("<div class=\"preview\"></div>")
-      .bind("mouseup keyup", function() {
-        // TODO check for specific mouse keys
+
+    if(htmlDiv){
+      htmlDiv.addClass('preview');
+    } else {
+      htmlDiv = $("<div class=\"preview\"></div>");
+    }
+    this.htmlDiv = htmlDiv.bind("mouseup keyup", function() {
         if(editor.is("wysiwyg")) {
           editor.checkState();
         }
       });
     addKeyListeners(this.htmlDiv);
     
-    this.container = textArea.wrap("<div class=\"markupEditor\"></div>")
-      .parent().append(editor.htmlDiv);
-    textArea.wrap("<div class=\"textarea\">");
     this.toolbar = new Toolbar(this);
+    this.container = textArea.wrap("<div class=\"markupEditor\"></div>")
+      .parent().append(editor.htmlDiv).
+      prepend(this.toolbar.div);
+    textArea.wrap("<div class=\"textarea\">");
+
+    activeEditors[numberOfEditors] = editor;
+    editor.id = numberOfEditors;
+    // console.log("init editor " + numberOfEditors);
+    numberOfEditors ++;
   } // Editor
 
   Editor.prototype = /** @scope Editor.prototype */{
@@ -632,10 +664,10 @@
      */
     changeMode: function(modeId) {
       var nextMode;
-      nextMode = this.getMode(modeId);
-      this.commit();
+      nextMode = ME.getMode(modeId);
+      this.synchronize();
       this.currentMode = nextMode;
-      nextMode.activate();
+      nextMode.activate(this);
     },
     /**
      * Change the current underlying data format
@@ -656,27 +688,13 @@
      * @returns {Mode} The current datamode
      */
     getDataMode: function() {
-      return this.getMode(this.dataType);
+      return ME.getMode(this.dataType);
     },
     /**
-     * Get the specified mode. Loads it if necessary
+     * Extract the datatype from the given class string 
      *
-     * @param {String} modeId The id of the mode (e.g. textile)
-     *
-     * @returns {Mode} The initialized mode
+     * @param {String} classString The class string of the editor element
      */
-    getMode: function(modeId) {
-      if(this.loadedModes[modeId]) {
-        return this.loadedModes[modeId];
-      }
-      else if (availableModes[modeId]) {
-        this.loadedModes[modeId] = availableModes[modeId](this);
-        return this.loadedModes[modeId];
-      }
-      else {
-        console.log("Mode " + modeId + " is not defined");
-      }
-    },
     setDataType: function(classString) {
       var i, cssClass,
       cssClasses = classString.split(/\s+/);
@@ -689,22 +707,238 @@
         }
       }
     },
-    commit: function() {
+    initSelectionProperties: function(){
+      var textArea = this.textArea;
+      
+      this.scrollPosition = textArea.scrollTop;
+      this.selectionStart = textArea[0].selectionStart;
+      this.selectionEnd = textArea[0].selectionEnd;
+    },
+    setSelectionRange: function(selectionStart, selectionEnd){
+      this.textArea[0].setSelectionRange(selectionStart, selectionEnd);
+      this.selectionStart = selectionStart;
+      this.selectionEnd = selectionEnd;
+    },
+    /**
+     * Synchronize the changes between preview div and the text area
+     */
+    synchronize: function() {
       if(this.is("wysiwyg")) {
-        this.getMode(this.dataType).updateTextArea();
+        ME.getMode(this.dataType).updateTextArea(this);
       } else {
-        this.currentMode.updatePreview();
+        this.currentMode.updatePreview(this);
       }
     },
+    /**
+     * Check which mode is loaded.
+     *
+     * @param {String} modeId The short name of the mode e.g. wysiwyg
+     * 
+     * @returns {Boolean} Returns true if the current mode has the
+     *given modeId
+     */
     is: function(modeId) {
       return this.currentMode.id === modeId;
     },
+    /**
+     * Check the state of the current selection (bold/italic etc.) and
+     * change the toolbar.
+     */
     checkState: function () {
-      // check if the current Selection is inside a bold/italic etc.
-      this.toolbar.setActive(this.currentMode.getStates());
+      this.toolbar.setActive(this.currentMode.getStates(this));
+    },
+    /**
+     * Focus the editor, which will show the toolbar etc.
+     */
+    focus: function() {
+      if(focusedEditor){
+        activeEditors[focusedEditor].blur();
+      }
+      focusedEditor = this.id;
+      // console.log("new focus: " + this.id);
+    },
+    /**
+     * Blur (unfocus) the Editor, hide the toolbar etc.
+     */
+    blur: function(){
+      
+    },
+    /**
+     * Close the editor and restore the original div/textarea
+     */
+    close: function() {
+      var replacement = this.settings.htmlDiv || this.textArea;
+      this.synchronize();
+      
+      this.container.replaceWith(replacement);
+      replacement.removeClass('preview').unbind()
+        .attr('contentEditable',false).show()
+        .markupEditor('prepare', this.settings);
     }
   }; // end Editor prototype
 
+  /**
+   * @namespace Holds all public methods
+   */
+  ME = {
+    /**
+     * Add a mode
+     *
+     * @param {String} modeId The id of the mode as referenced
+     * internally
+     * @param {Object} modeDefinition Defines methods and toolbaritems
+     * of the new Mode 
+     */
+    addMode: function(modeId, modeDefinition) {
+      var items = modeDefinition.items, constructor, supportedItems = globalItems.slice();
+      modeDefinition.id = modeId;
+      
+      if(items) {
+        for( item in items) {
+          if(items.hasOwnProperty(item) && item !== "default") {
+            supportedItems.push(item);
+            if(!toolbarItems[item]) {
+              constructor = items[item].options ? ToolbarSelect : ToolbarButton;
+              toolbarItems[item] = new constructor(item);
+            }
+            toolbarItems[item][modeId] = $.extend({name: item}, items["default"], items[item]);
+          }
+        }
+      }
+
+      if(modeId !== 'wysiwyg'){
+        toolbarItems.changeDataMode.options.push([modeId, modeDefinition.name]);
+      }
+
+      modeDefinition.supportedItems = supportedItems;
+      
+      return availableModes[modeId] = new Mode(modeDefinition);
+    },
+    /**
+     * Get the specified mode. Loads it if necessary
+     *
+     * @param {String} modeId The id of the mode (e.g. textile)
+     *
+     * @returns {Mode} The initialized mode
+     */
+    getMode: function(modeId) {
+      var mode = availableModes[modeId];
+      if (mode) {
+        return mode;
+      }
+      else {
+        console.log("Mode " + modeId + " is not defined");
+      }
+    },
+    /**
+     * The global options of markup editor
+     *
+     * @class
+     * @property {Function} save The save callback. Takes the editor
+     * as parameter
+     * @property {Boolean} closable If true, the close button is
+     * visible
+     * @property {jQuery} htmlDiv The htmlDiv the editor has been
+     * loaded from
+     */
+    options: {},
+    /**
+     * Set the options
+     *
+     * @see ME#options for settable options
+     *
+     * @param {Object} options The options object
+     */
+    setOptions: function(options){
+      this.options = options;
+    }
+  };
+
+  toolbarItems.changeDataMode = new ToolbarSelect("changeDataMode", [], function(editor, mode, target) {
+    editor.changeDataMode(target.value);
+  });
+
+  toolbarItems.formatBlock = new ToolbarSelect("formatBlock",[
+    ["p", "Paragraph"],
+    ["h1", "Heading 1"],
+    ["h2", "Heading 2"],
+    ["h3", "Heading 3"]
+  ]);
+
+  toolbarItems.save = new ToolbarButton("save", function(editor){
+    editor.synchronize();
+    editor.settings.save(editor);
+  }, function(editor){
+    return editor.settings.save;
+  });
+
+  toolbarItems.wysiwyg = new ToolbarButton("wysiwyg", function(editor, mode){
+    if(editor.is('wysiwyg')){
+      editor.changeMode(editor.dataType);
+    } else {
+      editor.changeMode('wysiwyg');
+    }
+  });
+
+  toolbarItems.close = new ToolbarButton('close', function(editor){
+    editor.close();
+  }, function(editor) {
+    var settings = editor.settings;
+    return settings.htmlDiv || settings.closable;
+  });
+
+  /**
+   * @name jQuery
+   * @namespace The popular DOM utility
+   */
+
+  var methods = {
+    /**
+     * Create the markup editor
+     *
+     * @param {Object} settings The specific settings for the editor
+     * @see ME#settings
+     */
+    init: function(settings) {
+      ME.settings = settings;
+      return this.each(function(index,element) {
+        var $element = $(element), editor;
+        if($element.is("textarea")) {
+          initEditorFromTextarea($element, settings);
+        } else {
+          initEditorFromHTML($element, settings);
+        }
+      });
+    },
+    close: function(){
+      // find ta and get number of editor
+      // execute editor.close
+    },
+    prepare: function(settings) {
+      return this.one('click', function(){
+        $(this).markupEditor(settings);
+      });
+    }
+  };
+  
+  /**
+   * Markupeditor method.
+   *
+   * @memberOf jQuery.prototype
+   *
+   * @param {String} [method="init"] The method to call
+   */
+  $.fn.markupEditor= function(method) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    if(typeof method === 'object'){
+      args.push(method);
+    }
+    if (!methods[method]) {
+      method = 'init';
+    }
+    return methods[method].apply(this, args);
+  };
+  
   /**
    * Initialize the editor from a given HTML element
    *
@@ -716,16 +950,15 @@
   function initEditorFromHTML(container, settings){
     container.css("min-height", container.height());
     var editor,
-    textarea = $("<textarea class=\"" + container[0].className + "\">")
-      .prependTo(container); // needs to be attached to DOM in firefox
-    
+    textarea = $("<textarea class=\"" + container[0].className + "\">");
+    container.before(textarea); // needs to be attached to DOM in firefox
+
+    settings = settings || {};
+    settings.htmlDiv = container;
     editor = initEditorFromTextarea(textarea, settings);
-    editor.htmlDiv.append(editor.container.nextAll());
-    editor.currentMode.updateTextArea();
+    editor.currentMode.updateTextArea(editor);
     editor.changeMode("wysiwyg");
     editor.checkState();
-    
-    container.append(editor.container);
   }
   
   /**
@@ -745,130 +978,15 @@
 
     if(textarea.hasClass("wysiwyg")) {
       // TODO better flow here
-      editor.currentMode.activate();
-      editor.currentMode = editor.getMode("wysiwyg");
+      editor.currentMode.activate(editor);
+      editor.currentMode = ME.getMode("wysiwyg");
     }
-    editor.currentMode.activate();
+    editor.currentMode.activate(editor);
     editor.checkState();
     return editor;
   }
-
-  /**
-   * @namespace Holds all public methods
-   */
-  ME = {
-    /**
-     * Add a mode
-     *
-     * TODO change spec to object
-     * @param {String} modeId The id of the mode as referenced
-     * internally
-     * @param {Function} spec The definiton of the mode
-     */
-    addMode: function(modeId, spec) {
-      var mode = spec(), items = mode.items, constructor, supportedItems = globalItems.slice();
-      mode.id = modeId;
-      
-      if(items) {
-        for( item in items) {
-          if(items.hasOwnProperty(item) && item !== "default") {
-            supportedItems.push(item);
-            if(!toolbarItems[item]) {
-              constructor = items[item].options ? ToolbarSelect : ToolbarButton;
-              toolbarItems[item] = new constructor(item);
-            }
-            toolbarItems[item][modeId] = $.extend({name: item}, items["default"], items[item]);
-          }
-        }
-      }
-
-      if(modeId !== 'wysiwyg'){
-        toolbarItems.changeDataMode.options.push([modeId, mode.name]);
-      }
-
-      mode.supportedItems = supportedItems;
-      
-      availableModes[modeId] = function(editor) {
-        var modeInstance = new Mode(mode);
-        
-        modeInstance.load(editor);
-        
-        return modeInstance;
-      };
-      return mode;
-    },
-    /**
-     * The global options of markup editor
-     *
-     * @class
-     * @property {Function} save The save callback. Takes the editor
-     * as parameter
-     */
-    options: {},
-    /**
-     * Set the options
-     *
-     * @see ME#options for settable options
-     *
-     * @param {Object} options The options object
-     */
-    setOptions: function(options){
-      this.options = options;
-    }
-  };
-
-  /**
-   * @name jQuery
-   * @namespace The popular DOM utility
-   */
-
-  /**
-   * Create the markup editor
-   *
-   * @memberOf jQuery.prototype
-   *
-   * @param {Object} settings The specific settings for the editor
-   * @see ME#settings
-   */
-  $.fn.initMarkupEditor = function(settings) {
-    ME.settings = settings;
-    this.each(function(index,element) {
-      var $element = $(element);
-      if($element.is("textarea")) {
-        initEditorFromTextarea($element, settings);
-      } else {
-        initEditorFromHTML($element, settings);
-      }
-    });
-    return this;
-  };
-
-  toolbarItems.changeDataMode = new ToolbarSelect("changeDataMode", [], function(editor, mode, target) {
-    editor.changeDataMode(target.value);
-  });
-
-  toolbarItems.formatBlock = new ToolbarSelect("formatBlock",[
-    ["p", "Paragraph"],
-    ["h1", "Heading 1"],
-    ["h2", "Heading 2"],
-    ["h3", "Heading 3"]
-  ]);
-
-  toolbarItems.save = new ToolbarButton("save", function(editor){
-    editor.commit();
-    editor.settings.save(editor);
-  });
-
-  toolbarItems.wysiwyg = new ToolbarButton("wysiwyg", function(editor, mode){
-    if(editor.is('wysiwyg')){
-      editor.changeMode(editor.dataType);
-    } else {
-      editor.changeMode('wysiwyg');
-    }
-  });
-
-  return ME;
-})(jQuery);
+  
+}(jQuery));
 (function(ME){
   // Do not include Enter, Backspace, Delete
   neutralKeys = "9.16.17.18.20.27.33.34.35.36.37.38.39.40.45.91.93.93";
@@ -1200,26 +1318,32 @@
     ])
   };
 })(jQuery);
-ME.addMode("textile", function() {
-  var text, selectionStart, startOfParagraphs, endOfParagraphs, oldExtendedSelectionLength, currentNodes = {},
-  $ = jQuery;
+(function() {
+  var $ = jQuery, textileMode;
 
   /**
    * Iterate over each paragraph and call the functor on it and set the paragraphs
    * CONSIDER rename or move setParagraphs out of it
-   * 
-   * @param {Mode} mode The current mode
+   *
+   * @param {Editor} editor The editor to work on
    * @param {Function} functor The functor will be applied on each paragraph
    */
-  function eachParagraph(mode, functor) {
-    var paragraphs = mode.getParagraphs(), paragraphsLength = paragraphs.length;
+  function eachParagraph(editor, functor) {
+    var paragraphs = textileMode.getParagraphs(editor), paragraphsLength = paragraphs.length;
 
     for(i = 0; i < paragraphsLength; i++) {
       paragraphs[i] = functor(paragraphs[i]);
     }
-    mode.setParagraphs(paragraphs);
+    textileMode.setParagraphs(editor, paragraphs);
   }
 
+  /**
+   * Apply the functor to each given line
+   *
+   * @param {String[]} lines The line array
+   * @param {Function} functor The function which will be applied to
+   * each line
+   */
   function eachLine(lines, functor){
     var linesLength = lines.length,
     i, line, lineStart, match;
@@ -1237,22 +1361,40 @@ ME.addMode("textile", function() {
     }
   }
 
-  function replaceEachLine(mode, boundary, functor){
-    var lines = mode.getSelection(boundary).split("\n");
+  /**
+   * Apply the functor to each line of the current selection.
+   *
+   * @param {Editor} editor The editor to work on
+   * @param {String} boundary The boundary to which the Selection will
+   * be extended e.g. '\n', ' '
+   * @param {Function} functor The function to apply to each line
+   */
+  function replaceEachLine(editor, boundary, functor){
+    var lines = textileMode.extendSelection(editor, boundary).split("\n");
 
     eachLine(lines, function(i, lineStart, line){
       lines[i] = functor(lineStart, line);
     });
     
-    mode.replaceSelection(lines.join("\n"));
+    textileMode.replaceSelection(editor, lines.join("\n"));
   }
 
-  function firstLine(mode){
-    var lines = mode.getSelection("\n").split("\n").slice(0,1),
+  /**
+   * Get the first line of the selection, without the special textile
+   * tokens which might be at the start of the line.
+   *
+   * @param {Editor} editor The editor to work on
+   *
+   * @returns {String} The first line of the selection
+   */
+  function firstLine(editor, boundary){
+    // lines has only one element
+    var lines = textileMode.extendSelection(editor, boundary).split("\n").slice(0,1),
     lineLength = lines[0].length;
-    mode.selectionEnd = mode.selectionStart + lineLength;
+    editor.selectionEnd = editor.selectionStart + lineLength;
+    // Ignore special textile tokens at the beginnig of the line
     eachLine(lines, function(i, lineStart, line){
-      mode.selectionStart += lineStart.length;
+      editor.setSelectionRange( editor.selectionStart + lineStart.length, editor.selectionEnd);
       lines[i] = line;
     });
     return lines[0];
@@ -1261,11 +1403,11 @@ ME.addMode("textile", function() {
   /**
    * Execute align command
    * 
-   * @param {Mode} mode The current mode
+   * @param {Editor} editor The editor to work on
    * @param {String} orientation The orientation of the alignment
    */
-  function align(mode, orientation) {
-    eachParagraph(mode, function(paragraph) {
+  function align(editor, orientation) {
+    eachParagraph(editor, function(paragraph) {
       var classes, classesLength, newClasses = [];
       if(/^\w+\([^)]+\)\./.test(paragraph)) {
         classes = jQuery.trim(paragraph.slice(paragraph.indexOf("(") + 1, paragraph.indexOf(")"))).split(/\s+/);
@@ -1289,26 +1431,34 @@ ME.addMode("textile", function() {
    * Scan the textarea for the first match and set selection to it.
    * This is useful e.g. for finding a link markup with a given source
    * 
-   * @param {Mode} mode The current mode
+   * @param {Editor} editor The editor to work on
    * @param {RegExp} r The regexp to search for
    */
-  function scanForMatch(mode,r){
-    var match = r.exec(text);
+  function scanForMatch(editor, r){
+    var text = editor.textArea.val(),
+    match = r.exec(text);
     if(r.lastIndex === 0){
       return;   // TODO escalate this return to break the caller too
     }
-    while(r.lastIndex < selectionStart){
+    while(r.lastIndex < editor.selectionStart){
       match = r.exec(text);
     }
 
     // needed for the replaceSelection call
-    mode.selectionStart = r.lastIndex - match[0].length;
-    mode.selectionEnd = r.lastIndex;
+    editor.setSelectionRange(r.lastIndex - match[0].length, r.lastIndex);
+
     return match;
   }
 
-  function toggleList(mode, target, bullet){
-    replaceEachLine(mode, "\n", function(lineStart, line){
+  /**
+   * Toggle lists on and of
+   *
+   * @param {Editor} editor The editor to work on
+   * @param {HTMLElement} target The clicked button
+   * @param {String} bullet The bullet string e.g. '*'
+   */
+  function toggleList(editor, target, bullet){
+    replaceEachLine(editor, "\n", function(lineStart, line){
       if(!/ on$/.test(target.className)){
         line = bullet + " " + line;
       }
@@ -1316,59 +1466,79 @@ ME.addMode("textile", function() {
     });
   }
 
+  /**
+   * The available types of lists in Textile
+   */
   var listTypes = {
     ul: '*',
     ol: '#'
   };
 
   /**
-   * @returns {Boolean} return false to prevent browser
-   * CONSIDER move to object or remove mode parameter
+   * Handles enter inside lists, so that list are continued
+   * 
+   * @param {Editor} editor The editor to work on
+   *
+   * @returns {Boolean} Returns false to prevent the default browser behaviour
    */
-  function pressedEnter(mode){
-    var list = currentNodes.list, replacement;
+  function pressedEnter(editor){
+    var list = editor.currentNodes.list, replacement;
 
     if(list && /(u|o)l/i.test(list.tag)){ // only headings
-      mode.getSelection();
-      if(mode.holdShift){
+      textileMode.getSelection(editor);
+      if(ME.holdShift){
         replacement = " <br> ";
       } else {
         replacement = "\n" + listTypes[list.tag] + " ";
       }
-      mode.replaceSelection(replacement, false);
+      textileMode.replaceSelection(editor, replacement, false);
       return false;
     }
   }
-
-  regexpes = {
-    "*": [/^(\w+\. )?\s*\*/, /\*([\.]*)$/],
-    "_": [/^(\w+\. )?\s*_/, /_([\.]*)$/]
-  };
-  return {
+  /**
+   * @name textileMode
+   * @namespace holds the methods from the textile mode
+   * @augments Mode
+   */
+  textileMode = ME.addMode('textile', /** @scope textileMode.prototype */{
+    /**
+     * The long name of the mode
+     * @property
+     */
     name: "Textile Mode",
+    /**
+     * Holds the supported toolbaritems
+     * @property
+     */
     items: {
       "default": {
-        clicked: function(editor, mode, target) {
+        /**
+         * The default action for the buttons. With textile this works
+         * for the same delimiters right and left
+         *
+         * @param {Editor} editor The editor to work on
+         */
+        clicked: function(editor, target) {
           // TODO find left and right boundaries that are valid
           var match, that = this;
-          replaceEachLine(mode, " ", function(lineStart, line){
+          replaceEachLine(editor, " ", function(lineStart, line){
             if(/ on$/.test(target.className)){
               
               // first handle the left part
-              match = line.match(regexpes[that.delimiter][0]);
+              match = line.match(that.leftRegExp);
               if(match){
                 line = (match[1] || "") + line.slice(match[0].length);
               } else {
                 // place delimiter left and extend selection
-                line = that.delimiter + mode.extendLeftSelection(/[ .]+/) + line;
+                line = that.delimiter + textileMode.extendLeftSelection(editor, /[ .]+/) + line;
               }
 
               // Then handle the right
-              match = line.match(regexpes[that.delimiter][1]);
+              match = line.match(that.rightRegExp);
               if(match){
                 line = line.slice(0, - match[0].length) + (match[1] || ""); 
               } else {
-                line += mode.extendRightSelection(/ +/) + that.delimiter;
+                line += textileMode.extendRightSelection(editor, / +/) + that.delimiter;
               }
               
             } else {
@@ -1381,65 +1551,68 @@ ME.addMode("textile", function() {
         }
       },
       bold: {
-        delimiter: "*"
+        delimiter: "*",
+        leftRegExp: /^(\w+\. )?\s*\*/,
+        rightRegExp: /\*([\.]*)$/
       },
       italic: {
-        delimiter: "_"
+        delimiter: "_",
+        leftRegExp: /^(\w+\. )?\s*_/,
+        rightRegExp: /_([\.]*)$/
       },
       alignLeft: {
-        clicked: function(editor, mode) {
-          align(mode, "left");
+        clicked: function(editor) {
+          align(editor, "left");
         }
       },
       alignRight: {
-        clicked: function(editor, mode) {
-          align(mode, "right");
+        clicked: function(editor) {
+          align(editor, "right");
         }
       },
       alignCenter: {
-        clicked: function(editor, mode) {
-          align(mode, "center");
+        clicked: function(editor) {
+          align(editor, "center");
         }
       },
       unorderedList: {
-        clicked: function(editor, mode, target) {
-          toggleList(mode, target, "*");
+        clicked: function(editor, target) {
+          toggleList(editor, target, "*");
         }
       },
       orderedList: {
-        clicked: function(editor, mode, target) {
-          toggleList(mode, target, "#");
+        clicked: function(editor, target) {
+          toggleList(editor, target, "#");
         }
       },
       link: {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
           var dialog, callback, titleString, href, r, match;
           
           callback = {
             submit: function(title,uri){
-              mode.replaceSelection("\"" + title + "\":" + uri);
+              textileMode.replaceSelection(editor, "\"" + title + "\":" + uri);
             },
             remove: function(){
-              mode.replaceSelection(match[1]);
+              textileMode.replaceSelection(editor, match[1]);
             },
             close: function(){
-              mode.updatePreview();
+              textileMode.updatePreview(editor);
               editor.checkState();
             }
           };
 
           if(/ on$/.test(target.className)){
             dialog = ME.dialog.link(['Update','Remove','Cancel']);
-            href = currentNodes.a.attributes.href;
+            href = editor.currentNodes.a.attributes.href;
 
-            match = scanForMatch(mode,new RegExp('\"([^\"]*)\":'+href,'g'));
-
+            match = scanForMatch(editor, new RegExp('\"([^\"]*)\":'+href,'g'));
             titleString = match[1];
             dialog.val('input.uri', href);
           }
           else {
             dialog = ME.dialog.link(['Create','Cancel']);
-            titleString = firstLine(mode);
+            titleString = firstLine(editor, " ");
           }
           
           if(!/^\s*$/.test(titleString)){
@@ -1450,7 +1623,7 @@ ME.addMode("textile", function() {
         }
       },
       insertImage: {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
           var dialog, callback, href, src, r;
 
           callback = {
@@ -1464,41 +1637,41 @@ ME.addMode("textile", function() {
                 replacement = replacement + ":" + uri;
               }
 
-              mode.replaceSelection(replacement);
+              textileMode.replaceSelection(editor, replacement);
             },
             remove: function(){
-              mode.replaceSelection("");
+              textileMode.replaceSelection(editor, "");
             },
             close: function(){
-              mode.updatePreview();
+              textileMode.updatePreview(editor);
               editor.checkState();
             }
           };
           
           if(/ on$/.test(target.className)){
             dialog = ME.dialog.insertImage(['Update','Remove','Cancel']);
-            src = currentNodes.img.attributes.src;
+            src = editor.currentNodes.img.attributes.src;
 
-            scanForMatch(mode, new RegExp('!' + src + "(\\([^\\)]*\\))?!(:[^ \n]*)?",'g'));
+            scanForMatch(editor, new RegExp('!' + src + "(\\([^\\)]*\\))?!(:[^ \n]*)?",'g'));
             
-            if(currentNodes.a){
-              href = currentNodes.a.attributes.href;
+            if(editor.currentNodes.a){
+              href = editor.currentNodes.a.attributes.href;
             }
             dialog.val('input.uri', href);
             dialog.val('input.imageUri', src);
-            dialog.val('input.title', currentNodes.img.attributes.title);
+            dialog.val('input.title', editor.currentNodes.img.attributes.title);
           }
           else {
             dialog = ME.dialog.insertImage(['Create','Cancel']);
-            firstLine(mode);
+            firstLine(editor, " ");
           }
 
           dialog.dialog('open', callback);
         }
       },
       formatBlock: {
-        clicked: function(editor, mode, target) {
-          eachParagraph(mode, function(paragraph) {
+        clicked: function(editor, target) {
+          eachParagraph(editor, function(paragraph) {
             if(/^\w+(\([\w ]+\))?\./.test(paragraph)) {
               return paragraph.replace(/^\w+(\([\w ]+\))?\.\s+/, target.value + "$1. ");
             } else if(/^[\*#] /.test(paragraph)){ // ignore lists
@@ -1512,21 +1685,31 @@ ME.addMode("textile", function() {
     },
     /**
      * Compile textile and update the preview div
+     *
+     * @param {Editor} editor The editor to work on
      */
-    updatePreview: function() {
-      var html = textileCompiler.compile(this.textArea.val());
-      this.htmlDiv.html(html);
+    updatePreview: function(editor) {
+      var html = textileCompiler.compile(editor.textArea.val());
+      editor.htmlDiv.html(html);
     },
     /**
      * Convert preview div to textile
      * 
+     * @param {Editor} editor The editor to work on
+     *
      * @returns {String} A textile string
      */
-    toText: function(html) {
+    toText: function(editor, html) {
       if(!html){
-        html = this.htmlDiv.html();
+        html = editor.htmlDiv.html();
       }
 
+      /**
+       * Fetch the regexps for the given tags and call the given
+       * callback
+       *
+       * TODO get rid of the tags parameter?
+       */
       function eachRegexp(tags, callback){
         var i, item,
         items = {
@@ -1595,79 +1778,55 @@ ME.addMode("textile", function() {
     /**
      * Get the states for the current selection
      * 
+     * @param {Editor} editor The editor to work on
+     *
      * @return {Object} An object representing the states
      */
-    getSelectionStates: function() {
-      var paragraphs = this.getExtendedSelection(),
-      startTrace = selectionStart - startOfParagraphs,
-      endTrace = selectionEnd - startOfParagraphs;
+    getSelectionStates: function(editor) {
+      var paragraphs = this.getSelection(editor, "\n\n"),
+      startTrace = editor.selectionStart - editor.boundaryStart,
+      endTrace = editor.selectionEnd - editor.boundaryStart,
       trace = textileCompiler.trace(paragraphs, startTrace, endTrace);
-
-      return this.buildStateObject(trace, currentNodes = {});
-    },
-    /**
-     * Get the paragraphs containing the current selection
-     * 
-     * CONSIDER remove this? is it only needed for getParagraphs?
-     * 
-     * @returns {String} The paragraphs
-     */
-    getExtendedSelection: function(){
-      var paragraphIndex, searchIndex = 0, extendedSelection;
-      selectionStart = this.textArea[0].selectionStart;
-      selectionEnd = this.textArea[0].selectionEnd;
-      text = this.textArea.val();
-      startOfParagraphs = 0; endOfParagraphs = -1;
-
-      while((paragraphIndex = text.indexOf("\n\n",searchIndex) + 2 ) !== 1) {
-        if(selectionStart > paragraphIndex) {
-          startOfParagraphs = paragraphIndex;
-        } else if (selectionEnd < paragraphIndex) {
-          endOfParagraphs = paragraphIndex - 2;
-          break;
-        }
-        searchIndex = paragraphIndex;
-      }
       
-      if(endOfParagraphs === -1) {
-        extendedSelection = text.slice(startOfParagraphs);
-      } else {
-        extendedSelection = text.slice(startOfParagraphs, endOfParagraphs);
-      }
-      oldExtendedSelectionLength = extendedSelection.length;
-
-      return extendedSelection;
+      return this.buildStateObject(trace, editor.currentNodes = {});
     },
     /**
+     * @param {Editor} editor The editor to work on
+     *
      * @returns {String[]} An array of paragraphs
      */
-    getParagraphs: function() {
-      return this.getExtendedSelection().split(/\n\n+/);
+    getParagraphs: function(editor) {
+      return this.getSelection(editor, "\n\n").split(/\n\n+/);
     },
     /**
      * Set the paragraphs and move the caret
      * 
+     * @param {Editor} editor The editor to work on
      * @param {String[]} paragraphs An array of paragraphs
      */
-    setParagraphs: function(paragraphs) {
+    setParagraphs: function(editor, paragraphs) {
+      var text = editor.textArea.val();
       paragraphs = paragraphs.join("\n\n");
 
-      if(endOfParagraphs === -1) {
-        this.textArea.val(text.slice(0,startOfParagraphs) + paragraphs);
+      if(editor.rightBoundary === -1) {
+        editor.textArea.val(text.slice(0,editor.leftBoundary) + paragraphs);
       } else {
-        this.textArea.val(text.slice(0,startOfParagraphs) + paragraphs + text.slice(endOfParagraphs));
+        editor.textArea.val(text.slice(0,editor.leftBoundary) + paragraphs + text.slice(editor.rightBoundary));
       }
       
-      this.moveCaret(paragraphs.length - oldExtendedSelectionLength);
+      this.moveCaret(editor, paragraphs.length - editor.boundaryDistance);
     },
     /**
      * Move the caret by the given distance. Positive values move the caret to 
      * the right, negative to the left.
      * 
+     * @param {Editor} editor The editor to work on
      * @param {Integer} distance The distance to move the caret
      */
-    moveCaret: function(distance) {
+    moveCaret: function(editor, distance) {
       // console.log("Moving caret: " + distance);
+      var selectionStart = editor.selectionStart,
+      startOfParagraphs = editor.startOfParagraphs;
 
       if(Math.abs(selectionStart - startOfParagraphs) > Math.abs(distance)) {
         selectionStart += distance;
@@ -1675,20 +1834,26 @@ ME.addMode("textile", function() {
         selectionStart = startOfParagraphs;
       }
       
-      this.textArea.focus();
-      this.textArea[0].setSelectionRange(selectionStart, selectionStart);
+      editor.textArea.focus();
+      editor.setSelectionRange(selectionStart, selectionStart);
     },
-    pressed: function(keyCode){
+    /**
+     * Handle special keyevents or standard keys that need fixing
+     *
+     * @param {Editor} editor The editor to work on
+     * @param {Integer} keyCode
+     */
+    pressed: function(editor, keyCode){
       // console.log("pressed", keyCode);
       switch(keyCode){
       case 13: // enter
-        return pressedEnter(this);
+        return pressedEnter(editor, this);
       default: // handle keyCombos
         this.prototype.pressed.apply(this, [keyCode]);
       }
     }
-  };
-});
+  });
+})();
 (function (){
   /**
    * @name Builder
@@ -1700,7 +1865,11 @@ ME.addMode("textile", function() {
    */
   
   /**
-   * @type Builder
+   * Builds the html tree and traces the common nodes inside a
+   * selection
+   *
+   * @name Builder
+   * @namespace
    */
   var builder = (function (){
     var stack, tracingStack, stackPosition, traceJustStarted, traceJustEnded, popping, pointer, sP, eP, tracing, lastTrace, unsuccessfulPush = false, stringLength,
@@ -2214,14 +2383,38 @@ ME.addMode("textile", function() {
       }
     }
   }
-  
+
+  /**
+   * The Compiler for textile
+   *
+   * @name textileCompiler
+   * @namespace
+   */
   textileCompiler = {
+    /**
+     * Compile the given text to html
+     *
+     * @param {String} textToCompile A textile string
+     *
+     * @returns {String} The html
+     */
     compile: function(textToCompile){
       builder.init();
       text = textToCompile;
       parseParagraphs();
       return builder.toHtml();
     },
+    /**
+     * Trace the common nodes between the given boundaries
+     *
+     * @param {String} textToCompile A textile string
+     * @param {Integer} startTrace Index of textToCompile where to
+     * start the trace
+     * @param {Integer} endTrace Index of textToCompile where to
+     * end the trace
+     *
+     * @returns {Object} A stack of the common nodes
+     */
     trace: function(textToCompile, startTrace, endTrace){
       builder.initTrace(startTrace, endTrace, textToCompile.length);
       this.compile(textToCompile);
@@ -2230,8 +2423,10 @@ ME.addMode("textile", function() {
     }
   };
 })();
-ME.addMode("wysiwyg",function() {
-  var currentNodes = {}, $ = jQuery, selection = getSelection(), range = document.createRange();
+(function() {
+  var wysiwygMode,
+  $ = jQuery,
+  selection = getSelection(), range = document.createRange();
 
   function startNode(){
     return jQuery(selection.getRangeAt(0).startContainer);
@@ -2294,27 +2489,33 @@ ME.addMode("wysiwyg",function() {
     selection.addRange(range);
   }
 
-  function handleList(editor, mode, target, listType){
+  /**
+   * @param {Editor} editor The editor to work on
+   */
+  function handleList(editor, target, listType){
     var contents, lines, $p, $list;
     
     if(/ on$/.test(target.className)){
-      disableList(editor, mode);
+      disableList(editor);
     } else {
-      contents = mode.getSelection('br');
+      contents = wysiwygMode.getSelection(editor, 'br');
       
       $list = $("<" + listType + ">");
       createList($list, contents.firstChild);
 
-      joinAdjacentList(mode.leftBorder, $list);
-      joinAdjacentList(mode.rightBorder, $list);
+      joinAdjacentList(editor.leftBorder, $list);
+      joinAdjacentList(editor.rightBorder, $list);
 
-      mode.replaceSelection(editor, $list);
+      wysiwygMode.replaceSelection(editor, $list);
     }
   }
 
-  function disableList(editor, mode){
+  /**
+   * @param {Editor} editor The editor to work on
+   */
+  function disableList(editor){
     // get list items and detach them from the dom
-    contents = mode.getSelection('li');
+    contents = wysiwygMode.getSelection(editor, 'li');
 
     lines = [];
     // insert their contents into a paragraph tag and seperate
@@ -2322,7 +2523,7 @@ ME.addMode("wysiwyg",function() {
     addListItems(lines, contents.firstChild);
     $p = $("<p>").html(lines.join("<br>"));
 
-    mode.replaceSelection(editor, $p);
+    wysiwygMode.replaceSelection(editor, $p);
   }
 
   /**
@@ -2477,7 +2678,7 @@ ME.addMode("wysiwyg",function() {
       return false;
     }
     var lastSibling = true, node, range, endContainer,
-    block = currentNodes.block;
+    block = editor.currentNodes.block;
 
     if(/h[1-5]/i.test(block.nodeName)){ // only headings
       range = selection.getRangeAt(0);
@@ -2510,15 +2711,17 @@ ME.addMode("wysiwyg",function() {
    * Chrome tries to keep the styles whilst backspacing from say a
    * paragraph to a heading. The content of the paragraph looks like a
    * paragraph, but is a heading
+   *
+   * @param {Editor} editor The editor to work on
    */
-  function pressedBackspace(mode, htmlDiv, editor){
+  function pressedBackspace(editor, htmlDiv){
     if(checkIfDeletedAll(htmlDiv,8) === false){
       return false;
     }
     var children, atBeginningOfLI,
     inFirstSibling = true,
-    block = currentNodes.block,
-    list = currentNodes.list,
+    block = editor.currentNodes.block,
+    list = editor.currentNodes.list,
     prev = (list || block).previousSibling,
     range = selection.getRangeAt(0),
     node = range.startContainer;
@@ -2552,7 +2755,7 @@ ME.addMode("wysiwyg",function() {
       node.remove();
       selectNodes([children[0]], true);
     } else if(list && atBeginningOfLI){
-      disableList(editor,mode);
+      disableList(editor);
     }
     
     return false;
@@ -2561,8 +2764,10 @@ ME.addMode("wysiwyg",function() {
   /**
    * @browserbug Chrome
    * bring Chrome to a normal behaviour
+   *
+   * @param {Editor} editor The editor to work on
    */
-  function pressedDelete(mode, htmlDiv, editor){
+  function pressedDelete(editor, htmlDiv){
     if(checkIfDeletedAll(htmlDiv,46) === false){
       return false;
     }
@@ -2570,8 +2775,8 @@ ME.addMode("wysiwyg",function() {
       return true;
     }
     var children,
-    block = currentNodes.block,
-    list = currentNodes.list,
+    block = editor.currentNodes.block,
+    list = editor.currentNodes.list,
     next = (list || block).nextSibling,
     range = selection.getRangeAt(0),
     node = range.startContainer;
@@ -2631,11 +2836,24 @@ ME.addMode("wysiwyg",function() {
     }
   }
 
-  return {
+  /** 
+   * @name wysiwygMode
+   * @namespace
+   * @augments Mode
+   */
+  wysiwygMode = ME.addMode('wysiwyg', /** @scope wysiwygMode.prototype */{
+    /**
+     * The long name of the mode
+     * @property
+     */
     name: "Preview Mode",
+    /**
+     * Holds the supported toolbaritems
+     * @property
+     */
     items: {
       "default": {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
           document.execCommand(this.name, false, null);
         }
       },
@@ -2661,17 +2879,17 @@ ME.addMode("wysiwyg",function() {
         }
       },
       unorderedList: {
-        clicked: function(editor, mode, target){
-          handleList(editor, mode, target, 'ul');
+        clicked: function(editor, target){
+          handleList(editor, target, 'ul');
         }
       },
       orderedList: {
-        clicked: function(editor, mode, target){
-          handleList(editor, mode, target, 'ol');
+        clicked: function(editor, target){
+          handleList(editor, target, 'ol');
         }
       },
       link: {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
           var dialog, linkNode, titleString,
           range = selection.getRangeAt(0),
           callback = {
@@ -2687,7 +2905,7 @@ ME.addMode("wysiwyg",function() {
           };
           
           if(/ on$/.test(target.className)){
-            linkNode = $(currentNodes.a);
+            linkNode = $(editor.currentNodes.a);
             dialog = ME.dialog.link(['Update','Remove','Cancel']);
             
             callback.submit = function(title,uri){
@@ -2726,7 +2944,7 @@ ME.addMode("wysiwyg",function() {
         }
       },
       insertImage: {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
           var dialog, callback, linkNode,
           selection = window.getSelection(),
           range = selection.getRangeAt(0);
@@ -2760,12 +2978,12 @@ ME.addMode("wysiwyg",function() {
 
           if(/ on$/.test(target.className)){
             dialog = ME.dialog.insertImage(['Update','Remove','Cancel']);
-            if(currentNodes.a){
-              linkNode = $(currentNodes.a);
+            if(editor.currentNodes.a){
+              linkNode = $(editor.currentNodes.a);
               dialog.val('input.uri', linkNode.attr('href'));
-              range.selectNode(currentNodes.a);
+              range.selectNode(editor.currentNodes.a);
             }
-            imageNode = $(currentNodes.img);
+            imageNode = $(editor.currentNodes.img);
 
             dialog.val('input.imageUri', imageNode.attr('src'));
             dialog.val('input.title', imageNode.attr('title'));
@@ -2778,7 +2996,7 @@ ME.addMode("wysiwyg",function() {
         }
       },
       formatBlock: {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
           var paragraph, newParagraphs = [], tag;
 
           getParagraphs().replaceWith(function(){
@@ -2799,34 +3017,50 @@ ME.addMode("wysiwyg",function() {
         }
       }
     },
-    getSelection: function(nodeType){
+    /**
+     * Detach the selected Nodes from the dom and return them
+     *
+     * @param {Editor} editor The editor to work on
+     * @param {String} nodeType The type of node to which the border of
+     * the selection will be extended
+     *
+     * @returns {HTMLFragment} The selected nodes
+     */
+    getSelection: function(editor, nodeType){
       var range = selection.getRangeAt(0);
 
-      this.collapsed = range.collapsed;
+      editor.collapsed = range.collapsed;
 
-      this.leftBorder = new Border(startNode(), nodeType, 'previousSibling');
-      this.rightBorder = new Border(endNode(), nodeType, 'nextSibling');
+      editor.leftBorder = new Border(startNode(), nodeType, 'previousSibling');
+      editor.rightBorder = new Border(endNode(), nodeType, 'nextSibling');
       
-      range.setStartBefore(this.leftBorder.node);
-      range.setEndAfter(this.rightBorder.node);
+      range.setStartBefore(editor.leftBorder.node);
+      range.setEndAfter(editor.rightBorder.node);
 
       // split node if there are other nodes after the selection
-      if(this.rightBorder.borderNode){
-        $(this.rightBorder.borderNode).nextAll()
-          .appendTo('<' + this.rightBorder.block.nodeName + '>').parent()
-          .insertAfter(this.rightBorder.block);
+      if(editor.rightBorder.borderNode){
+        $(editor.rightBorder.borderNode).nextAll()
+          .appendTo('<' + editor.rightBorder.block.nodeName + '>').parent()
+          .insertAfter(editor.rightBorder.block);
       }
 
       return range.extractContents();
     },
+    /**
+     * Insert the given nodes into the DOM tree at the place where
+     * getSelection extracted the nodes
+     *
+     * @param {Editor} editor The editor to work on
+     * @param {HTMLFragment} nodes The nodes which will be inserted
+     */
     replaceSelection: function(editor, nodes){
-      if(this.leftBorder.safeBlock){
-        nodes.insertAfter(this.leftBorder.safeBlock);
+      if(editor.leftBorder.safeBlock){
+        nodes.insertAfter(editor.leftBorder.safeBlock);
       } else {
         editor.htmlDiv.prepend(nodes);
       }
       
-      if(this.collapsed){
+      if(editor.collapsed){
         selectNodes(nodes, true);
       } else {
         selectNodes(nodes);
@@ -2834,23 +3068,37 @@ ME.addMode("wysiwyg",function() {
       
       // remove empty block tags
       // OPTIMIZE
-      if(/^\s*$/.test(this.leftBorder.block.textContent)){
-        $(this.leftBorder.block).remove();
+      if(/^\s*$/.test(editor.leftBorder.block.textContent)){
+        $(editor.leftBorder.block).remove();
       }
-      if(/^\s*$/.test(this.rightBorder.block.textContent)){
-        $(this.rightBorder.block).remove();
+      if(/^\s*$/.test(editor.rightBorder.block.textContent)){
+        $(editor.rightBorder.block).remove();
       }
     },
-    afterActivation: function() {
-      this.textArea.parent().hide();
-      this.htmlDiv.attr("contentEditable",true);
+    /**
+     * Executed after the mode has been activated.
+     * Hides the textarea and set contenteditable
+     *
+     * @param {Editor} editor The editor to work on
+     */
+    afterActivation: function(editor) {
+      editor.textArea.parent().hide();
+      editor.htmlDiv.attr("contentEditable",true);
 
       // Force Mozilla to generate tags instead of inline styles
       if ($.browser.mozilla) {
         document.execCommand("styleWithCSS",null, false);
       }
     },
-    getSelectionStates: function() {
+    /**
+     * Get the State of the current selection (e.g. if a link is
+     * selected) 
+     *
+     * @param {Editor} editor The editor to work on
+     *
+     * @returns {Object} An object representing the states
+     */
+    getSelectionStates: function(editor) {
       if(!$(document.activeElement).is(".preview")){
         return {};
       }
@@ -2880,33 +3128,57 @@ ME.addMode("wysiwyg",function() {
       } else {
         nodes = startNodes;
       }
-      return this.buildStateObject(nodes, currentNodes = {});
+      return this.buildStateObject(nodes, editor.currentNodes = {});
     },
+    /**
+     * Executed if the htmlDiv of the Editor is clicked.
+     * Checks where the Caret has been placed by the browser
+     */
     clicked: function(){
       checkCaret(0);
     },
-    pressed: function(keyCode){
-      this.prototype.pressed.apply(this, [keyCode]);
+    /**
+     * Handle special keyevents or standard keys that need fixing
+     *
+     * @param {Editor} editor The editor to work on
+     * @param {Integer} keyCode
+     *
+     * @returns {Boolean} If false is returned, the default action is
+     * prevented
+     */
+    pressed: function(editor, keyCode){
+      this.prototype.pressed.apply(this, [editor, keyCode]);
       switch(keyCode){
       case 13: // enter
-        return pressedEnter(this.htmlDiv);
+        return pressedEnter(editor.htmlDiv);
       case 8: // Backspace
-        return pressedBackspace(this, this.htmlDiv, this.editor);
+        return pressedBackspace(editor, editor.htmlDiv);
       case 46: // Delete
-        return pressedDelete(this, this.htmlDiv, this.editor);
+        return pressedDelete(editor, editor.htmlDiv);
       case 37: // left arrow
         return checkCaret(-1);
       case 39: // right arrow
         return checkCaret(1);
       default:
-        return checkIfDeletedAll(this.htmlDiv, keyCode, this.holdNeutralKey);
+        return checkIfDeletedAll(editor.htmlDiv, keyCode, this.holdNeutralKey);
       }
     },
-    toText: function() {
-      return this.editor.getDataMode().toText();
+    /**
+     * @param {Editor} editor The editor to work on
+     *
+     * @returns {String} The text representation of the preview
+     * mode. Depends on the current data mode.
+     */
+    toText: function(editor) {
+      return editor.getDataMode().toText(editor);
     },
-    toHTML: function() {
-      return this.htmlDiv.html();
+    /**
+     * @param {Editor} editor The editor to work on
+     *
+     * @returns {String} The html behind the preview
+     */
+    toHTML: function(editor) {
+      return editor.htmlDiv.html();
     }
-  };
-});
+  });
+})();

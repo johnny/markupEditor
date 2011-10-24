@@ -1,5 +1,7 @@
-ME.addMode("wysiwyg",function() {
-  var currentNodes = {}, $ = jQuery, selection = getSelection(), range = document.createRange();
+(function() {
+  var wysiwygMode,
+  $ = jQuery,
+  selection = getSelection(), range = document.createRange();
 
   function startNode(){
     return jQuery(selection.getRangeAt(0).startContainer);
@@ -62,27 +64,33 @@ ME.addMode("wysiwyg",function() {
     selection.addRange(range);
   }
 
-  function handleList(editor, mode, target, listType){
+  /**
+   * @param {Editor} editor The editor to work on
+   */
+  function handleList(editor, target, listType){
     var contents, lines, $p, $list;
     
     if(/ on$/.test(target.className)){
-      disableList(editor, mode);
+      disableList(editor);
     } else {
-      contents = mode.getSelection('br');
+      contents = wysiwygMode.getSelection(editor, 'br');
       
       $list = $("<" + listType + ">");
       createList($list, contents.firstChild);
 
-      joinAdjacentList(mode.leftBorder, $list);
-      joinAdjacentList(mode.rightBorder, $list);
+      joinAdjacentList(editor.leftBorder, $list);
+      joinAdjacentList(editor.rightBorder, $list);
 
-      mode.replaceSelection(editor, $list);
+      wysiwygMode.replaceSelection(editor, $list);
     }
   }
 
-  function disableList(editor, mode){
+  /**
+   * @param {Editor} editor The editor to work on
+   */
+  function disableList(editor){
     // get list items and detach them from the dom
-    contents = mode.getSelection('li');
+    contents = wysiwygMode.getSelection(editor, 'li');
 
     lines = [];
     // insert their contents into a paragraph tag and seperate
@@ -90,7 +98,7 @@ ME.addMode("wysiwyg",function() {
     addListItems(lines, contents.firstChild);
     $p = $("<p>").html(lines.join("<br>"));
 
-    mode.replaceSelection(editor, $p);
+    wysiwygMode.replaceSelection(editor, $p);
   }
 
   /**
@@ -245,7 +253,7 @@ ME.addMode("wysiwyg",function() {
       return false;
     }
     var lastSibling = true, node, range, endContainer,
-    block = currentNodes.block;
+    block = editor.currentNodes.block;
 
     if(/h[1-5]/i.test(block.nodeName)){ // only headings
       range = selection.getRangeAt(0);
@@ -278,15 +286,17 @@ ME.addMode("wysiwyg",function() {
    * Chrome tries to keep the styles whilst backspacing from say a
    * paragraph to a heading. The content of the paragraph looks like a
    * paragraph, but is a heading
+   *
+   * @param {Editor} editor The editor to work on
    */
-  function pressedBackspace(mode, htmlDiv, editor){
+  function pressedBackspace(editor, htmlDiv){
     if(checkIfDeletedAll(htmlDiv,8) === false){
       return false;
     }
     var children, atBeginningOfLI,
     inFirstSibling = true,
-    block = currentNodes.block,
-    list = currentNodes.list,
+    block = editor.currentNodes.block,
+    list = editor.currentNodes.list,
     prev = (list || block).previousSibling,
     range = selection.getRangeAt(0),
     node = range.startContainer;
@@ -320,7 +330,7 @@ ME.addMode("wysiwyg",function() {
       node.remove();
       selectNodes([children[0]], true);
     } else if(list && atBeginningOfLI){
-      disableList(editor,mode);
+      disableList(editor);
     }
     
     return false;
@@ -329,8 +339,10 @@ ME.addMode("wysiwyg",function() {
   /**
    * @browserbug Chrome
    * bring Chrome to a normal behaviour
+   *
+   * @param {Editor} editor The editor to work on
    */
-  function pressedDelete(mode, htmlDiv, editor){
+  function pressedDelete(editor, htmlDiv){
     if(checkIfDeletedAll(htmlDiv,46) === false){
       return false;
     }
@@ -338,8 +350,8 @@ ME.addMode("wysiwyg",function() {
       return true;
     }
     var children,
-    block = currentNodes.block,
-    list = currentNodes.list,
+    block = editor.currentNodes.block,
+    list = editor.currentNodes.list,
     next = (list || block).nextSibling,
     range = selection.getRangeAt(0),
     node = range.startContainer;
@@ -399,11 +411,24 @@ ME.addMode("wysiwyg",function() {
     }
   }
 
-  return {
+  /** 
+   * @name wysiwygMode
+   * @namespace
+   * @augments Mode
+   */
+  wysiwygMode = ME.addMode('wysiwyg', /** @scope wysiwygMode.prototype */{
+    /**
+     * The long name of the mode
+     * @property
+     */
     name: "Preview Mode",
+    /**
+     * Holds the supported toolbaritems
+     * @property
+     */
     items: {
       "default": {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
           document.execCommand(this.name, false, null);
         }
       },
@@ -429,17 +454,17 @@ ME.addMode("wysiwyg",function() {
         }
       },
       unorderedList: {
-        clicked: function(editor, mode, target){
-          handleList(editor, mode, target, 'ul');
+        clicked: function(editor, target){
+          handleList(editor, target, 'ul');
         }
       },
       orderedList: {
-        clicked: function(editor, mode, target){
-          handleList(editor, mode, target, 'ol');
+        clicked: function(editor, target){
+          handleList(editor, target, 'ol');
         }
       },
       link: {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
           var dialog, linkNode, titleString,
           range = selection.getRangeAt(0),
           callback = {
@@ -455,7 +480,7 @@ ME.addMode("wysiwyg",function() {
           };
           
           if(/ on$/.test(target.className)){
-            linkNode = $(currentNodes.a);
+            linkNode = $(editor.currentNodes.a);
             dialog = ME.dialog.link(['Update','Remove','Cancel']);
             
             callback.submit = function(title,uri){
@@ -494,7 +519,7 @@ ME.addMode("wysiwyg",function() {
         }
       },
       insertImage: {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
           var dialog, callback, linkNode,
           selection = window.getSelection(),
           range = selection.getRangeAt(0);
@@ -528,12 +553,12 @@ ME.addMode("wysiwyg",function() {
 
           if(/ on$/.test(target.className)){
             dialog = ME.dialog.insertImage(['Update','Remove','Cancel']);
-            if(currentNodes.a){
-              linkNode = $(currentNodes.a);
+            if(editor.currentNodes.a){
+              linkNode = $(editor.currentNodes.a);
               dialog.val('input.uri', linkNode.attr('href'));
-              range.selectNode(currentNodes.a);
+              range.selectNode(editor.currentNodes.a);
             }
-            imageNode = $(currentNodes.img);
+            imageNode = $(editor.currentNodes.img);
 
             dialog.val('input.imageUri', imageNode.attr('src'));
             dialog.val('input.title', imageNode.attr('title'));
@@ -546,7 +571,7 @@ ME.addMode("wysiwyg",function() {
         }
       },
       formatBlock: {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
           var paragraph, newParagraphs = [], tag;
 
           getParagraphs().replaceWith(function(){
@@ -567,34 +592,50 @@ ME.addMode("wysiwyg",function() {
         }
       }
     },
-    getSelection: function(nodeType){
+    /**
+     * Detach the selected Nodes from the dom and return them
+     *
+     * @param {Editor} editor The editor to work on
+     * @param {String} nodeType The type of node to which the border of
+     * the selection will be extended
+     *
+     * @returns {HTMLFragment} The selected nodes
+     */
+    getSelection: function(editor, nodeType){
       var range = selection.getRangeAt(0);
 
-      this.collapsed = range.collapsed;
+      editor.collapsed = range.collapsed;
 
-      this.leftBorder = new Border(startNode(), nodeType, 'previousSibling');
-      this.rightBorder = new Border(endNode(), nodeType, 'nextSibling');
+      editor.leftBorder = new Border(startNode(), nodeType, 'previousSibling');
+      editor.rightBorder = new Border(endNode(), nodeType, 'nextSibling');
       
-      range.setStartBefore(this.leftBorder.node);
-      range.setEndAfter(this.rightBorder.node);
+      range.setStartBefore(editor.leftBorder.node);
+      range.setEndAfter(editor.rightBorder.node);
 
       // split node if there are other nodes after the selection
-      if(this.rightBorder.borderNode){
-        $(this.rightBorder.borderNode).nextAll()
-          .appendTo('<' + this.rightBorder.block.nodeName + '>').parent()
-          .insertAfter(this.rightBorder.block);
+      if(editor.rightBorder.borderNode){
+        $(editor.rightBorder.borderNode).nextAll()
+          .appendTo('<' + editor.rightBorder.block.nodeName + '>').parent()
+          .insertAfter(editor.rightBorder.block);
       }
 
       return range.extractContents();
     },
+    /**
+     * Insert the given nodes into the DOM tree at the place where
+     * getSelection extracted the nodes
+     *
+     * @param {Editor} editor The editor to work on
+     * @param {HTMLFragment} nodes The nodes which will be inserted
+     */
     replaceSelection: function(editor, nodes){
-      if(this.leftBorder.safeBlock){
-        nodes.insertAfter(this.leftBorder.safeBlock);
+      if(editor.leftBorder.safeBlock){
+        nodes.insertAfter(editor.leftBorder.safeBlock);
       } else {
         editor.htmlDiv.prepend(nodes);
       }
       
-      if(this.collapsed){
+      if(editor.collapsed){
         selectNodes(nodes, true);
       } else {
         selectNodes(nodes);
@@ -602,23 +643,37 @@ ME.addMode("wysiwyg",function() {
       
       // remove empty block tags
       // OPTIMIZE
-      if(/^\s*$/.test(this.leftBorder.block.textContent)){
-        $(this.leftBorder.block).remove();
+      if(/^\s*$/.test(editor.leftBorder.block.textContent)){
+        $(editor.leftBorder.block).remove();
       }
-      if(/^\s*$/.test(this.rightBorder.block.textContent)){
-        $(this.rightBorder.block).remove();
+      if(/^\s*$/.test(editor.rightBorder.block.textContent)){
+        $(editor.rightBorder.block).remove();
       }
     },
-    afterActivation: function() {
-      this.textArea.parent().hide();
-      this.htmlDiv.attr("contentEditable",true);
+    /**
+     * Executed after the mode has been activated.
+     * Hides the textarea and set contenteditable
+     *
+     * @param {Editor} editor The editor to work on
+     */
+    afterActivation: function(editor) {
+      editor.textArea.parent().hide();
+      editor.htmlDiv.attr("contentEditable",true);
 
       // Force Mozilla to generate tags instead of inline styles
       if ($.browser.mozilla) {
         document.execCommand("styleWithCSS",null, false);
       }
     },
-    getSelectionStates: function() {
+    /**
+     * Get the State of the current selection (e.g. if a link is
+     * selected) 
+     *
+     * @param {Editor} editor The editor to work on
+     *
+     * @returns {Object} An object representing the states
+     */
+    getSelectionStates: function(editor) {
       if(!$(document.activeElement).is(".preview")){
         return {};
       }
@@ -648,33 +703,57 @@ ME.addMode("wysiwyg",function() {
       } else {
         nodes = startNodes;
       }
-      return this.buildStateObject(nodes, currentNodes = {});
+      return this.buildStateObject(nodes, editor.currentNodes = {});
     },
+    /**
+     * Executed if the htmlDiv of the Editor is clicked.
+     * Checks where the Caret has been placed by the browser
+     */
     clicked: function(){
       checkCaret(0);
     },
-    pressed: function(keyCode){
-      this.prototype.pressed.apply(this, [keyCode]);
+    /**
+     * Handle special keyevents or standard keys that need fixing
+     *
+     * @param {Editor} editor The editor to work on
+     * @param {Integer} keyCode
+     *
+     * @returns {Boolean} If false is returned, the default action is
+     * prevented
+     */
+    pressed: function(editor, keyCode){
+      this.prototype.pressed.apply(this, [editor, keyCode]);
       switch(keyCode){
       case 13: // enter
-        return pressedEnter(this.htmlDiv);
+        return pressedEnter(editor.htmlDiv);
       case 8: // Backspace
-        return pressedBackspace(this, this.htmlDiv, this.editor);
+        return pressedBackspace(editor, editor.htmlDiv);
       case 46: // Delete
-        return pressedDelete(this, this.htmlDiv, this.editor);
+        return pressedDelete(editor, editor.htmlDiv);
       case 37: // left arrow
         return checkCaret(-1);
       case 39: // right arrow
         return checkCaret(1);
       default:
-        return checkIfDeletedAll(this.htmlDiv, keyCode, this.holdNeutralKey);
+        return checkIfDeletedAll(editor.htmlDiv, keyCode, this.holdNeutralKey);
       }
     },
-    toText: function() {
-      return this.editor.getDataMode().toText();
+    /**
+     * @param {Editor} editor The editor to work on
+     *
+     * @returns {String} The text representation of the preview
+     * mode. Depends on the current data mode.
+     */
+    toText: function(editor) {
+      return editor.getDataMode().toText(editor);
     },
-    toHTML: function() {
-      return this.htmlDiv.html();
+    /**
+     * @param {Editor} editor The editor to work on
+     *
+     * @returns {String} The html behind the preview
+     */
+    toHTML: function(editor) {
+      return editor.htmlDiv.html();
     }
-  };
-});
+  });
+})();

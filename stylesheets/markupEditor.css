@@ -100,6 +100,10 @@
         background-image: url("images/icons/disk.png"); }
       .markupEditor .toolbar a.wysiwyg span {
         background-image: url("images/icons/layout.png"); }
+      .markupEditor .toolbar a.close {
+        float: right; }
+        .markupEditor .toolbar a.close span {
+          background-image: url("images/icons/cancel.png"); }
     .markupEditor .toolbar select {
       background-color: #f9f9f9;
       border: 1px solid #f9f9f9;
