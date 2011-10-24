@@ -38,6 +38,8 @@
 				
 					<li><a href="../symbols/_global_.html">_global_</a></li>
 				
+					<li><a href="../symbols/Builder.html">Builder</a></li>
+				
 					<li><a href="../symbols/Editor.html">Editor</a></li>
 				
 					<li><a href="../symbols/jQuery.html">jQuery</a></li>
@@ -48,11 +50,17 @@
 				
 					<li><a href="../symbols/Mode.html">Mode</a></li>
 				
+					<li><a href="../symbols/textileCompiler.html">textileCompiler</a></li>
+				
+					<li><a href="../symbols/textileMode.html">textileMode</a></li>
+				
 					<li><a href="../symbols/Toolbar.html">Toolbar</a></li>
 				
 					<li><a href="../symbols/ToolbarButton.html">ToolbarButton</a></li>
 				
 					<li><a href="../symbols/ToolbarSelect.html">ToolbarSelect</a></li>
+				
+					<li><a href="../symbols/wysiwygMode.html">wysiwygMode</a></li>
 				
 			</ul>
 		</nav>
@@ -61,7 +69,7 @@
 		
 		Documentation generator: <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0<br />
 		Template: <a href="http://www.thebrightlines.com/2010/05/06/new-template-for-jsdoctoolkit-codeview/" target="_blank">Codeview</a> 1.2<br />
-		Generated on: 2011-7-23 20:43
+		Generated on: 2011-9-22 13:19
 	</div>
 </div>
 
@@ -143,7 +151,7 @@
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#activate">activate</a></b>()
+										<div class="fixedFont"><b><a href="../symbols/Mode.html#activate">activate</a></b>(editor)
 										</div>
 										<div class="description">Activate this mode for the editor</div>
 									</td>
@@ -154,7 +162,7 @@
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#afterActivation">afterActivation</a></b>()
+										<div class="fixedFont"><b><a href="../symbols/Mode.html#afterActivation">afterActivation</a></b>(editor)
 										</div>
 										<div class="description">Run after activation.</div>
 									</td>
@@ -190,7 +198,7 @@ CONSIDER make currentNodes a property</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#extendLeftSelection">extendLeftSelection</a></b>(regexp)
+										<div class="fixedFont"><b><a href="../symbols/Mode.html#extendLeftSelection">extendLeftSelection</a></b>(regexp, regexp)
 										</div>
 										<div class="description">Extend the left selection with a regexp.</div>
 									</td>
@@ -201,7 +209,7 @@ CONSIDER make currentNodes a property</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#extendRightSelection">extendRightSelection</a></b>(regexp)
+										<div class="fixedFont"><b><a href="../symbols/Mode.html#extendRightSelection">extendRightSelection</a></b>(regexp, regexp)
 										</div>
 										<div class="description">Extend the right selection with a regexp.</div>
 									</td>
@@ -212,7 +220,7 @@ CONSIDER make currentNodes a property</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#getSelection">getSelection</a></b>(boundary)
+										<div class="fixedFont"><b><a href="../symbols/Mode.html#getSelection">getSelection</a></b>(boundary, boundary)
 										</div>
 										<div class="description"></div>
 									</td>
@@ -223,9 +231,9 @@ CONSIDER make currentNodes a property</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#getSelectionStates">getSelectionStates</a></b>()
+										<div class="fixedFont"><b><a href="../symbols/Mode.html#getSelectionStates">getSelectionStates</a></b>(editor)
 										</div>
-										<div class="description">This is a placeholder.</div>
+										<div class="description">Get the state of the current selection.</div>
 									</td>
 								</tr>
 							
@@ -234,7 +242,7 @@ CONSIDER make currentNodes a property</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#getStates">getStates</a></b>()
+										<div class="fixedFont"><b><a href="../symbols/Mode.html#getStates">getStates</a></b>(editor)
 										</div>
 										<div class="description">Get a state object which sets defines the states of the buttons
 and the selects.</div>
@@ -246,18 +254,6 @@ and the selects.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#load">load</a></b>(editor)
-										</div>
-										<div class="description">This loads the mode for the current Editor
-TODO this is ugly.</div>
-									</td>
-								</tr>
-							
-								<tr
-									 class='item10'
-								>
-									<td class="attributes">&nbsp;</td>
-									<td class="nameDescription">
 										<div class="fixedFont"><b><a href="../symbols/Mode.html#pressed">pressed</a></b>(keyCode)
 										</div>
 										<div class="description">The default pressed function to handle key combos (shift + x)</div>
@@ -265,7 +261,7 @@ TODO this is ugly.</div>
 								</tr>
 							
 								<tr
-									 class='item11'
+									 class='item10'
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
@@ -276,13 +272,26 @@ TODO this is ugly.</div>
 								</tr>
 							
 								<tr
+									 class='item11'
+								>
+									<td class="attributes">&nbsp;</td>
+									<td class="nameDescription">
+										<div class="fixedFont"><b><a href="../symbols/Mode.html#replaceSelection">replaceSelection</a></b>(string, collapseToStart, collapseToStart)
+										</div>
+										<div class="description">Replace the current selection with the given string</div>
+									</td>
+								</tr>
+							
+								<tr
 									 class='item12'
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#replaceSelection">replaceSelection</a></b>(string, collapseToStart)
+										<div class="fixedFont"><b><a href="../symbols/Mode.html#updatePreview">updatePreview</a></b>(editor)
 										</div>
-										<div class="description">Replace the current selection with the given string</div>
+										<div class="description">Update the preview html div with the html representation of the
+mode
+CONSIDER move to editor</div>
 									</td>
 								</tr>
 							
@@ -291,18 +300,7 @@ TODO this is ugly.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#updatePreview">updatePreview</a></b>()
-										</div>
-										<div class="description">Update the preview html div with the html representation of the mode</div>
-									</td>
-								</tr>
-							
-								<tr
-									 class='item14'
-								>
-									<td class="attributes">&nbsp;</td>
-									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#updateTextArea">updateTextArea</a></b>()
+										<div class="fixedFont"><b><a href="../symbols/Mode.html#updateTextArea">updateTextArea</a></b>(editor)
 										</div>
 										<div class="description">Update the textarea with the text representation of the mode</div>
 									</td>
@@ -385,7 +383,7 @@ TODO this is ugly.</div>
 									
 									
 									
-									<b>activate</b>()
+									<b>activate</b>(editor)
 								</div>
 								
 								<div class="description">
@@ -398,6 +396,17 @@ TODO this is ugly.</div>
 								
 								
 								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<b>editor</b>
+												
+											</dt>
+											<dd></dd>
+										
+									</dl>
 								
 								
 								
@@ -414,7 +423,7 @@ TODO this is ugly.</div>
 									
 									
 									
-									<b>afterActivation</b>()
+									<b>afterActivation</b>(editor)
 								</div>
 								
 								<div class="description">
@@ -428,6 +437,17 @@ its own version
 								
 								
 								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<b>editor</b>
+												
+											</dt>
+											<dd></dd>
+										
+									</dl>
 								
 								
 								
@@ -543,7 +563,7 @@ CONSIDER make currentNodes a property
 									
 									
 									
-									<b>extendLeftSelection</b>(regexp)
+									<b>extendLeftSelection</b>(regexp, regexp)
 								</div>
 								
 								<div class="description">
@@ -567,10 +587,16 @@ String in textile
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<span class="light fixedFont">{Regexp}</span> <b>regexp</b>
+												<span class="light fixedFont">{RegExp}</span> <b>regexp</b>
 												
 											</dt>
 											<dd>The regexp.</dd>
+										
+											<dt>
+												<b>regexp</b>
+												
+											</dt>
+											<dd></dd>
 										
 									</dl>
 								
@@ -589,7 +615,7 @@ String in textile
 									
 									
 									
-									<b>extendRightSelection</b>(regexp)
+									<b>extendRightSelection</b>(regexp, regexp)
 								</div>
 								
 								<div class="description">
@@ -613,10 +639,16 @@ String in textile
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<span class="light fixedFont">{Regexp}</span> <b>regexp</b>
+												<span class="light fixedFont">{RegExp}</span> <b>regexp</b>
 												
 											</dt>
 											<dd>The regexp</dd>
+										
+											<dt>
+												<b>regexp</b>
+												
+											</dt>
+											<dd></dd>
 										
 									</dl>
 								
@@ -635,7 +667,7 @@ String in textile
 									
 									<span class="light">{String}</span>
 									
-									<b>getSelection</b>(boundary)
+									<b>getSelection</b>(boundary, boundary)
 								</div>
 								
 								<div class="description">
@@ -658,6 +690,12 @@ String in textile
 											</dt>
 											<dd>The right and left boundary the
 selection should be extended to</dd>
+										
+											<dt>
+												<b>boundary</b>
+												
+											</dt>
+											<dd></dd>
 										
 									</dl>
 								
@@ -697,11 +735,12 @@ selection should be extended to</dd>
 									
 									<span class="light">{Object}</span>
 									
-									<b>getSelectionStates</b>()
+									<b>getSelectionStates</b>(editor)
 								</div>
 								
 								<div class="description">
-									This is a placeholder. Each mode should define its version
+									Get the state of the current selection. This is a placeholder.
+Each mode should define its version
 									
 									
 									
@@ -710,6 +749,17 @@ selection should be extended to</dd>
 								
 								
 								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<b>editor</b>
+												
+											</dt>
+											<dd></dd>
+										
+									</dl>
 								
 								
 								
@@ -752,7 +802,7 @@ selection should be extended to</dd>
 									
 									<span class="light">{Object}</span>
 									
-									<b>getStates</b>()
+									<b>getStates</b>(editor)
 								</div>
 								
 								<div class="description">
@@ -766,6 +816,17 @@ and the selects.
 								
 								
 								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<b>editor</b>
+												
+											</dt>
+											<dd></dd>
+										
+									</dl>
 								
 								
 								
@@ -795,47 +856,6 @@ and the selects.
 						
 							<li 
 								 class='item9'
-							>
-								<div class="fixedFont heading" id="load">
-									<span class='lighter'>
-									
-									</span>
-									
-									
-									
-									<b>load</b>(editor)
-								</div>
-								
-								<div class="description">
-									This loads the mode for the current Editor
-TODO this is ugly. why should every editor have every mode?
-									
-									
-									
-									
-								</div>
-								
-								
-								
-								
-									<dl class="detailList params">
-										<dt class="heading">Parameters:</dt>
-										
-											<dt>
-												<span class="light fixedFont">{<a href="../symbols/Editor.html">Editor</a>}</span> <b>editor</b>
-												
-											</dt>
-											<dd></dd>
-										
-									</dl>
-								
-								
-								
-								<div class="hr"></div>
-							</li>
-						
-							<li 
-								 class='item10'
 							>
 								<div class="fixedFont heading" id="pressed">
 									<span class='lighter'>
@@ -875,7 +895,7 @@ TODO this is ugly. why should every editor have every mode?
 							</li>
 						
 							<li 
-								 class='item11'
+								 class='item10'
 							>
 								<div class="fixedFont heading" id="released">
 									<span class='lighter'>
@@ -915,7 +935,7 @@ TODO this is ugly. why should every editor have every mode?
 							</li>
 						
 							<li 
-								 class='item12'
+								 class='item11'
 							>
 								<div class="fixedFont heading" id="replaceSelection">
 									<span class='lighter'>
@@ -924,7 +944,7 @@ TODO this is ugly. why should every editor have every mode?
 									
 									
 									
-									<b>replaceSelection</b>(string, collapseToStart)
+									<b>replaceSelection</b>(string, collapseToStart, collapseToStart)
 								</div>
 								
 								<div class="description">
@@ -953,6 +973,54 @@ TODO this is ugly. why should every editor have every mode?
 											</dt>
 											<dd>If the selection should collapse</dd>
 										
+											<dt>
+												<b>collapseToStart</b>
+												
+											</dt>
+											<dd></dd>
+										
+									</dl>
+								
+								
+								
+								<div class="hr"></div>
+							</li>
+						
+							<li 
+								 class='item12'
+							>
+								<div class="fixedFont heading" id="updatePreview">
+									<span class='lighter'>
+									
+									</span>
+									
+									
+									
+									<b>updatePreview</b>(editor)
+								</div>
+								
+								<div class="description">
+									Update the preview html div with the html representation of the
+mode
+CONSIDER move to editor
+									
+									
+									
+									
+								</div>
+								
+								
+								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<b>editor</b>
+												
+											</dt>
+											<dd></dd>
+										
 									</dl>
 								
 								
@@ -963,35 +1031,6 @@ TODO this is ugly. why should every editor have every mode?
 							<li 
 								 class='item13'
 							>
-								<div class="fixedFont heading" id="updatePreview">
-									<span class='lighter'>
-									
-									</span>
-									
-									
-									
-									<b>updatePreview</b>()
-								</div>
-								
-								<div class="description">
-									Update the preview html div with the html representation of the mode
-									
-									
-									
-									
-								</div>
-								
-								
-								
-								
-								
-								
-								<div class="hr"></div>
-							</li>
-						
-							<li 
-								 class='item14'
-							>
 								<div class="fixedFont heading" id="updateTextArea">
 									<span class='lighter'>
 									
@@ -999,7 +1038,7 @@ TODO this is ugly. why should every editor have every mode?
 									
 									
 									
-									<b>updateTextArea</b>()
+									<b>updateTextArea</b>(editor)
 								</div>
 								
 								<div class="description">
@@ -1012,6 +1051,17 @@ TODO this is ugly. why should every editor have every mode?
 								
 								
 								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<b>editor</b>
+												
+											</dt>
+											<dd></dd>
+										
+									</dl>
 								
 								
 								

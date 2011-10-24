@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8"></meta>
 		<meta name="generator" content="JsDoc Toolkit"></meta>
-		<title>ToolbarSelect | JsDoc Reference</title>
+		<title>textileCompiler | JsDoc Reference</title>
 
 		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;"></meta>
 		<meta name="mobileoptimized" content="0"></meta>
@@ -79,7 +79,7 @@
 	<div class="innerContent">
 		<h1 class="classTitle">
 			
-			Class <span>ToolbarSelect</span>
+			Namespace <span>textileCompiler</span>
 		</h1>
 		
 		<div class="intro">
@@ -92,19 +92,17 @@
 					
 					
 					
-						<li>Defined in: <a href="../symbols/src/source_javascripts_markupEditor.js.html">markupEditor.js</a></li>
+						<li>Defined in: <a href="../symbols/src/source_javascripts_modes_textile_bruteForceCompiler.js.html">bruteForceCompiler.js</a></li>
 					
-						<li>Extends <span class="fixedFont">
-						<a href="../symbols/ToolbarButton.html">ToolbarButton</a></span></li>
-					
+						
 				</ul>
 			
 		</div>
 		
 		
 			<div class="props">
-				<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class ToolbarSelect.">
-					<caption class="sectionTitle">Class Summary</caption>
+				<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class textileCompiler.">
+					<caption class="sectionTitle">Namespace Summary</caption>
 					<thead>
 						<tr>
 							<th scope="col">Constructor Attributes</th>
@@ -116,9 +114,9 @@
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription" >
 								<div class="fixedFont">
-									<b><a href="../symbols/ToolbarSelect.html#constructor">ToolbarSelect</a></b>(name, options, clicked)
+									<b><a href="../symbols/textileCompiler.html#constructor">textileCompiler</a></b>
 								</div>
-								<div class="description">Create a select for the toolbar</div>
+								<div class="description">The Compiler for textile</div>
 							</td>
 						</tr>
 					</tbody>
@@ -126,42 +124,6 @@
 			</div>
 		
 		
-		
-			
-			
-				<div class="props">
-					<table class="summaryTable" cellspacing="0" summary="A summary of the fields documented in the class ToolbarSelect.">
-						<caption class="sectionTitle">Field Summary</caption>
-						
-						<thead>
-							<tr>
-								<th scope="col">Field Attributes</th>
-								<th scope="col">Field Name and Description</th>
-							</tr>
-						</thead>
-						
-						<tbody>
-							
-								<tr>
-									<td class="attributes">&nbsp;</td>
-									<td class="nameDescription">
-										<div class="fixedFont">
-										<b><a href="../symbols/ToolbarSelect.html#options">options</a></b>
-										</div>
-										<div class="description">The options of the select dropdown</div>
-									</td>
-								</tr>
-							
-						</tbody>
-					</table>
-				</div>
-			
-			
-			
-				<dl class="inheritsList">
-				<dt>Fields borrowed from class <a href="../symbols/ToolbarButton.html">ToolbarButton</a>: </dt><dd><a href="../symbols/ToolbarButton.html#clicked">clicked</a>, <a href="../symbols/ToolbarButton.html#isAvailable">isAvailable</a>, <a href="../symbols/ToolbarButton.html#name">name</a></dd>
-				</dl>
-			
 		
 <!--
 #### METHODS SUMMARY
@@ -173,7 +135,7 @@
 				<h2 class="sectionTitle">Method Summary</h2>
 				
 				
-					<table class="summaryTable" id="MethodsList" cellspacing="0" summary="A summary of the methods documented in the class ToolbarSelect.">
+					<table class="summaryTable" id="MethodsList" cellspacing="0" summary="A summary of the methods documented in the class textileCompiler.">
 						<thead>
 							<tr>
 								<th scope="col">Method Attributes</th>
@@ -187,11 +149,22 @@
 								<tr
 									 class='item0'
 								>
-									<td class="attributes">&nbsp;</td>
+									<td class="attributes">&lt;static&gt; &nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/ToolbarSelect.html#getButton">getButton</a></b>()
+										<div class="fixedFont">textileCompiler.<b><a href="../symbols/textileCompiler.html#.compile">compile</a></b>(textToCompile)
 										</div>
-										<div class="description"></div>
+										<div class="description">Compile the given text to html</div>
+									</td>
+								</tr>
+							
+								<tr
+									 class='item1'
+								>
+									<td class="attributes">&lt;static&gt; &nbsp;</td>
+									<td class="nameDescription">
+										<div class="fixedFont">textileCompiler.<b><a href="../symbols/textileCompiler.html#.trace">trace</a></b>(textToCompile, startTrace, endTrace)
+										</div>
+										<div class="description">Trace the common nodes between the given boundaries</div>
 									</td>
 								</tr>
 							
@@ -199,10 +172,6 @@
 					</table>
 				
 			
-				
-					<dl class="inheritsList" id="MethodsListInherited">
-					
-					</dl>
 				
 			</div>
 		
@@ -218,43 +187,20 @@
 			<div class="details props">
 				<div class="innerProps">
 					<h2 class="sectionTitle" id="constructor">
-						Class Detail
+						Namespace Detail
 					</h2>
 					
 					<div class="fixedFont">
-						<b>ToolbarSelect</b>(name, options, clicked)
+						<b>textileCompiler</b>
 					</div>
 					
 					<div class="description">
-						Create a select for the toolbar
+						The Compiler for textile
 						
 					</div>
 					
 					
 				
-					
-						<dl class="detailList params">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<span class="light fixedFont">{String}</span>  <b>name</b>
-									
-								</dt>
-								<dd>The class name of the button</dd>
-							
-								<dt>
-									<span class="light fixedFont">{Array}</span>  <b>options</b>
-									<i>Optional</i>
-								</dt>
-								<dd>The options of the select dropdown</dd>
-							
-								<dt>
-									<span class="light fixedFont">{Function}</span>  <b>clicked</b>
-									<i>Optional</i>
-								</dt>
-								<dd>The default action if the button is clicked</dd>
-							
-						</dl>
 					
 					
 					
@@ -264,38 +210,6 @@
 <!--
 #### FIELD DETAILS
 -->
-		
-			<div class="details props">
-				<div class="innerProps">
-					<h2 class="sectionTitle">
-						Field Detail
-					</h2>
-					
-					
-						<div class="fixedFont heading" id="options">
-							<span class='lighter'>
-							
-							</span>
-							
-							<span class="light">{Array}</span>
-							
-							<b>options</b>							
-						</div>
-						
-						<div class="description">
-							The options of the select dropdown
-							
-							
-							
-						</div>
-						
-						
-							
-						
-						
-					
-				</div>
-			</div>
 		
 <!--
 #### METHOD DETAILS
@@ -313,18 +227,18 @@
 							<li 
 								 class='item0'
 							>
-								<div class="fixedFont heading" id="getButton">
+								<div class="fixedFont heading" id=".compile">
 									<span class='lighter'>
-									
+									&lt;static&gt; 
 									</span>
 									
 									<span class="light">{String}</span>
 									
-									<b>getButton</b>()
+									<span class="light">textileCompiler.</span><b>compile</b>(textToCompile)
 								</div>
 								
 								<div class="description">
-									
+									Compile the given text to html
 									
 									
 									
@@ -333,6 +247,17 @@
 								
 								
 								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<span class="light fixedFont">{String}</span> <b>textToCompile</b>
+												
+											</dt>
+											<dd>A textile string</dd>
+										
+									</dl>
 								
 								
 								
@@ -347,7 +272,82 @@
 										
 											<dt class="heading">Returns:</dt>
 											
-												<dd><span class="light fixedFont">{String}</span> A html string of the button</dd>
+												<dd><span class="light fixedFont">{String}</span> The html</dd>
+											
+										
+										
+										
+										
+										
+									
+									</dl>
+								
+								<div class="hr"></div>
+							</li>
+						
+							<li 
+								 class='item1'
+							>
+								<div class="fixedFont heading" id=".trace">
+									<span class='lighter'>
+									&lt;static&gt; 
+									</span>
+									
+									<span class="light">{Object}</span>
+									
+									<span class="light">textileCompiler.</span><b>trace</b>(textToCompile, startTrace, endTrace)
+								</div>
+								
+								<div class="description">
+									Trace the common nodes between the given boundaries
+									
+									
+									
+									
+								</div>
+								
+								
+								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<span class="light fixedFont">{String}</span> <b>textToCompile</b>
+												
+											</dt>
+											<dd>A textile string</dd>
+										
+											<dt>
+												<span class="light fixedFont">{Integer}</span> <b>startTrace</b>
+												
+											</dt>
+											<dd>Index of textToCompile where to
+start the trace</dd>
+										
+											<dt>
+												<span class="light fixedFont">{Integer}</span> <b>endTrace</b>
+												
+											</dt>
+											<dd>Index of textToCompile where to
+end the trace</dd>
+										
+									</dl>
+								
+								
+								
+									<dl class="detailList nomargin">
+									
+										
+										
+										
+										
+										
+										
+										
+											<dt class="heading">Returns:</dt>
+											
+												<dd><span class="light fixedFont">{Object}</span> A stack of the common nodes</dd>
 											
 										
 										
