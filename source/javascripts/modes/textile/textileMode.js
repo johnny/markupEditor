@@ -9,11 +9,14 @@
    * @param {Function} functor The functor will be applied on each paragraph
    */
   function eachParagraph(editor, functor) {
-    var paragraphs = textileMode.getParagraphs(editor), paragraphsLength = paragraphs.length;
+    var i,
+    paragraphs = textileMode.getParagraphs(editor),
+    paragraphsLength = paragraphs.length;
 
     for(i = 0; i < paragraphsLength; i++) {
       paragraphs[i] = functor(paragraphs[i]);
     }
+
     textileMode.setParagraphs(editor, paragraphs);
   }
 
@@ -89,6 +92,7 @@
   function align(editor, orientation) {
     eachParagraph(editor, function(paragraph) {
       var classes, classesLength, newClasses = [];
+
       if(/^\w+\([^)]+\)\./.test(paragraph)) {
         classes = jQuery.trim(paragraph.slice(paragraph.indexOf("(") + 1, paragraph.indexOf(")"))).split(/\s+/);
         classesLength = classes.length;
@@ -164,8 +168,10 @@
   function pressedEnter(editor){
     var list = editor.currentNodes.list, replacement;
 
-    if(list && /(u|o)l/i.test(list.tag)){ // only headings
+    if(list && /(u|o)l/i.test(list.tag) && // only lists
+       !textileMode.atBeginningOfLine(editor)){
       textileMode.getSelection(editor);
+
       if(ME.holdShift){
         replacement = " <br> ";
       } else {
@@ -364,13 +370,14 @@
       }
     },
     /**
-     * Compile textile and update the preview div
+     * Compile textile to html
      *
      * @param {Editor} editor The editor to work on
+     *
+     * @returns {String} HTML String
      */
-    updatePreview: function(editor) {
-      var html = textileCompiler.compile(editor.textArea.val());
-      editor.htmlDiv.html(html);
+    toHTML: function(editor, callback) {
+      return textileCompiler.compile(editor.textArea.val());
     },
     /**
      * Convert preview div to textile
@@ -379,10 +386,8 @@
      *
      * @returns {String} A textile string
      */
-    toText: function(editor, html) {
-      if(!html){
-        html = editor.htmlDiv.html();
-      }
+    toText: function(editor, callback) {
+      var html = editor.htmlDiv.html();
 
       /**
        * Fetch the regexps for the given tags and call the given
@@ -393,10 +398,10 @@
       function eachRegexp(tags, callback){
         var i, item,
         items = {
-          b: [/<(?:b|strong)>((.|[\r\n])*?)<\/(?:b|strong)>/gi,'*'],
-          i: [ /<(?:i|em)>((.|[\r\n])*?)<\/(?:i|em)>/gi, '_'],
-          del: [ /<(?:strike|del)>((.|[\r\n])*?)<\/(?:strike|del)>/gi, '-'],
-          u: [ /<(?:u|ins)>((.|[\r\n])*?)<\/(?:u|ins)>/gi, '+']
+          b: [/(\s*)<(?:b|strong)>((?:.|[\r\n])*?)<\/(?:b|strong)>(\s*)/gi,'*'],
+          i: [ /(\s*)<(?:i|em)>((?:.|[\r\n])*?)<\/(?:i|em)>(\s*)/gi, '_'],
+          del: [ /(\s*)<(?:strike|del)>((?:.|[\r\n])*?)<\/(?:strike|del)>(\s*)/gi, '-'],
+          u: [ /(\s*)<(?:u|ins)>((?:.|[\r\n])*?)<\/(?:u|ins)>(\s*)/gi, '+']
         };
         for(i = tags.length; i; i--){
           item = items[tags[i-1]];
@@ -408,7 +413,11 @@
         var bullet = tag == 'ul' ? '*' : '#';
         
         eachRegexp(['b','i', 'u', 'del'], function(regexp, delimiter){
-          items = items.replace(regexp, delimiter + '$1' + delimiter);
+          items = items.replace(regexp, function(match, startSpace, text, endSpace){
+            startSpace = startSpace ? ' ' : '';
+            endSpace = endSpace ? ' ' : '';
+            return startSpace + delimiter + text + delimiter + endSpace;
+          });
         });
 
         return items.replace(/\s*<li>((.|[\r\n])*?)<\/li>\s*/gi, bullet + " $1\n") + "\n";
@@ -421,17 +430,18 @@
         } else if(tag != "p"){
           front = tag + ". ";
         }
-
         eachRegexp(['b','i', 'u', 'del'], function(regexp, d){
-          content = content.replace(regexp, function(match, text){
-            return d + text.replace(/<br ?\/?>\s*/gi, d + "\n" + d) + d;
+          content = content.replace(regexp, function(match, startSpace, text, endSpace){
+            startSpace = startSpace ? ' ' : '';
+            endSpace = endSpace ? ' ' : '';
+            return startSpace + d + text.replace(/<br ?\/?>\s*/gi, d + "\n" + d) + d + endSpace;
           });
         });
         
         return front + content.replace(/<br ?\/?>\s*/gi, "\n") + "\n\n";
       });
       
-      html = html.replace(/<img[^>]*>/gi, function(match){
+      html = html.replace(/\s*<img[^>]*>\s*/gi, function(match){
         var img = $(match),
         replacement = img.attr('src'),
         title = img.attr('title');
@@ -441,12 +451,19 @@
         }
         return "!" + replacement + "!";
       });
-      html = html.replace(/<a href="([^\"]*)">((.|[\r\n])*?)<\/a>/gi, function(match, uri, content){
+      html = html.replace(/(\s*)<a href="([^\"]*)">((?:.|[\r\n])*?)<\/a>(\s*)/gi, function(match, startSpace, uri, content, endSpace){
+        var out = startSpace ? ' ' : '';
+
         if(/^\s*![^!]+!\s*$/.test(content)){
-          return $.trim(content) + ":" + uri;
+          out += $.trim(content) + ":";
         } else {
-          return "\"" + content + "\":" + uri;
+          out += "\"" + content + "\":";
         }
+        out += uri;
+        if(endSpace){
+          out += ' ';
+        }
+        return out;
       });
       html = html.replace(/\s*<code[^>]*>((.|[\r\n])*?)<\/code>\s*/gi, ' @$1@ ');
       html = html.replace(/(\r\n|\n){3,}/g, "\n\n");
@@ -488,10 +505,10 @@
       var text = editor.textArea.val();
       paragraphs = paragraphs.join("\n\n");
 
-      if(editor.rightBoundary === -1) {
-        editor.textArea.val(text.slice(0,editor.leftBoundary) + paragraphs);
+      if(editor.boundaryStart === -1) {
+        editor.textArea.val(text.slice(0,editor.boundaryStart) + paragraphs);
       } else {
-        editor.textArea.val(text.slice(0,editor.leftBoundary) + paragraphs + text.slice(editor.rightBoundary));
+        editor.textArea.val(text.slice(0,editor.boundaryStart) + paragraphs + text.slice(editor.boundaryEnd));
       }
       
       this.moveCaret(editor, paragraphs.length - editor.boundaryDistance);
@@ -529,7 +546,7 @@
       case 13: // enter
         return pressedEnter(editor, this);
       default: // handle keyCombos
-        this.prototype.pressed.apply(this, [keyCode]);
+        this.prototype.pressed.apply(this, [editor, keyCode]);
       }
     }
   });

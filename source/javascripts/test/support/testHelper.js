@@ -23,7 +23,11 @@ DialogHelper.prototype = {
   }
 };
 
-var SharedHelper = {
+function GeneralHelper(object){
+  jQuery.extend(this,object);
+  this.cache = {};
+}
+GeneralHelper.prototype = {
   find: function find(identifier){
     return this.cache[identifier] || (this.cache[identifier] = this.form.find(identifier));
   },
@@ -61,18 +65,21 @@ var SharedHelper = {
   dialog: function dialog(name, callback){
     // put this here, so the dialog has been initialized
     this.click('.'+name);
-    
+    return this.handleDialog(name, callback);
+  },
+  handleDialog: function(name, callback){
     var identifier = '#'+name+'-dialog',
     d = this.cache[identifier] || (this.cache[identifier] = $(identifier).parent());
-    
-    callback(new DialogHelper(d, name));
+
+    if(d.is(':visible')){
+      callback(new DialogHelper(d, name));
+    }
     return this;
   }
 };
 
 function TextileHelper(object){
-  jQuery.extend(this,object);
-  this.cache = {};
+  GeneralHelper.apply(this, [object]);
 }
 
 TextileHelper.prototype = (function (){
@@ -87,9 +94,17 @@ TextileHelper.prototype = (function (){
       this.textArea[0].setSelectionRange(0, this.textArea.val().length);
       return this.click('textarea');
     },
-    select: function select(string){
-      var position = this.textArea.val().indexOf(string);
-      this.textArea[0].setSelectionRange(position, position + string.length);
+    select: function select(string, collapse){
+      var start = this.textArea.val().indexOf(string),
+      end = start + string.length;
+      
+      if(collapse === true){
+        start = end;
+      } else if(collapse === false){
+        end = start;
+      }
+
+      this.textArea[0].setSelectionRange(start, end);
       // set toolbar items active
       return this.click('textarea');
     },
@@ -107,17 +122,20 @@ TextileHelper.prototype = (function (){
       this._match(object, true, " should match ");
       return this;
     },
+    equal: function(string){
+      equal(this.textArea.val(),string);
+      return this;
+    },
     notMatch: function notMatch(object){
       this._match(object, false, " should not match ");
       return this;
     }
   };
-  return jQuery.extend(methods,SharedHelper);
+  return jQuery.extend(methods, GeneralHelper.prototype);
 })();
 
 function WysiwygHelper(object){
-  jQuery.extend(this,object);
-  this.cache = {};
+  GeneralHelper.apply(this, [object]);
 }
 
 WysiwygHelper.prototype = (function(){
@@ -176,5 +194,5 @@ WysiwygHelper.prototype = (function(){
       return this;
     }
   };
-  return jQuery.extend(methods, SharedHelper);
+  return jQuery.extend(methods, GeneralHelper.prototype);
 })();

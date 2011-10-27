@@ -53,7 +53,9 @@ $(document).ready(function(){
                "_italic_edgecase_", "<p><i>italic_edgecase</i></p>",
                " _italic with spaces_", "<p> <i>italic with spaces</i></p>",
                "_italic _with a twist_", "<p><i>italic _with a twist</i></p>",
-               "_*italicBold*_", "<p><i><b>italicBold</b><i></p>",
+               "_*italicBold*_", "<p><i><b>italicBold</b></i></p>",
+               "_*italicBold_*", "<p><i><b>italicBold</i></b></p>",
+               "*_italicBold_*", "<p><b><i>italicBold</i></b></p>",
                "_interleaved *bold_ and italic*", "<p><i>interleaved <b>bold</i> and italic</b></p>"
               ]);
 
@@ -109,6 +111,15 @@ $(document).ready(function(){
     return index;
   }
 
+  /**
+   * For each entry there are the following alternatives for
+   * specifying trace borders
+   *
+   *      start    end
+   * 1.  Number   Number   specify exact borders
+   * 2.  String   String   Beginning of word = border position
+   * 3.  String   Number   Number specifies the width of the selection
+   */
   function tracingTest(name, textile, selections, testNumber){
     test(name, function() {
       var i = 0,j, trace, l = selections.length, startTrace, endTrace, results, result, key;
@@ -124,6 +135,7 @@ $(document).ready(function(){
           endTrace = parseParam(textile,selections[i+1],true);
         }
         results = selections[i+2];
+        console.log(startTrace, endTrace, textile.slice(startTrace, endTrace));
         trace = textileCompiler.trace(textile, startTrace, endTrace);
         // console.log(trace);
         equals(trace.length, results.length, "Sequence: " + textile.slice(startTrace, endTrace));
@@ -215,14 +227,27 @@ $(document).ready(function(){
     // Do some more specs with cursors over single entry
   ]);
 
-  tracingTest("lists", "Text before\n# List1\n# List2\nText between\n* List3\n\n* List4\n# List5", [
+  var lists = "Text before\n# List1\n# List2\nText between\n* List3\n\n\n* List4\n# List5\n* List6";
+
+  $('textarea.textile').val(lists);
+  tracingTest("lists", lists, [
     "before", "between", ['p'],
     "List1", "List2", ['ol'],
     "List3", "List4", ['ul'],
     "List2", "between", ['p'],
     "List4", "List5", ['p'],
     "List5", 0, ['ol'],
-    65, 65, ['ol']
+    lists.length, lists.length, ['ul'],
+    "\n\n* List4", 0, ['p'],
+    "\n* List4", 0, ['p'],
+    "# List1", 0, ['ol'],
+    "# List2", 0, ['ol'],
+    "* List3", 0, ['ul'],
+    "* List4", 0, ['ul'],
+    " List5", 0, ['ol'],
+    "\n# List5", 0, ['ul'],
+    "\n* List6", 0, ['ol'],
+    "* List6", 0, ['ul']
   ]);
 });
 

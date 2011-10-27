@@ -47,3 +47,6 @@ configure :build do
   # set :http_prefix, "file:///home/jonas/projects/markup_editor/build/"
   set :http_prefix, "/markupEditor"
 end
+
+require 'lib/markup'
+use Rack::Markup

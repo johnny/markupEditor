@@ -229,8 +229,18 @@ $(document).ready(function(){
     textile.set("This\n\nThat")
       .selectAll()
       .change(".formatBlock", "h1")
-      .match(/h1. This/)
-      .match(/h1. That/);
+      .equal('h1. This\n\nh1. That')
+      .select('h1. This')
+      .click('.alignCenter')
+      .equal('h1(center). This\n\nh1. That')
+      .click('.alignRight')
+      .equal('h1(right). This\n\nh1. That')
+      .selectAll()
+      .click('.alignLeft')
+      .equal('h1(left). This\n\nh1(left). That')
+      .select('That')
+      .click('.alignCenter')
+      .equal('h1(left). This\n\nh1(center). That');
   });
 
   function testListType(listType, bullet){
@@ -288,6 +298,20 @@ $(document).ready(function(){
         .match("item1\n" + bullet + " item2")
         .off(listType);
     });
+
+    test("List " + listType + " selection", function() {
+      textile.set(bullet + " item1\n\n" + bullet + " item2\n" + bullet + " item3\n\n")
+        .select("item1", true)
+        .on(listType)
+        .select("item2", true)
+        .on(listType)
+        .select(bullet + " item2", true)
+        .on(listType)
+        .select("\n" + bullet + " item2", true)
+        .off(listType)
+        .select("item3", true)
+        .on(listType);
+    });
   }
   
   var listTypes = {
@@ -324,7 +348,7 @@ $(document).ready(function(){
       .disabled("alignRight")
       .disabled("alignLeft")
       .click(".alignCenter")
-      .match(string);
+      .equal(string);
   });
 
   test("List -> italic", function(){
@@ -394,18 +418,29 @@ $(document).ready(function(){
     checkConversion(" *bold* ");
     checkConversion("_italic_");
     checkConversion(" _italic_ ");
-    checkConversion("\"This\":uri");
+    checkConversion("\"This\":uri", "\"This\":uri ");
     checkConversion(" \"This\":uri ");
     checkConversion("!src!");
-    checkConversion("!src!:uri");
+    checkConversion("!src!:uri", "!src!:uri ");
     checkConversion("!src(Title)!");
-    checkConversion("!src(Title)!:uri");
-    checkConversion("* test\n* test\n\n* test");
+    checkConversion("!src(Title)!:uri", "!src(Title)!:uri ");
+    checkConversion("* _test_\n* *test*\n\n* test");
     checkConversion("* test\n# test", "* test\n\n# test");
     checkConversion("* _test<br>test_\n* test");
     checkConversion("&nbsp;", " ");
     checkConversion("* list\n\nh1. heading");
     checkConversion("_test<br>test_", "_test_\n_test_");
+  });
+
+  function checkConversionFromHTML(html, result){
+    textile.click('.wysiwyg')
+      .find('.preview').html(html);
+    textile.click('.wysiwyg');
+    equal(textArea.val(),result);
+  }
+  test('conversion from special html', function(){
+    checkConversionFromHTML('<p>test\n<a href=\"src\">link</a>\ntest</p>', 'test \"link\":src test');
+    checkConversionFromHTML('<p>test\n<b>middle</b>\ntest</p>', 'test *middle* test');
   });
 
 });

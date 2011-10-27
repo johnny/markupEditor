@@ -21,6 +21,10 @@
     definableAttributes = {
       img: ['title','src'],
       a: ['href']
+    },
+    delimiters = {
+      i: "_",
+      b: "*"
     };
 
     /**
@@ -41,7 +45,9 @@
     }
     
     /**
-     * Test if the tracing stack can be moved down again with the given node.
+     * Test if the tracing stack can be moved down again with the
+     * given node.
+     * TODO give better name and document better
      * 
      * @param {TraceNode} targetNode The node to test
      * 
@@ -142,6 +148,7 @@
       tracing = true;
       traceJustStarted = true;
       for(i=1;i<length;i++){
+        // console.log(stack[i].tag);
         if(ignoredTags.indexOf(stack[i].tag) == -1){
           tracingStack[i-1 - numberOfIgnoredTags] = new TraceNode(stack[i]);
         } else {
@@ -181,6 +188,7 @@
         pointer = 0;
         sP = startPosition;
         eP = endPosition;
+        // console.log(sP, eP);
         stringLength = lengthOfString;
       },
       /**
@@ -189,6 +197,10 @@
       finalizeTrace: function(){
         if(tracing){
           endTrace();
+        }
+        // If the tracingstack is empty, add a default node to it
+        if(!tracingStack[0]){
+          tracingStack[0] = {tag: 'p'};
         }
       },
       /**
@@ -206,6 +218,7 @@
         }
         if(tracing && pointer > eP){
           if(lastTrace || forceEndTrace){
+            // console.log("forcefully end trace");
             endTrace();
           } else {
             // console.log("set last trace");
@@ -239,6 +252,18 @@
             }
           }
           // console.log("stackPosition " + stackPosition);
+        }
+      },
+      /**
+       * Push a tag to the build stack unless the tag is already open
+       *
+       * @param {String} tag The tag to push on top of the stack
+       */
+      pushTagUnlessOpen: function(tag){
+        if(this.isOpen(tag)){
+          this.pushString(delimiters[tag]);
+        } else {
+          this.pushTag(tag);
         }
       },
       /**
@@ -279,6 +304,27 @@
         // The tag needs to be closed at the top, where the current string insertion occurs
         this.pushString("</"+removedNode.tag+">"); 
         popping = false;
+      },
+      /**
+       * Close a tag if the tag is open. If its not open push the
+       * String to the top node of the stack
+       *
+       * @param {String} tag The tag to close
+       * @param {String} before The string before the tag identifier
+       * @param {String} after The string after the tag identifier,
+       * which is still mached to ensure valid markup. Normally its
+       * whitespace
+       */
+      closeTagIfOpen: function (tag, before, after) {
+        before = before || "";
+        after = after || "";
+        if(this.isOpen(tag)){
+          this.pushString(before);
+          this.closeTag(tag);
+          this.pushString(after);
+        } else {
+          this.pushString(before + delimiters[tag] + after);
+        }
       },
       /**
        * Closes all textile markup that ends at a line break.
@@ -375,6 +421,7 @@
       whitespaceLength = /^\s*/.exec(match[0])[0].length;
       matchLength = match[0].length;
       if(whitespaceLength){
+        // console.log("whitespace");
         builder.advancePointer(whitespaceLength, true);
       }
       if(matchLength - whitespaceLength){
@@ -445,44 +492,33 @@
     builder.pushString(match[0]);
     parseLine();
   }
+
   function parseLine(){
-    var match, isInListOrTable;
+    var match, surpressLineBreak;
     while(true){
       // Italic start
       if(match = advance(/^_(?=[^ \n]+)/)){
-        if(builder.isOpen("i")){
-          builder.pushString("_");
-        } else {
-          builder.pushTag("i");
-        }
+        builder.pushTagUnlessOpen("i");
       }
       // bold start
       else if(match = advance(/^\*(?=[^ \n]+)/)){
-        if(builder.isOpen("b")){
-          builder.pushString("*");
-        } else {
-          builder.pushTag("b");
-        }
+        builder.pushTagUnlessOpen("b");
       }
       // italic end
-      else if(match = advance(/^([^ \n]+)_( +|(?=\n|$))/)){
-        if(builder.isOpen("i")){
-          builder.pushString(match[1]);
-          builder.closeTag("i");
-          builder.pushString(match[2]);
-        } else {
-          builder.pushString(match[1] + "_" + match[2]);
+      else if(match = advance(/^([^ \n"\*]+)_([\*]*)( +|(?=\n|$))/)){
+        builder.closeTagIfOpen("i", match[1]);
+        if(match[2]){
+          builder.closeTagIfOpen('b');
         }
+        builder.pushString(match[3]);
       }
       // bold end
-      else if(match = advance(/^([^ \n]+)\*( +|(?=\n|$))/)){
-        if(builder.isOpen("b")){
-          builder.pushString(match[1]);
-          builder.closeTag("b");
-          builder.pushString(match[2]);
-        } else {
-          builder.pushString(match[1] + "*" + match[2]);
+      else if(match = advance(/^([^ \n"_]+)\*([_]*)( +|(?=\n|$))/)){
+        builder.closeTagIfOpen("b", match[1]);
+        if(match[2]){
+          builder.closeTagIfOpen('i');
         }
+        builder.pushString(match[3]);
       }
       // link
       else if(match = advance(/^( *)"([^"]*)":([^ \n]+)/)) {
@@ -518,9 +554,22 @@
       // end of line
       else {
         advance(/^\n/);
+        
         // If in List for example, surpress line break
-        isInListOrTable = builder.popLineEnd();
-        if(!isInListOrTable && !next(/^\s*(\n|$|[\*#] )/)){
+        surpressLineBreak = builder.popLineEnd();
+        
+        if(surpressLineBreak){
+          // close list/table if next line doesn't continue the
+          // list/table
+          if((builder.isOpen('ul') && !next(/^ *\*+/)) ||
+             (builder.isOpen('ol') && !next(/^ *#+/))){
+            builder.closeTag();
+          }
+        } else if(next(/^ *(\||[\*#] )/)){
+          // TODO check table format, needs | a space, like the list tags
+          // close current block tag if next line defines a table/list
+          builder.closeTag();
+        } else if(!next(/^ *(\n|$|[\*#] )/)){
           builder.pushString("<br/>");
         }
         return;

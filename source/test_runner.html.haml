@@ -18,9 +18,31 @@
 %div.markupClick.textile
   = erb :"textareas/html"
 
+%form#externalSelect
+  %select.availableModes
+    %option{:value => 'textile'} Textile
+    %option{:value => 'haml'} Haml
+    %option{:value => 'modeWithoutToText'} Basic Mode
+    %option{:value => 'completeSyncMode'} Basic Mode
+    %option{:value => 'unknown'} Unknown
+  %textarea.ta1.markupExternalSelect.textile
+  %textarea.ta2.markupExternalSelect.textile
+
+%form#externalSelect2
+  %select.availableModes
+    %option{:value => 'textile'} Textile
+  %textarea.markupExternalSelect2.textile
+
+%div.markupClick.unknown2{ :src => 'api/markup/get?file=unknown'}
+  = erb :"textareas/html"
+
+%div.markupClick.haml{ :src => 'api/markup/get?file=haml'}
+  = erb :"textareas/html"
+
 - content_for :bottom do
   = javascript_include_tag "vendor/qunit"
-  = javascript_include_tag "test/testHelper"
+  = javascript_include_tag "test/support/testHelper"
+  = javascript_include_tag "test/support/modeWithoutToText"
   = javascript_include_tag "test/markupEditor"
   = javascript_include_tag "test/wysiwygMode"
   = javascript_include_tag "test/textileMode"

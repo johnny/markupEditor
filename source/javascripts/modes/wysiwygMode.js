@@ -248,7 +248,7 @@
   /**
    * @browserbug Firefox and Chrome
    */
-  function pressedEnter(htmlDiv){
+  function pressedEnter(editor, htmlDiv){
     if(checkIfDeletedAll(htmlDiv,13) === false){
       return false;
     }
@@ -725,7 +725,7 @@
       this.prototype.pressed.apply(this, [editor, keyCode]);
       switch(keyCode){
       case 13: // enter
-        return pressedEnter(editor.htmlDiv);
+        return pressedEnter(editor, editor.htmlDiv);
       case 8: // Backspace
         return pressedBackspace(editor, editor.htmlDiv);
       case 46: // Delete
@@ -744,8 +744,8 @@
      * @returns {String} The text representation of the preview
      * mode. Depends on the current data mode.
      */
-    toText: function(editor) {
-      return editor.getDataMode().toText(editor);
+    toText: function(editor, callback) {
+      return editor.getDataMode().toText(editor, callback);
     },
     /**
      * @param {Editor} editor The editor to work on

@@ -2,6 +2,14 @@ $(document).ready(function(){
   $(".markup").markupEditor({
   });
 
+  $(".markupExternalSelect").markupEditor({
+    select: $("#externalSelect select")
+  });
+
+  $(".markupExternalSelect2").markupEditor({
+    select: $("#externalSelect2 select")
+  });
+
   $(".markupClick").markupEditor("prepare",{
     save: function(editor){
       console.log(editor);

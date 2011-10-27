@@ -1,7 +1,5 @@
-* [22/32] Further improvements
-  - [ ] flexible toolbar, which stays on top
-  - [ ] textileCompiler
-    - [ ] "* item1":src should compile as a link
+* [29/40] Further improvements
+  - [ ] fix multiple.html
   - [-] wysiwyg
     - [ ] Toolbar should work only if there is a range inside the preview
           (also the state checking)
@@ -29,8 +27,6 @@
         - [X] enter in the middle of a heading does not move the rest of the heading down
         - [X] selecting all by hand and deleting it leaves empty tags
               this is a result of the current implementation of checkIfDeletedAll
-  - [ ] provide support for external mode select
-  - [ ] support haml
   - [-] Better Dialogs (for inspiration see gollum)
     - [ ] display errors as tooltips
     - [X] reset errors on open
@@ -44,17 +40,51 @@
     - [X] values for the selects should be defined by a method call if functions are defined
     - [X] fields should share the combobox
   - [ ] localization
+  - [ ] flexible toolbar, which stays on top
+  - [ ] split up markupEditor.js
+    - [ ] look how ender handles the extensability
+          perhaps (... ME.Mode = Mode;})(ME, jQuery) is an option
+  - [ ] spec closing of editors
+    - [ ] should work with external select
+  - [ ] handle multiple init
   - [ ] spec with selenium
     - [ ] spec press enter
       - [ ] in list
       - [ ] in heading
     - [ ] spec press shift enter
       - [ ] in list
+    - [ ] spec press entf
+      - [ ] between lists
+      - [ ] between blocks
+    - [ ] spec backspace
+      - [ ] between lists
+      - [ ] between blocks
     - [ ] show window in different awesome tab
     - [ ] use existing window (not supported in ruby bindings)
     - [ ] fire native events (not supported in awesome, try in kde or windows)
   - [ ] clean and parse pasted html
   - [ ] handle blocktags within lists
+  - [X] textile: fix align with single caret
+  - [X] fix wysiwyg specs. probably an error in initFromHTMLDiv
+  - [X] provide support for external mode select
+    - [X] basics
+    - [X] hide select if it has just one option
+    - [X] handle and spec different edgecases
+      - [X] toHTML/toText
+      - [X] getText or similar
+      - [X] loadFromDiv in case mode has no toText/getText
+  - [X] Support haml in preview mode
+    - [X] basics
+    - [X] handle asynchronus update
+    - [X] fix spec
+    - [X] should block all other actions until mode change is finished
+    - [X] should block all other actions if a dialog is open
+  - [X] fix enter in lists
+    - [X] doesn't add #*
+    - [X] at the beginning of the line it should not add tags
+  - [X] list trace at the end of a line does not work
+  - [X] textileCompiler
+    - [X] "* item1":src should compile as a link
   - [X] Decouple mode and editor
     - [X] fix all specs
     - [X] add link error: place cursor at the end of a word and click link -> add uri -> ok -> link is after word
