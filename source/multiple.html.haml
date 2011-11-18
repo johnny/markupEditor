@@ -6,11 +6,8 @@
 %form#textile
   %textarea.markup.textile= erb :"textareas/textile"
 
-%form#html
-  %textarea.markup.html= erb :"textareas/html"
-
 %form#wysiwyg
-  %textarea.markup.html.wysiwyg= erb :"textareas/html"
+  %textarea.markup.textile.wysiwyg= erb :"textareas/textile"
 
 %form#none
   %textarea= erb :"textareas/html"

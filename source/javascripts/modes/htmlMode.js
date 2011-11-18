@@ -69,7 +69,7 @@ ME.addMode("html",function() {
       return this.textArea.val();
     },
     toText: function() {
-      return this.htmlDiv.html();
+      return this.preview.html();
     }
   };
 });

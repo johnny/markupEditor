@@ -387,7 +387,7 @@
      * @returns {String} A textile string
      */
     toText: function(editor, callback) {
-      var html = editor.htmlDiv.html();
+      var html = editor.preview.html();
 
       /**
        * Fetch the regexps for the given tags and call the given

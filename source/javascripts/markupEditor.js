@@ -60,7 +60,7 @@
      * @param {Editor} editor The editor to work on
      */
     activate: function(editor, callback) {
-      if(editor.htmlDiv.is(":empty")) {
+      if(editor.preview.is(":empty")) {
         this.updatePreview(editor, callback);
       } else {
         this.updateTextArea(editor, callback);
@@ -81,7 +81,7 @@
 
         html = this.toHTML(editor, callback);
         if(html !== undefined){
-          editor.htmlDiv.html(html || "<p>&nbsp;</p>");
+          editor.preview.html(html || "<p>&nbsp;</p>");
           
           if(callback){
             callback();
@@ -122,17 +122,17 @@
      * @param {Editor} editor The editor to work on
      */
     afterActivation: function(editor) {
-      var htmlDiv = editor.htmlDiv;
+      var preview = editor.preview;
       editor.textArea
         .parent().show()
         .find(":first-child").focus()[0]
         .setSelectionRange(0,0);
       editor.dataType = this.id;
-      htmlDiv.attr("contentEditable",false);
+      preview.attr("contentEditable",false);
       if(this.toHTML){
-        htmlDiv.show();
+        preview.show();
       } else {
-        htmlDiv.hide();
+        preview.hide();
       }
     },
     /**
@@ -535,7 +535,7 @@
         if(target.disabled){
           // TODO handle focus somewhere
           if(editor.is('wysiwyg')){
-            editor.htmlDiv.focus();
+            editor.preview.focus();
           } else {
             editor.textArea.focus();
           }
@@ -592,6 +592,10 @@
       item = toolbarItems[action],
       mode = editor.currentMode;
 
+      if(editor.is('wysiwyg')){
+        editor.preview.focus();
+      }
+
       // execute buttons clicked action
       asynchronous = (item[mode.id] || item).clicked(editor, target);
       
@@ -645,7 +649,7 @@
    * @param {Object} settings Editor specific settings
    */
   function Editor(textArea, settings) {
-    var editor = this, timer = 0, htmlDiv = settings.htmlDiv;
+    var editor = this, timer = 0, preview = settings.preview;
 
     activeEditors[numberOfEditors] = editor;
     editor.id = numberOfEditors;
@@ -685,24 +689,24 @@
     });
     addKeyListeners(textArea,true);
 
-    if(htmlDiv){
-      htmlDiv.addClass('preview');
+    if(preview){
+      preview.addClass('preview');
     } else {
-      htmlDiv = $("<div class=\"preview\">");
+      preview = $("<div class=\"preview\">");
     }
-    this.htmlDiv = htmlDiv.bind("mouseup keyup", function() {
+    this.preview = preview.bind("mouseup keyup", function() {
         if(editor.is("wysiwyg")) {
           editor.checkState();
         }
       });
-    addKeyListeners(this.htmlDiv);
+    addKeyListeners(this.preview);
 
     this.overlay = $('<div class=\"overlay\"><div class=\"background\"></div><div class=\"spinner\"></div></div>');
     
     this.toolbar = new Toolbar(this);
     this.container = textArea.wrap("<div class=\"markupEditor\">")
       .parent()
-      .append(editor.htmlDiv)
+      .append(editor.preview)
       .append(this.overlay)
       .prepend(this.toolbar.div);
     textArea.wrap("<div class=\"textarea\">");
@@ -919,7 +923,7 @@
      * Close the editor and restore the original div/textarea
      */
     close: function() {
-      var replacement = this.settings.htmlDiv || this.textArea;
+      var replacement = this.settings.preview || this.textArea;
       this.synchronize();
       
       this.container.replaceWith(replacement);
@@ -999,7 +1003,7 @@
      * as parameter
      * @property {Boolean} closable If true, the close button is
      * visible
-     * @property {jQuery} htmlDiv The htmlDiv the editor has been
+     * @property {jQuery} preview The preview the editor has been
      * loaded from
      */
     options: {},
@@ -1053,7 +1057,7 @@
     editor.close();
   }, function(editor) {
     var settings = editor.settings;
-    return settings.htmlDiv || settings.closable;
+    return settings.preview || settings.closable;
   });
 
   /**
@@ -1107,6 +1111,15 @@
     }
     return methods[method].apply(this, args);
   };
+
+  function isValidDatatype(cssClass, changeDatamodeSelect){
+    if(!Editor.extractDataType(cssClass, changeDatamodeSelect)){
+      ME.dialog.notice(['Ok'],'Datamode not found. Please specify a valid datamode')
+        .dialog('open');
+    } else {
+      return true;
+    }
+  }
   
   /**
    * Initialize the editor from a given HTML element
@@ -1117,12 +1130,9 @@
    * @param {Option} settings Settings for this editor
    */
   function initEditorFromHTML(container, settings){
-    if(!Editor.extractDataType(container[0].className)){
-      ME.dialog.notice(['Ok'],'Datamode not found. Please specify a valid datamode')
-        .dialog('open');
+    if(!isValidDatatype(container[0].className)){
       return;
     }
-
     var editor,src,
     textarea = $("<textarea class=\"" + container[0].className + "\">");
 
@@ -1130,7 +1140,7 @@
     container.before(textarea); // needs to be attached to DOM in firefox
 
     settings = settings || {};
-    settings.htmlDiv = container;
+    settings.preview = container;
     editor = initEditorFromTextarea(textarea, settings);
 
     src = container.attr('src');
@@ -1156,6 +1166,9 @@
    * @param {Option} instanceSettings Settings for this editor
    */
   function initEditorFromTextarea(textarea,instanceSettings){
+    if(!isValidDatatype(textarea[0].className)){
+      return;
+    }
     var editor,settings = {};
     $.extend(settings,globalSettings,instanceSettings);
     editor = new Editor(textarea, settings);

@@ -7,7 +7,7 @@ ME.addMode('haml', function(){
         type: 'haml',
         content: editor.textArea.val()
       }, function(html, status, response){
-        editor.htmlDiv.html(html);
+        editor.preview.html(html);
         if(callback){
           callback();
         }
@@ -16,7 +16,7 @@ ME.addMode('haml', function(){
     toText: function(editor, callback) {
       $.get('/api/markup/from_html', {
         type: 'haml',
-        content: editor.htmlDiv.html()
+        content: editor.preview.html()
       }, function(haml, status, response){
         editor.textArea.val(haml);
         if(callback){

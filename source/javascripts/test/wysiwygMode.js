@@ -20,6 +20,25 @@ $(document).ready(function(){
 
   module("wysiwyg");
 
+  test('toolbar should act on the editor it belongs to', function(){
+    var otherEditor = $("div.markupClick.textile").parent(),
+    w2 = new WysiwygHelper({
+      form: otherEditor,
+      textArea: otherEditor.find('textarea'),
+      preview: otherEditor.find('.preview'),
+      selection: selection,
+      range: range
+    });
+    w.set('text')
+      .select('p');
+    w2.click('.bold');
+    w.notMatch('b');
+    w.set('text')
+      .select('p');
+    w2.change(".formatBlock", "h1");
+    w.notMatch('h1');
+  });
+
   test("default paragraph", function(){
     w.match("p");
   });

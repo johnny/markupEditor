@@ -248,8 +248,8 @@
   /**
    * @browserbug Firefox and Chrome
    */
-  function pressedEnter(editor, htmlDiv){
-    if(checkIfDeletedAll(htmlDiv,13) === false){
+  function pressedEnter(editor, preview){
+    if(checkIfDeletedAll(preview,13) === false){
       return false;
     }
     var lastSibling = true, node, range, endContainer,
@@ -260,7 +260,7 @@
       node = endContainer = range.endContainer;
 
       // only the last sibling
-      while(node.parentNode !== htmlDiv[0]){
+      while(node.parentNode !== preview[0]){
         if(node.nextSibling){
           lastSibling = false;
           break;
@@ -289,8 +289,8 @@
    *
    * @param {Editor} editor The editor to work on
    */
-  function pressedBackspace(editor, htmlDiv){
-    if(checkIfDeletedAll(htmlDiv,8) === false){
+  function pressedBackspace(editor, preview){
+    if(checkIfDeletedAll(preview,8) === false){
       return false;
     }
     var children, atBeginningOfLI,
@@ -306,7 +306,7 @@
     }
 
     // only the first sibling
-    while(node.parentNode !== htmlDiv[0]){
+    while(node.parentNode !== preview[0]){
       if(node.previousSibling){
         inFirstSibling = false;
         if(/li/i.test(node.nodeName)){
@@ -342,8 +342,8 @@
    *
    * @param {Editor} editor The editor to work on
    */
-  function pressedDelete(editor, htmlDiv){
-    if(checkIfDeletedAll(htmlDiv,46) === false){
+  function pressedDelete(editor, preview){
+    if(checkIfDeletedAll(preview,46) === false){
       return false;
     }
     if(!$.browser.webkit){
@@ -361,7 +361,7 @@
     }
 
     // only the first sibling
-    while(node.parentNode !== htmlDiv[0]){
+    while(node.parentNode !== preview[0]){
       if(node.nextSibling){
         return true;
       }
@@ -388,7 +388,7 @@
   /**
    * @browserbug Firefox
    */
-  function checkIfDeletedAll(htmlDiv, keyCode, holdNeutralKey){
+  function checkIfDeletedAll(preview, keyCode, holdNeutralKey){
     var range = selection.getRangeAt(0);
     if(!$.browser.mozilla || holdNeutralKey || range.collapsed || ME.util.isNeutralKey(keyCode)){
       return true;
@@ -398,9 +398,9 @@
     // The second check is necessary, because extractContents might
     // leave some empty tags when you manually select the whole div
     // (the selection is always inside the block tags)
-    if(htmlDiv.is(":empty") || /^ *$/.test(htmlDiv.text())){
+    if(preview.is(":empty") || /^ *$/.test(preview.text())){
       node = document.createElement(content.childNodes[0].nodeName);
-      htmlDiv.html(node);
+      preview.html(node);
       selectNodes([node]);
       if(!/^8|13|46$/.test("" + keyCode)){
         // Pass non special keystrokes upwards
@@ -474,7 +474,7 @@
               linkNode.replaceWith(text);
             },
             close: function(){
-              editor.htmlDiv.focus();
+              editor.preview.focus();
               editor.checkState();
             }
           };
@@ -546,7 +546,7 @@
               imageNode.remove();
             },
             close: function(){
-              editor.htmlDiv.focus();
+              editor.preview.focus();
               editor.checkState();
             }
           };
@@ -632,7 +632,7 @@
       if(editor.leftBorder.safeBlock){
         nodes.insertAfter(editor.leftBorder.safeBlock);
       } else {
-        editor.htmlDiv.prepend(nodes);
+        editor.preview.prepend(nodes);
       }
       
       if(editor.collapsed){
@@ -658,7 +658,7 @@
      */
     afterActivation: function(editor) {
       editor.textArea.parent().hide();
-      editor.htmlDiv.attr("contentEditable",true);
+      editor.preview.attr("contentEditable",true);
 
       // Force Mozilla to generate tags instead of inline styles
       if ($.browser.mozilla) {
@@ -706,7 +706,7 @@
       return this.buildStateObject(nodes, editor.currentNodes = {});
     },
     /**
-     * Executed if the htmlDiv of the Editor is clicked.
+     * Executed if the preview of the Editor is clicked.
      * Checks where the Caret has been placed by the browser
      */
     clicked: function(){
@@ -725,17 +725,17 @@
       this.prototype.pressed.apply(this, [editor, keyCode]);
       switch(keyCode){
       case 13: // enter
-        return pressedEnter(editor, editor.htmlDiv);
+        return pressedEnter(editor, editor.preview);
       case 8: // Backspace
-        return pressedBackspace(editor, editor.htmlDiv);
+        return pressedBackspace(editor, editor.preview);
       case 46: // Delete
-        return pressedDelete(editor, editor.htmlDiv);
+        return pressedDelete(editor, editor.preview);
       case 37: // left arrow
         return checkCaret(-1);
       case 39: // right arrow
         return checkCaret(1);
       default:
-        return checkIfDeletedAll(editor.htmlDiv, keyCode, this.holdNeutralKey);
+        return checkIfDeletedAll(editor.preview, keyCode, this.holdNeutralKey);
       }
     },
     /**
@@ -753,7 +753,7 @@
      * @returns {String} The html behind the preview
      */
     toHTML: function(editor) {
-      return editor.htmlDiv.html();
+      return editor.preview.html();
     }
   });
 })();

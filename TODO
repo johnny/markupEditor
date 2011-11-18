@@ -1,8 +1,5 @@
-* [29/40] Further improvements
-  - [ ] fix multiple.html
+* [30/40] Further improvements
   - [-] wysiwyg
-    - [ ] Toolbar should work only if there is a range inside the preview
-          (also the state checking)
     - [ ] expand selection to word boundaries, just as in textile
     - [ ] join lists on backspace/entf between lists
     - [ ] Firefox: fix checkState for one bold word
@@ -11,6 +8,8 @@
           This would be the approach with a future since there might be other
           cases of nested nodes ( b>i, i>b would be different now, but should 
           be the same)
+    - [X] Toolbar should work only if there is a range inside the preview
+          (also the state checking)
     - [X] handle delete key
     - [X] selecting all and pressing bold should bolden each (part of a) paragraph in turn
     - [X] ignore special keyCodes on deletion
@@ -46,7 +45,9 @@
           perhaps (... ME.Mode = Mode;})(ME, jQuery) is an option
   - [ ] spec closing of editors
     - [ ] should work with external select
-  - [ ] handle multiple init
+  - [ ] better editor loading
+    - [ ] handle multiple init gracefully. Currently it stacks two editors on top of each other
+    - [ ] loading from textarea with an unknown mode, that is inside a textarea, should work
   - [ ] spec with selenium
     - [ ] spec press enter
       - [ ] in list
@@ -64,6 +65,7 @@
     - [ ] fire native events (not supported in awesome, try in kde or windows)
   - [ ] clean and parse pasted html
   - [ ] handle blocktags within lists
+  - [X] fix multiple.html
   - [X] textile: fix align with single caret
   - [X] fix wysiwyg specs. probably an error in initFromHTMLDiv
   - [X] provide support for external mode select
