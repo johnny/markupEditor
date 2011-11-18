@@ -446,6 +446,39 @@
     }
   }
 
+  function extendRangeToSpaces(){
+    // extend selection to word boundaries
+    var text, changedRange,
+    range = selection.getRangeAt(0),
+    startNode = range.startContainer,
+    startOffset = range.startOffset,
+    endNode = range.endContainer,
+    endOffset = range.endOffset;
+
+    if(startNode.nodeType == 3){ // Its a textnode
+      changedRange = true;
+      text = startNode.nodeValue;
+      range.setStart(startNode, text.lastIndexOf(' ', startOffset) + 1);
+    }
+
+    if(endNode.nodeType == 3){ // Its a textnode
+      changedRange = true;
+      text = endNode.nodeValue;
+      
+      endOffset = text.indexOf(' ', endOffset -1); // -1, otherwise it
+      // might overextend
+      if(endOffset === -1){
+        endOffset = text.length;
+      }
+      range.setEnd(endNode, endOffset);
+    }
+
+    if(changedRange){
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }
+
   /** 
    * @name wysiwygMode
    * @namespace
@@ -464,6 +497,7 @@
     items: {
       "default": {
         clicked: function(editor, target) {
+          extendRangeToSpaces();
           document.execCommand(this.name, false, null);
         }
       },
@@ -500,6 +534,7 @@
       },
       link: {
         clicked: function(editor, target) {
+          extendRangeToSpaces();
           var dialog, linkNode, titleString,
           range = selection.getRangeAt(0),
           callback = {

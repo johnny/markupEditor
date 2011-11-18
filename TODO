@@ -1,12 +1,12 @@
 * [30/40] Further improvements
   - [-] wysiwyg
-    - [ ] expand selection to word boundaries, just as in textile
     - [ ] Firefox: fix checkState for one bold word
     - [ ] br tags should be top level, because Border expects that
           or alternatively change behavior of the node search within Border
           This would be the approach with a future since there might be other
           cases of nested nodes ( b>i, i>b would be different now, but should 
           be the same)
+    - [X] expand selection to word boundaries, just as in textile
     - [X] pressing enter on empty list item should remove the list item and add a paragraph
     - [X] join lists on backspace/entf between lists
     - [X] Toolbar should work only if there is a range inside the preview

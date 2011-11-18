@@ -155,6 +155,29 @@ WysiwygHelper.prototype = (function(){
     selectAll: function(){
       return this.select(this.preview.children());
     },
+    // TODO this doesn't work, if the node has multiple text nodes
+    selectText: function(text, offset){
+      var index, startOffset, endOffset,
+      node = this.preview.find(':contains('+ text + ')').last()[0].firstChild;
+
+      if(node.nodeType == 3){ // Its a textnode
+        index = node.nodeValue.indexOf(text);
+        if(offset){
+          endOffset = startOffset = index + offset;
+        } else {
+          startOffset = index;
+          endOffset = index + text.length;
+        }
+        this.range.setStart(node, startOffset);
+        this.range.setEnd(node, endOffset);
+      } else {
+        console.log('node is not a text node', node);
+      }
+
+      this.selection.removeAllRanges();
+      this.selection.addRange(this.range);
+      return this.click('.preview');
+    },
     select: function select(identifier){
       var node;
       if(typeof identifier === "string"){

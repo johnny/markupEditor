@@ -43,6 +43,22 @@ $(document).ready(function(){
     w.match("p");
   });
 
+  test('should extend selection to spaces', function(){
+    w.set('this and that')
+      .selectText('and', 2)
+      .click('.bold')
+      .match('b:contains(and)')
+      .selectText('and', 1)
+      .click('.bold')
+      .notMatch('b')
+      .set('this and that')
+      .selectText(' and ')
+      .click('.bold')
+      .match('b:contains(and)')
+      .notMatch('b:contains( and)')
+      .notMatch('b:contains(and )');
+  });
+
   test("Image remove", function(){
     w.set("!remove(Title)!")
       .select("img")
@@ -189,13 +205,13 @@ $(document).ready(function(){
   
   test("Link create", function(){
     w.set("This")
-      .select("p")
+      .selectText("This",2)
       .off('link')
       .dialog('link', function(d){
         d.set('uri','src');
         d.click("Create");
       })
-      .match("a")
+      .match("a:contains(This)")
       .on('link');
   });
 
