@@ -252,30 +252,49 @@
     if(checkIfDeletedAll(preview,13) === false){
       return false;
     }
-    var lastSibling = true, node, range, endContainer,
-    block = editor.currentNodes.block;
+    var node, range, endContainer, insertNewParagraph, listItem,
+    lastSibling = true,
+    block = editor.currentNodes.block,
+    list = editor.currentNodes.list,
+    isHeading = /h[1-5]/i.test((list || block).nodeName);
 
-    if(/h[1-5]/i.test(block.nodeName)){ // only headings
-      range = selection.getRangeAt(0);
-      node = endContainer = range.endContainer;
+    if(!(isHeading || list)){
+      return;
+    }
+    
+    range = selection.getRangeAt(0);
+    node = endContainer = range.endContainer;
 
-      // only the last sibling
-      while(node.parentNode !== preview[0]){
-        if(node.nextSibling){
-          lastSibling = false;
-          break;
-        }
-        node = node.parentNode;
+    // only the last sibling
+    while(node.parentNode !== preview[0]){
+      if(/li/i.test(node.nodeName)){
+        listItem = node;
       }
-      
-      if(lastSibling
-         && range.endOffset === endContainer.textContent.length // at
-         // the end
-        ){
-        node = $("<p>").insertAfter(block);
-        selectNodes(node);
+      if(node.nextSibling){
+        lastSibling = false;
+        break;
+      }
+      node = node.parentNode;
+    }
+
+    if(!lastSibling){
+      if(listItem && !$(listItem).text()){
+        disableList(editor);
         return false;
       }
+    } else if(isHeading && /* only headings */
+       // check if the cursor is at the end
+       range.endOffset === endContainer.textContent.length){
+        insertNewParagraph = true;
+      }
+    else if (list && !$(listItem).text()){
+      $(listItem).remove();
+      insertNewParagraph = true;
+    }
+    if(insertNewParagraph){
+      node = $("<p>").insertAfter(list || block);
+      selectNodes(node);
+      return false;
     }
   }
 
@@ -293,11 +312,12 @@
     if(checkIfDeletedAll(preview,8) === false){
       return false;
     }
-    var children, atBeginningOfLI,
+    var children, atBeginningOfLI, prevIsList, nextIsList,
     inFirstSibling = true,
     block = editor.currentNodes.block,
     list = editor.currentNodes.list,
     prev = (list || block).previousSibling,
+    next = (list || block).nextSibling,
     range = selection.getRangeAt(0),
     node = range.startContainer;
 
@@ -319,9 +339,16 @@
       node = node.parentNode;
     }
 
+    prevIsList = /(u|o)l/i.test(prev.nodeName);
+    nextIsList = /(u|o)l/i.test(next.nodeName);
+
     if(inFirstSibling){
       if(list){
         node = node.firstChild;
+      }
+      if(prevIsList){
+        // append content to the last list item
+        prev = prev.lastChild;
       }
       node = $(node);
       children = node.contents();
@@ -329,10 +356,13 @@
       $(prev).append(children);
       node.remove();
       selectNodes([children[0]], true);
+      if(prevIsList && nextIsList){
+        $(prev).parent().append($(next).detach().contents());
+      }
     } else if(list && atBeginningOfLI){
       disableList(editor);
     }
-    
+
     return false;
   }
 
@@ -349,7 +379,7 @@
     if(!$.browser.webkit){
       return true;
     }
-    var children,
+    var children, nextIsList,
     block = editor.currentNodes.block,
     list = editor.currentNodes.list,
     next = (list || block).nextSibling,
@@ -360,7 +390,7 @@
       return true;
     }
 
-    // only the first sibling
+    // only the last sibling
     while(node.parentNode !== preview[0]){
       if(node.nextSibling){
         return true;
@@ -368,14 +398,19 @@
       node = node.parentNode;
     }
 
-    if(list){
-      // append to last list item
-      node = node.lastChild;
+    nextIsList = /(u|o)l/i.test(next.nodeName);
+
+    if(!(nextIsList && list)){
+      if(list){
+        // append to last list item
+        node = node.lastChild;
+      }
+      if(nextIsList){
+        // swallow only the first list item
+        next = next.firstChild;
+      }
     }
-    if(/(u|o)l/i.test(next.nodeName)){
-      // swallow only the first list item
-      next = next.firstChild;
-    }
+    
     next = $(next);
     children = next.contents();
 

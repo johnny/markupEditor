@@ -1,13 +1,14 @@
 * [30/40] Further improvements
   - [-] wysiwyg
     - [ ] expand selection to word boundaries, just as in textile
-    - [ ] join lists on backspace/entf between lists
     - [ ] Firefox: fix checkState for one bold word
     - [ ] br tags should be top level, because Border expects that
           or alternatively change behavior of the node search within Border
           This would be the approach with a future since there might be other
           cases of nested nodes ( b>i, i>b would be different now, but should 
           be the same)
+    - [X] pressing enter on empty list item should remove the list item and add a paragraph
+    - [X] join lists on backspace/entf between lists
     - [X] Toolbar should work only if there is a range inside the preview
           (also the state checking)
     - [X] handle delete key
@@ -39,7 +40,6 @@
     - [X] values for the selects should be defined by a method call if functions are defined
     - [X] fields should share the combobox
   - [ ] localization
-  - [ ] flexible toolbar, which stays on top
   - [ ] split up markupEditor.js
     - [ ] look how ender handles the extensability
           perhaps (... ME.Mode = Mode;})(ME, jQuery) is an option
@@ -48,9 +48,11 @@
   - [ ] better editor loading
     - [ ] handle multiple init gracefully. Currently it stacks two editors on top of each other
     - [ ] loading from textarea with an unknown mode, that is inside a textarea, should work
+  - [ ] flexible toolbar, which stays on top
   - [ ] spec with selenium
     - [ ] spec press enter
       - [ ] in list
+        - [ ] pressing enter on empty list item should remove the list item and add a paragraph
       - [ ] in heading
     - [ ] spec press shift enter
       - [ ] in list
