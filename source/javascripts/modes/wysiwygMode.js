@@ -296,6 +296,26 @@
       selectNodes(node);
       return false;
     }
+    var atEndOfList = false;
+    if(list && atEndOfList){ // prevent addition of br in current node
+      listItem = $(listItem) || $(node).parent('li');
+      selectNodes(listItem.after('<li>').next(), true);
+      return false;
+    }
+  }
+
+  /** Remove invisible nodes from the end of an element
+   *
+   * @param {Node} node
+   */
+  function clearNodeEnd(node){
+    var child = node.lastChild;
+
+    while(child && (/br/i.test(child.nodeName) ||
+                    (child.nodeType === 3 && /^ *$/.test(child.textContent)))){
+      node.removeChild(child);
+      child = node.lastChild;
+    }
   }
 
   /**
@@ -312,7 +332,7 @@
     if(checkIfDeletedAll(preview,8) === false){
       return false;
     }
-    var children, atBeginningOfLI, prevIsList, nextIsList,
+    var children, parent, listItem, atBeginningOfLI, atBeginningOfLineInLI, prevIsList, nextIsList,
     inFirstSibling = true,
     block = editor.currentNodes.block,
     list = editor.currentNodes.list,
@@ -331,7 +351,9 @@
         inFirstSibling = false;
         if(/li/i.test(node.nodeName)){
           atBeginningOfLI = true;
-        } else {
+        } else if(list && /br/i.test(node.previousSibling.nodeName)){
+          atBeginningOfLineInLI = true;
+        } else{
           return true;
         }
         break;
@@ -359,8 +381,38 @@
       if(prevIsList && nextIsList){
         $(prev).parent().append($(next).detach().contents());
       }
-    } else if(list && atBeginningOfLI){
+    } else if(atBeginningOfLineInLI){ // disable List
+      node.parentNode.removeChild(node.previousSibling);
+      
+      node = $(node);
+      children = node.nextAll();
+      parent = node.parent('li');
+      
+      listItem = $('<li>').append(node, children);
+      parent.after(listItem);
+      selectNodes(listItem, true);
+      
       disableList(editor);
+    } else if(atBeginningOfLI){ // append contents to the previous
+      // list item
+      listItem = node.previousSibling;
+      children = $(node).detach().contents();
+
+      // chrome adds invisible br tags to the end of a list item on
+      // some enter presses. Remove them
+      clearNodeEnd(listItem);
+
+      if(!children[0] || /br/i.test(children[0].nodeName)){
+        //add a nonbreaking (solid) space, that can be selected by a range
+        children[0] = document.createTextNode('\xa0') ;
+      }
+      $(listItem).append('<br>', children);
+
+      if(children[0]){
+        selectNodes(children, true);
+      } else {
+        selectNodes([listItem], false);
+      }
     }
 
     return false;
