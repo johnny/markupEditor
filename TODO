@@ -1,4 +1,4 @@
-* [30/40] Further improvements
+* [33/41] Further improvements
   - [-] wysiwyg
     - [ ] Firefox: fix checkState for one bold word
     - [ ] br tags should be top level, because Border expects that
@@ -8,6 +8,7 @@
           be the same)
     - [X] expand selection to word boundaries, just as in textile
     - [X] pressing enter on empty list item should remove the list item and add a paragraph
+
     - [X] join lists on backspace/entf between lists
     - [X] Toolbar should work only if there is a range inside the preview
           (also the state checking)
@@ -27,19 +28,6 @@
         - [X] enter in the middle of a heading does not move the rest of the heading down
         - [X] selecting all by hand and deleting it leaves empty tags
               this is a result of the current implementation of checkIfDeletedAll
-  - [-] Better Dialogs (for inspiration see gollum)
-    - [ ] display errors as tooltips
-    - [X] reset errors on open
-    - [X] enhancedTextfield: type, click clear, type again (no button), click cancel (button appears and button click did not work)
-    - [X] style clearButton + autocomplete
-    - [X] use errors
-    - [X] autocomplete select should trigger change (file bug)
-    - [X] support prompts in textfields
-    - [X] add a clear button to text fields
-    - [X] dialogs should be created on the fly
-    - [X] values for the selects should be defined by a method call if functions are defined
-    - [X] fields should share the combobox
-  - [ ] localization
   - [ ] split up markupEditor.js
     - [ ] look how ender handles the extensability
           perhaps (... ME.Mode = Mode;})(ME, jQuery) is an option
@@ -67,6 +55,22 @@
     - [ ] fire native events (not supported in awesome, try in kde or windows)
   - [ ] clean and parse pasted html
   - [ ] handle blocktags within lists
+  - [X] Improve dialog
+    - [X] merge tipsy and isValid
+  - [X] Better Dialogs (for inspiration see gollum)
+    - [X] display errors as tooltips
+    - [X] add tooltips
+    - [X] reset errors on open
+    - [X] enhancedTextfield: type, click clear, type again (no button), click cancel (button appears and button click did not work)
+    - [X] style clearButton + autocomplete
+    - [X] use errors
+    - [X] autocomplete select should trigger change (file bug)
+    - [X] support prompts in textfields
+    - [X] add a clear button to text fields
+    - [X] dialogs should be created on the fly
+    - [X] values for the selects should be defined by a method call if functions are defined
+    - [X] fields should share the combobox
+  - [X] localization
   - [X] fix multiple.html
   - [X] textile: fix align with single caret
   - [X] fix wysiwyg specs. probably an error in initFromHTMLDiv

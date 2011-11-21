@@ -1,15 +1,5 @@
-(function($){
-  var callback,
-  t10n = {
-    noticeTitle: 'Notice',
-    linkTitle: 'Link',
-    insertImageTitle: 'Image',
-    uri: 'Link',
-    uriPrompt: 'Enter or select link',
-    title: 'Title',
-    titlePrompt: 'Enter title',
-    imageUri: 'Image Source'
-  };
+(function($, _){
+  var callback;
 
   $.fn.isValid.init();
   
@@ -97,6 +87,7 @@
       width: 600,
       modal: true,
       close: function() {
+        $form.isValid('reset');
         if(callback.close){
           callback.close();
         }
@@ -111,7 +102,6 @@
           fields[i].change();
         }
         fields[0][0].setSelectionRange(0,0);
-        $form.isValid('reset');
       }
     });
 
@@ -138,10 +128,12 @@
       jQueryFunctions = fieldDefinitions[i][1];
       
       $form.append(
-        '<label for=\"' + fieldName + '\">'+ t10n[fieldName] + '</label>'
+        '<label for=\"' + fieldName + '\">'+ _(fieldName) + '</label>'
       );
       fields[i] = $('<input type=\"text\" class=\"' + fieldName + '\" name=\"' + fieldName + "\">")
         .appendTo($form);
+      
+      fields[i].enhanceTextfield({prompt: _(fieldName+"Prompt")});
       
       if(jQueryFunctions){
         for(method in jQueryFunctions){
@@ -151,7 +143,6 @@
           }
         }
       }
-      fields[i].enhanceTextfield({prompt: t10n[fieldName+"Prompt"]});
     }
     return fields;
   }
@@ -160,7 +151,7 @@
     var $dialogNode, proxy;
 
     $dialogNode = $('<div id=\"'+ name + '-dialog\" title=\"' + 
-                    t10n[name + "Title"] + '\">');
+                    _(name + "Title") + '\">');
 
     if(fieldDefinitions){
       proxy = initFormDialog($dialogNode, fieldDefinitions);
@@ -197,4 +188,4 @@
     ]),
     notice: createDialog('notice')
   };
-})(jQuery);
+})(jQuery, ME.t10n);

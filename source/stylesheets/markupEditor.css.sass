@@ -3,6 +3,9 @@
 $overlay: rgba(255, 255, 255, .5)
 $transparent: rgba(255, 255, 255, .8)
 $width: 20px
+$error: #ff0000
+$tip-color: #000
+$tip-background: $error
 
 @mixin editorElement
   background: none repeat scroll 0 0 #F9F9F9
@@ -164,26 +167,25 @@ $width: 20px
   span.clearButton
     display: block
     float: left
-    width: 300px
+    width: 342px
     margin: 0 0 0.4em
     border: 1px solid #d3d3d3
     &.focus
       border: 1px solid #eec77c
     &.error
       color: #666666
-      border: 1px solid #ff0000
-    &.ui-corner-all
-      width: 342px
-      input
-        width: 312px
+      border: 1px solid $error
     input
-      width: 270px
+      width: 312px
       border: none
       padding: 0.49em 0
       margin: 0 0.4em
       &:focus
         border: none
         outline: none
+      &.short
+        width: 270px
+        
     span
       width: 10px
       cursor: pointer
@@ -194,7 +196,43 @@ $width: 20px
 
   .ui-button
     margin: 0
-    margin-left: -1px
-    float: left
+    float: right
+    border: none
+    border-left: 1px
+  .ui-icon
+    margin-left: -6px
+  .ui-icon-triangle-1-s
+    background-position: -66px -16px
   .ui-button-icon-only .ui-button-text
     padding: 0.36em
+
+
+
+.error-tip
+  font-size: 0.9em
+  position: absolute
+  padding: 5px
+  z-index: 100000
+
+  .inner
+    background-color: $tip-background
+    color: $tip-color
+    max-width: 200px
+    padding: 5px 8px 4px 8px
+    text-align: center
+    border-radius: 3px
+    -moz-border-radius: 3px
+    -webkit-border-radius: 3px
+
+  /* Rounded corners
+
+  .arrow
+    position: absolute
+    width: 0
+    height: 0
+    border: 5px solid transparent
+    border-right-color: $error
+    top: 50%
+    margin-top: -5px
+    left: 0
+    border-left: none

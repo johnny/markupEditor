@@ -47,7 +47,7 @@
           input.val(ui.item.value).change();
         }
       })
-	.addClass( "ui-corner-left" );
+	.addClass( "ui-corner-right short" );
 
       input.data( "autocomplete" )._renderItem = function( ul, item ) {
 	return $( "<li></li>" )
@@ -59,14 +59,12 @@
       this.button = $( "<button type='button'>&nbsp;</button>" )
 	.attr( "tabIndex", -1 )
 	.attr( "title", "Show All Items" )
-	.insertAfter( input )
 	.button({
 	  icons: {
 	    primary: "ui-icon-triangle-1-s"
 	  },
 	  text: false
 	})
-	.removeClass( "ui-corner-all" )
 	.addClass( "ui-corner-right ui-button-icon" )
 	.click(function() {
 	  // close if already visible
@@ -81,7 +79,8 @@
 	    input.autocomplete( "search", "" );
 	    input.focus();
           }
-	});
+	})
+	.appendTo( input.parent() );
     },
 
     destroy: function() {

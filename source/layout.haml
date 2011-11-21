@@ -14,8 +14,8 @@
 
     = yield
 
-    = javascript_include_tag "vendor/jquery", "vendor/jquery-ui", "plugins/isValid.js"
-    = javascript_include_tag "markupEditor", "util"
+    = javascript_include_tag "vendor/jquery", "vendor/jquery-ui", 'vendor/jquery.tipsy'
+    = javascript_include_tag 'init', "plugins/t10n", 'locale/en', "plugins/isValid.js", "markupEditor", "util"
     = javascript_include_tag "plugins/combobox", "plugins/enhanceTextfield", "dialog"
     = javascript_include_tag "modes/textile/textileMode", "modes/textile/bruteForceCompiler"
     // = javascript_include_tag "modes/htmlMode"

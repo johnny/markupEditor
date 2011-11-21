@@ -76,11 +76,7 @@
             }
           })
           .parent().append($btn);
-        if($t.hasClass("ui-corner-left")){
-          $p.addClass("ui-corner-left");
-        } else {
-          $p.addClass("ui-corner-all");
-        }
+        $p.addClass("ui-corner-all");
       }
     });
   };

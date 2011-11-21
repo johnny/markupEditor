@@ -1,4 +1,4 @@
-(function ($) {
+(function ($, _) {
   var globalSettings = {}, availableModes = {}, toolbarItems = {}, toolbarHTML = "",
   availableItems = ['bold','italic','alignLeft','alignCenter','alignRight','unorderedList','orderedList','link','insertImage','save','wysiwyg','close','changeDataMode','formatBlock'],
   globalItems = [],
@@ -416,7 +416,7 @@
      * @returns {String} A html string of the button
      */
     getButton: function() {
-      return '<a href="#" class=\"'+ this.name +'" ><span>'+ this.name +'</span></a>';
+      return '<a href="#" class=\"'+ this.name +'\" title="' + _(this.name) + '"><span>'+ this.name +'</span></a>';
     }
   };
 
@@ -442,7 +442,7 @@
      * @returns {String} A html string of the button
      */
     getButton: function() {
-      var select = "<select class=\"" + this.name +  "\">",
+      var select = "<select class=\"" + this.name +  '\" title="' + _(this.name) + '">',
       optionsLength = this.options.length,
       i;
 
@@ -782,11 +782,11 @@
       } else {
         // TODO use i18n shortcut here
         if(nextMode.toText){
-          text = 'The old mode could not convert to HTML. You will have to convert the markup manually.';
+          text = 'noticeMissingToHTML';
         } else {
-          text = 'This mode can not convert HTML to your markup. You will have to convert the markup manually';
+          text = 'noticeMissingToText';
         }
-        dialogProxy = ME.dialog.notice(['Ok', 'Cancel'], text);
+        dialogProxy = ME.dialog.notice(['Ok', 'Cancel'], _(text));
         dialogProxy.dialog('open', {
           submit: function(){
             if(callback){
@@ -936,7 +936,7 @@
   /**
    * @namespace Holds all public methods
    */
-  ME = {
+  $.extend(ME, {
     /**
      * Add a mode
      *
@@ -1017,7 +1017,7 @@
     setOptions: function(options){
       this.options = options;
     }
-  };
+  });
 
   toolbarItems.changeDataMode = new ToolbarSelect("changeDataMode", [], function(editor, target) {
     editor.changeDataMode(target.value);
@@ -1027,10 +1027,10 @@
   });
 
   toolbarItems.formatBlock = new ToolbarSelect("formatBlock",[
-    ["p", "Paragraph"],
-    ["h1", "Heading 1"],
-    ["h2", "Heading 2"],
-    ["h3", "Heading 3"]
+    ["p", _("p")],
+    ["h1", _("h1")],
+    ["h2", _("h2")],
+    ["h3", _("h3")]
   ]);
 
   toolbarItems.save = new ToolbarButton("save", function(editor){
@@ -1114,7 +1114,7 @@
 
   function isValidDatatype(cssClass, changeDatamodeSelect){
     if(!Editor.extractDataType(cssClass, changeDatamodeSelect)){
-      ME.dialog.notice(['Ok'],'Datamode not found. Please specify a valid datamode')
+      ME.dialog.notice(['Ok'], _('noticeMissingDatamode'))
         .dialog('open');
     } else {
       return true;
@@ -1186,4 +1186,4 @@
     return editor;
   }
   
-}(jQuery));
+}(jQuery, ME.t10n));
