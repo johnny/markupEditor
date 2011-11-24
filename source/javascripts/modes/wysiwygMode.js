@@ -221,26 +221,37 @@
    * arrow keys
    */
   function checkCaret(adjustment){
-    var range = selection.getRangeAt(0),node, text;
+    var node, text,
+    range = selection.getRangeAt(0),
+    rangeIsCollapsed = range.collapsed;
+
     function checkSibling(property, collapse){
       while(!node[property]){
         node = node.parentNode;
       }
       node = node[property];
       if(node && !/br|h\d|p/i.test(node.nodeName)){
-        selectNodes([node], collapse);
+        if(rangeIsCollapsed){
+          selectNodes([node], collapse);
+        } else { // Fix a Firefox bug: double click on a bold word
+          // overextends the start of the selection outside the bold tag
+          if(collapse){
+            range.setStartBefore(node.firstChild);
+          }
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
         return false;
       }
     }
-    if(range.collapsed){
-      node = range.startContainer;
-      if(node.nodeType == 3){ // Its a textnode
-        text = node.nodeValue;
-        if(range.startOffset + adjustment === 0 && /^ /.test(text)){
-          return checkSibling('previousSibling', false);
-        } else if(range.startOffset + adjustment === node.length && / $/.test(text)){
-          return checkSibling('nextSibling', true);
-        }
+
+    node = range.startContainer;
+    if(node.nodeType == 3){ // Its a textnode
+      text = node.nodeValue;
+      if(range.startOffset + adjustment === 0 && /^ /.test(text)){
+        return checkSibling('previousSibling', false);
+      } else if(range.startOffset + adjustment === node.length && / $/.test(text)){
+        return checkSibling('nextSibling', true);
       }
     }
   }
@@ -800,6 +811,8 @@
         return {};
       }
 
+      checkCaret(0);
+
       function getParents(node, content){
         // TODO document me! why is this here?
         if(content){
@@ -857,7 +870,7 @@
       case 39: // right arrow
         return checkCaret(1);
       default:
-        return checkIfDeletedAll(editor.preview, keyCode, this.holdNeutralKey);
+        return checkIfDeletedAll(editor.preview, keyCode, ME.holdNeutralKey);
       }
     },
     /**
