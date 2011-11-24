@@ -1,6 +1,9 @@
 #!/usr/bin/ruby
 
-files = %w{vendor/jquery.tipsy init plugins/t10n locale/en plugins/isValid markupEditor util plugins/enhanceTextfield plugins/combobox dialog modes/textile/textileMode modes/textile/bruteForceCompiler modes/wysiwygMode modes/hamlMode}
+files = %w{markupEditor plugins/t10n locale/en plugins/isValid util
+plugins/enhanceTextfield plugins/combobox dialog
+core/jqueryHook core/mode core/toolbar core/editor
+modes/textile/textileMode modes/textile/bruteForceCompiler modes/wysiwygMode modes/hamlMode}
 
 File.open('source/javascripts/joined.js','w') do |file|
   files.each do |filename|

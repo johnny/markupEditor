@@ -40,25 +40,31 @@
 				
 					<li><a href="../symbols/Builder.html">Builder</a></li>
 				
-					<li><a href="../symbols/Editor.html">Editor</a></li>
+					<li><a href="../symbols/Error.html">Error</a></li>
 				
-					<li><a href="../symbols/jQuery.html">jQuery</a></li>
+					<li><a href="../symbols/jQuery.isValid.html">jQuery<span class='break'> </span>.<span class='break'> </span>isValid</a></li>
+				
+					<li><a href="../symbols/jQuery.markupEditor.html">jQuery<span class='break'> </span>.<span class='break'> </span>markupEditor</a></li>
 				
 					<li><a href="../symbols/ME.html">ME</a></li>
 				
+					<li><a href="../symbols/ME.Editor.html">ME<span class='break'> </span>.<span class='break'> </span>Editor</a></li>
+				
+					<li><a href="../symbols/ME.Mode.html">ME<span class='break'> </span>.<span class='break'> </span>Mode</a></li>
+				
 					<li><a href="../symbols/ME.options.html">ME<span class='break'> </span>.<span class='break'> </span>options</a></li>
 				
-					<li><a href="../symbols/Mode.html">Mode</a></li>
+					<li><a href="../symbols/ME.Toolbar.html">ME<span class='break'> </span>.<span class='break'> </span>Toolbar</a></li>
+				
+					<li><a href="../symbols/ME.ToolbarButton.html">ME<span class='break'> </span>.<span class='break'> </span>ToolbarButton</a></li>
+				
+					<li><a href="../symbols/ME.ToolbarSelect.html">ME<span class='break'> </span>.<span class='break'> </span>ToolbarSelect</a></li>
 				
 					<li><a href="../symbols/textileCompiler.html">textileCompiler</a></li>
 				
 					<li><a href="../symbols/textileMode.html">textileMode</a></li>
 				
-					<li><a href="../symbols/Toolbar.html">Toolbar</a></li>
-				
-					<li><a href="../symbols/ToolbarButton.html">ToolbarButton</a></li>
-				
-					<li><a href="../symbols/ToolbarSelect.html">ToolbarSelect</a></li>
+					<li><a href="../symbols/Validator.html">Validator</a></li>
 				
 					<li><a href="../symbols/wysiwygMode.html">wysiwygMode</a></li>
 				
@@ -69,7 +75,7 @@
 		
 		Documentation generator: <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0<br />
 		Template: <a href="http://www.thebrightlines.com/2010/05/06/new-template-for-jsdoctoolkit-codeview/" target="_blank">Codeview</a> 1.2<br />
-		Generated on: 2011-9-22 13:19
+		Generated on: 2011-10-25 1:19
 	</div>
 </div>
 
@@ -95,7 +101,7 @@
 						<li>Defined in: <a href="../symbols/src/source_javascripts_modes_textile_textileMode.js.html">textileMode.js</a></li>
 					
 						<li>Extends <span class="fixedFont">
-						<a href="../symbols/Mode.html">Mode</a></span></li>
+						<a href="../symbols/ME.Mode.html">ME.Mode</a></span></li>
 					
 				</ul>
 			
@@ -254,9 +260,9 @@
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/textileMode.html#toText">toText</a></b>(editor, html)
+										<div class="fixedFont"><b><a href="../symbols/textileMode.html#toHTML">toHTML</a></b>(editor, callback)
 										</div>
-										<div class="description">Convert preview div to textile</div>
+										<div class="description">Compile textile to html</div>
 									</td>
 								</tr>
 							
@@ -265,9 +271,9 @@
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/textileMode.html#updatePreview">updatePreview</a></b>(editor)
+										<div class="fixedFont"><b><a href="../symbols/textileMode.html#toText">toText</a></b>(editor, callback)
 										</div>
-										<div class="description">Compile textile and update the preview div</div>
+										<div class="description">Convert preview div to textile</div>
 									</td>
 								</tr>
 							
@@ -277,7 +283,7 @@
 			
 				
 					<dl class="inheritsList" id="MethodsListInherited">
-					<dt>Methods borrowed from class <span class='fixedFont'><a href="../symbols/Mode.html">Mode</a></span>: </dt><dd><span class='fixedFont'><a href="../symbols/Mode.html#activate">activate</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/Mode.html#afterActivation">afterActivation</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/Mode.html#buildStateObject">buildStateObject</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/Mode.html#clicked">clicked</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/Mode.html#extendLeftSelection">extendLeftSelection</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/Mode.html#extendRightSelection">extendRightSelection</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/Mode.html#getSelection">getSelection</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/Mode.html#getStates">getStates</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/Mode.html#released">released</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/Mode.html#replaceSelection">replaceSelection</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/Mode.html#updateTextArea">updateTextArea</a></span></dd>
+					<dt>Methods borrowed from class <span class='fixedFont'><a href="../symbols/ME.Mode.html">ME.Mode</a></span>: </dt><dd><span class='fixedFont'><a href="../symbols/ME.Mode.html#activate">activate</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/ME.Mode.html#afterActivation">afterActivation</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/ME.Mode.html#atBeginningOfLine">atBeginningOfLine</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/ME.Mode.html#buildStateObject">buildStateObject</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/ME.Mode.html#clicked">clicked</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/ME.Mode.html#extendLeftSelection">extendLeftSelection</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/ME.Mode.html#extendRightSelection">extendRightSelection</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/ME.Mode.html#extendSelection">extendSelection</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/ME.Mode.html#getSelection">getSelection</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/ME.Mode.html#getStates">getStates</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/ME.Mode.html#released">released</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/ME.Mode.html#replaceSelection">replaceSelection</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/ME.Mode.html#updatePreview">updatePreview</a></span></dd> <dd><span class='fixedFont'><a href="../symbols/ME.Mode.html#updateTextArea">updateTextArea</a></span></dd>
 					</dl>
 				
 			</div>
@@ -413,7 +419,7 @@
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<span class="light fixedFont">{<a href="../symbols/Editor.html">Editor</a>}</span> <b>editor</b>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
 												
 											</dt>
 											<dd>The editor to work on</dd>
@@ -474,7 +480,7 @@
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<span class="light fixedFont">{<a href="../symbols/Editor.html">Editor</a>}</span> <b>editor</b>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
 												
 											</dt>
 											<dd>The editor to work on</dd>
@@ -536,7 +542,7 @@ the right, negative to the left.
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<span class="light fixedFont">{<a href="../symbols/Editor.html">Editor</a>}</span> <b>editor</b>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
 												
 											</dt>
 											<dd>The editor to work on</dd>
@@ -582,7 +588,7 @@ the right, negative to the left.
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<span class="light fixedFont">{<a href="../symbols/Editor.html">Editor</a>}</span> <b>editor</b>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
 												
 											</dt>
 											<dd>The editor to work on</dd>
@@ -628,7 +634,7 @@ the right, negative to the left.
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<span class="light fixedFont">{<a href="../symbols/Editor.html">Editor</a>}</span> <b>editor</b>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
 												
 											</dt>
 											<dd>The editor to work on</dd>
@@ -649,6 +655,73 @@ the right, negative to the left.
 							<li 
 								 class='item5'
 							>
+								<div class="fixedFont heading" id="toHTML">
+									<span class='lighter'>
+									
+									</span>
+									
+									<span class="light">{String}</span>
+									
+									<b>toHTML</b>(editor, callback)
+								</div>
+								
+								<div class="description">
+									Compile textile to html
+									
+									
+									
+									
+								</div>
+								
+								
+								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
+												
+											</dt>
+											<dd>The editor to work on</dd>
+										
+											<dt>
+												<b>callback</b>
+												
+											</dt>
+											<dd></dd>
+										
+									</dl>
+								
+								
+								
+									<dl class="detailList nomargin">
+									
+										
+										
+										
+										
+										
+										
+										
+											<dt class="heading">Returns:</dt>
+											
+												<dd><span class="light fixedFont">{String}</span> HTML String</dd>
+											
+										
+										
+										
+										
+										
+									
+									</dl>
+								
+								<div class="hr"></div>
+							</li>
+						
+							<li 
+								 class='item6'
+							>
 								<div class="fixedFont heading" id="toText">
 									<span class='lighter'>
 									
@@ -656,7 +729,7 @@ the right, negative to the left.
 									
 									<span class="light">{String}</span>
 									
-									<b>toText</b>(editor, html)
+									<b>toText</b>(editor, callback)
 								</div>
 								
 								<div class="description">
@@ -674,13 +747,13 @@ the right, negative to the left.
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<span class="light fixedFont">{<a href="../symbols/Editor.html">Editor</a>}</span> <b>editor</b>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
 												
 											</dt>
 											<dd>The editor to work on</dd>
 										
 											<dt>
-												<b>html</b>
+												<b>callback</b>
 												
 											</dt>
 											<dd></dd>
@@ -709,46 +782,6 @@ the right, negative to the left.
 										
 									
 									</dl>
-								
-								<div class="hr"></div>
-							</li>
-						
-							<li 
-								 class='item6'
-							>
-								<div class="fixedFont heading" id="updatePreview">
-									<span class='lighter'>
-									
-									</span>
-									
-									
-									
-									<b>updatePreview</b>(editor)
-								</div>
-								
-								<div class="description">
-									Compile textile and update the preview div
-									
-									
-									
-									
-								</div>
-								
-								
-								
-								
-									<dl class="detailList params">
-										<dt class="heading">Parameters:</dt>
-										
-											<dt>
-												<span class="light fixedFont">{<a href="../symbols/Editor.html">Editor</a>}</span> <b>editor</b>
-												
-											</dt>
-											<dd>The editor to work on</dd>
-										
-									</dl>
-								
-								
 								
 								
 							</li>

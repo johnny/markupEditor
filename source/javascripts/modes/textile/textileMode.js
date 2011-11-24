@@ -1,4 +1,4 @@
-(function() {
+!function() {
   var $ = jQuery, textileMode;
 
   /**
@@ -184,7 +184,7 @@
   /**
    * @name textileMode
    * @namespace holds the methods from the textile mode
-   * @augments Mode
+   * @augments ME.Mode
    */
   textileMode = ME.addMode('textile', /** @scope textileMode.prototype */{
     /**
@@ -550,4 +550,4 @@
       }
     }
   });
-})();
+}();

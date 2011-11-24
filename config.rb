@@ -11,6 +11,7 @@ end
 
 with_layout :releaseLayout do
   page "/index.html"
+  page "/test_joined.html"
 end
 
 # Change the JS directory
@@ -23,6 +24,9 @@ end
 
 # Build-specific configuration
 configure :build do
+  with_layout :releaseLayout do
+    page "/*"
+  end
 
   `./join`
   # For example, change the Compass output style for deployment

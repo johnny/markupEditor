@@ -6,7 +6,7 @@
     / Always force latest IE rendering engine (even in intranet) & Chrome Frame
     %meta{ :content => "IE=edge,chrome=1", "http-equiv" => "X-UA-Compatible" }
 
-    = stylesheet_link_tag "markupEditor", "smoothness/jquery-ui-1.8.13.custom", "qunit"
+    = stylesheet_link_tag "markupEditor", "smoothness/jquery-ui-1.8.13.custom"
 
     = yield_content :head
     
@@ -15,8 +15,9 @@
     = yield
 
     = javascript_include_tag "vendor/jquery", "vendor/jquery-ui"
-    = javascript_include_tag 'init', "plugins/t10n", 'locale/en', "plugins/isValid.js", "markupEditor", "util"
+    = javascript_include_tag 'markupEditor', "plugins/t10n", 'locale/en', "plugins/isValid.js", "util"
     = javascript_include_tag "plugins/combobox", "plugins/enhanceTextfield", "dialog"
+    = javascript_include_tag "core/jqueryHook", 'core/mode', 'core/editor', 'core/toolbar'
     = javascript_include_tag "modes/textile/textileMode", "modes/textile/bruteForceCompiler"
     // = javascript_include_tag "modes/htmlMode"
     = javascript_include_tag "modes/hamlMode"

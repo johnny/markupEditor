@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8"></meta>
 		<meta name="generator" content="JsDoc Toolkit"></meta>
-		<title>Toolbar | JsDoc Reference</title>
+		<title>jQuery.isValid | JsDoc Reference</title>
 
 		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;"></meta>
 		<meta name="mobileoptimized" content="0"></meta>
@@ -40,25 +40,31 @@
 				
 					<li><a href="../symbols/Builder.html">Builder</a></li>
 				
-					<li><a href="../symbols/Editor.html">Editor</a></li>
+					<li><a href="../symbols/Error.html">Error</a></li>
 				
-					<li><a href="../symbols/jQuery.html">jQuery</a></li>
+					<li><a href="../symbols/jQuery.isValid.html">jQuery<span class='break'> </span>.<span class='break'> </span>isValid</a></li>
+				
+					<li><a href="../symbols/jQuery.markupEditor.html">jQuery<span class='break'> </span>.<span class='break'> </span>markupEditor</a></li>
 				
 					<li><a href="../symbols/ME.html">ME</a></li>
 				
+					<li><a href="../symbols/ME.Editor.html">ME<span class='break'> </span>.<span class='break'> </span>Editor</a></li>
+				
+					<li><a href="../symbols/ME.Mode.html">ME<span class='break'> </span>.<span class='break'> </span>Mode</a></li>
+				
 					<li><a href="../symbols/ME.options.html">ME<span class='break'> </span>.<span class='break'> </span>options</a></li>
 				
-					<li><a href="../symbols/Mode.html">Mode</a></li>
+					<li><a href="../symbols/ME.Toolbar.html">ME<span class='break'> </span>.<span class='break'> </span>Toolbar</a></li>
+				
+					<li><a href="../symbols/ME.ToolbarButton.html">ME<span class='break'> </span>.<span class='break'> </span>ToolbarButton</a></li>
+				
+					<li><a href="../symbols/ME.ToolbarSelect.html">ME<span class='break'> </span>.<span class='break'> </span>ToolbarSelect</a></li>
 				
 					<li><a href="../symbols/textileCompiler.html">textileCompiler</a></li>
 				
 					<li><a href="../symbols/textileMode.html">textileMode</a></li>
 				
-					<li><a href="../symbols/Toolbar.html">Toolbar</a></li>
-				
-					<li><a href="../symbols/ToolbarButton.html">ToolbarButton</a></li>
-				
-					<li><a href="../symbols/ToolbarSelect.html">ToolbarSelect</a></li>
+					<li><a href="../symbols/Validator.html">Validator</a></li>
 				
 					<li><a href="../symbols/wysiwygMode.html">wysiwygMode</a></li>
 				
@@ -69,7 +75,7 @@
 		
 		Documentation generator: <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0<br />
 		Template: <a href="http://www.thebrightlines.com/2010/05/06/new-template-for-jsdoctoolkit-codeview/" target="_blank">Codeview</a> 1.2<br />
-		Generated on: 2011-9-22 13:19
+		Generated on: 2011-10-25 1:19
 	</div>
 </div>
 
@@ -79,12 +85,12 @@
 	<div class="innerContent">
 		<h1 class="classTitle">
 			
-			Class <span>Toolbar</span>
+			Namespace <span>jQuery.isValid</span>
 		</h1>
 		
 		<div class="intro">
 			<p class="description summary">
-				
+				a simple validation plugin
 			</p>
 				
 			
@@ -92,7 +98,7 @@
 					
 					
 					
-						<li>Defined in: <a href="../symbols/src/source_javascripts_markupEditor.js.html">markupEditor.js</a></li>
+						<li>Defined in: <a href="../symbols/src/source_javascripts_plugins_isValid.js.html">isValid.js</a></li>
 					
 						
 				</ul>
@@ -101,8 +107,8 @@
 		
 		
 			<div class="props">
-				<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class Toolbar.">
-					<caption class="sectionTitle">Class Summary</caption>
+				<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class jQuery.isValid.">
+					<caption class="sectionTitle">Namespace Summary</caption>
 					<thead>
 						<tr>
 							<th scope="col">Constructor Attributes</th>
@@ -114,9 +120,10 @@
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription" >
 								<div class="fixedFont">
-									<b><a href="../symbols/Toolbar.html#constructor">Toolbar</a></b>()
+									<b><a href="../symbols/jQuery.isValid.html#constructor">jQuery.isValid</a></b>
 								</div>
-								<div class="description">Create a toolbar for an editor.</div>
+								<div class="description">Validate a given Form and display errors as tips, if formfields are
+invalid.</div>
 							</td>
 						</tr>
 					</tbody>
@@ -135,7 +142,7 @@
 				<h2 class="sectionTitle">Method Summary</h2>
 				
 				
-					<table class="summaryTable" id="MethodsList" cellspacing="0" summary="A summary of the methods documented in the class Toolbar.">
+					<table class="summaryTable" id="MethodsList" cellspacing="0" summary="A summary of the methods documented in the class jQuery.isValid.">
 						<thead>
 							<tr>
 								<th scope="col">Method Attributes</th>
@@ -151,31 +158,9 @@
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Toolbar.html#loadModeToolbar">loadModeToolbar</a></b>(editor)
+										<div class="fixedFont"><b><a href="../symbols/jQuery.isValid.html#$.fn.isValid">$.fn.isValid</a></b>(method, options)
 										</div>
-										<div class="description">Load the toolbar for the current mode.</div>
-									</td>
-								</tr>
-							
-								<tr
-									 class='item1'
-								>
-									<td class="attributes">&nbsp;</td>
-									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Toolbar.html#runAction">runAction</a></b>(action, target, target)
-										</div>
-										<div class="description">Execute the given action of the current mode</div>
-									</td>
-								</tr>
-							
-								<tr
-									 class='item2'
-								>
-									<td class="attributes">&nbsp;</td>
-									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Toolbar.html#setActive">setActive</a></b>(actions)
-										</div>
-										<div class="description">Activate the buttons/selects of the given actions on the toolbar</div>
+										<div class="description">Validates forms</div>
 									</td>
 								</tr>
 							
@@ -198,16 +183,18 @@
 			<div class="details props">
 				<div class="innerProps">
 					<h2 class="sectionTitle" id="constructor">
-						Class Detail
+						Namespace Detail
 					</h2>
 					
 					<div class="fixedFont">
-						<b>Toolbar</b>()
+						<b>jQuery.isValid</b>
 					</div>
 					
 					<div class="description">
-						Create a toolbar for an editor. Every editor has its own toolbar, since the
-items of the toolbar can be defined on a per editor basis (save callback)
+						Validate a given Form and display errors as tips, if formfields are
+invalid.
+
+inspired by tipsy
 						
 					</div>
 					
@@ -239,19 +226,18 @@ items of the toolbar can be defined on a per editor basis (save callback)
 							<li 
 								 class='item0'
 							>
-								<div class="fixedFont heading" id="loadModeToolbar">
+								<div class="fixedFont heading" id="$.fn.isValid">
 									<span class='lighter'>
 									
 									</span>
 									
 									
 									
-									<b>loadModeToolbar</b>(editor)
+									<b>$.fn.isValid</b>(method, options)
 								</div>
 								
 								<div class="description">
-									Load the toolbar for the current mode. If a toolbar item is not
-supported, it will be hidden.
+									Validates forms
 									
 									
 									
@@ -265,102 +251,16 @@ supported, it will be hidden.
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<b>editor</b>
+												<span class="light fixedFont">{String}</span> <b>method</b>
+												<i>Optional, Default: "check"</i>
+											</dt>
+											<dd>The method to call</dd>
+										
+											<dt>
+												<b>options</b>
 												
 											</dt>
 											<dd></dd>
-										
-									</dl>
-								
-								
-								
-								<div class="hr"></div>
-							</li>
-						
-							<li 
-								 class='item1'
-							>
-								<div class="fixedFont heading" id="runAction">
-									<span class='lighter'>
-									
-									</span>
-									
-									
-									
-									<b>runAction</b>(action, target, target)
-								</div>
-								
-								<div class="description">
-									Execute the given action of the current mode
-									
-									
-									
-									
-								</div>
-								
-								
-								
-								
-									<dl class="detailList params">
-										<dt class="heading">Parameters:</dt>
-										
-											<dt>
-												<span class="light fixedFont">{String}</span> <b>action</b>
-												
-											</dt>
-											<dd>The action to execute</dd>
-										
-											<dt>
-												<span class="light fixedFont">{HTMLElement}</span> <b>target</b>
-												
-											</dt>
-											<dd>The target of the click</dd>
-										
-											<dt>
-												<b>target</b>
-												
-											</dt>
-											<dd></dd>
-										
-									</dl>
-								
-								
-								
-								<div class="hr"></div>
-							</li>
-						
-							<li 
-								 class='item2'
-							>
-								<div class="fixedFont heading" id="setActive">
-									<span class='lighter'>
-									
-									</span>
-									
-									
-									
-									<b>setActive</b>(actions)
-								</div>
-								
-								<div class="description">
-									Activate the buttons/selects of the given actions on the toolbar
-									
-									
-									
-									
-								</div>
-								
-								
-								
-								
-									<dl class="detailList params">
-										<dt class="heading">Parameters:</dt>
-										
-											<dt>
-												<span class="light fixedFont">{Object}</span> <b>actions</b>
-												
-											</dt>
-											<dd>The actions which should be active</dd>
 										
 									</dl>
 								

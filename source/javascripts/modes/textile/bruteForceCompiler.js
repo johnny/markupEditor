@@ -1,4 +1,4 @@
-(function (){
+!function (){
   /**
    * @name Builder
    * 
@@ -615,4 +615,4 @@
       return builder.getTrace();
     }
   };
-})();
+}();

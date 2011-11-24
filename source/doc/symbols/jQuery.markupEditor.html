@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8"></meta>
 		<meta name="generator" content="JsDoc Toolkit"></meta>
-		<title>jQuery | JsDoc Reference</title>
+		<title>jQuery.markupEditor | JsDoc Reference</title>
 
 		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;"></meta>
 		<meta name="mobileoptimized" content="0"></meta>
@@ -40,25 +40,31 @@
 				
 					<li><a href="../symbols/Builder.html">Builder</a></li>
 				
-					<li><a href="../symbols/Editor.html">Editor</a></li>
+					<li><a href="../symbols/Error.html">Error</a></li>
 				
-					<li><a href="../symbols/jQuery.html">jQuery</a></li>
+					<li><a href="../symbols/jQuery.isValid.html">jQuery<span class='break'> </span>.<span class='break'> </span>isValid</a></li>
+				
+					<li><a href="../symbols/jQuery.markupEditor.html">jQuery<span class='break'> </span>.<span class='break'> </span>markupEditor</a></li>
 				
 					<li><a href="../symbols/ME.html">ME</a></li>
 				
+					<li><a href="../symbols/ME.Editor.html">ME<span class='break'> </span>.<span class='break'> </span>Editor</a></li>
+				
+					<li><a href="../symbols/ME.Mode.html">ME<span class='break'> </span>.<span class='break'> </span>Mode</a></li>
+				
 					<li><a href="../symbols/ME.options.html">ME<span class='break'> </span>.<span class='break'> </span>options</a></li>
 				
-					<li><a href="../symbols/Mode.html">Mode</a></li>
+					<li><a href="../symbols/ME.Toolbar.html">ME<span class='break'> </span>.<span class='break'> </span>Toolbar</a></li>
+				
+					<li><a href="../symbols/ME.ToolbarButton.html">ME<span class='break'> </span>.<span class='break'> </span>ToolbarButton</a></li>
+				
+					<li><a href="../symbols/ME.ToolbarSelect.html">ME<span class='break'> </span>.<span class='break'> </span>ToolbarSelect</a></li>
 				
 					<li><a href="../symbols/textileCompiler.html">textileCompiler</a></li>
 				
 					<li><a href="../symbols/textileMode.html">textileMode</a></li>
 				
-					<li><a href="../symbols/Toolbar.html">Toolbar</a></li>
-				
-					<li><a href="../symbols/ToolbarButton.html">ToolbarButton</a></li>
-				
-					<li><a href="../symbols/ToolbarSelect.html">ToolbarSelect</a></li>
+					<li><a href="../symbols/Validator.html">Validator</a></li>
 				
 					<li><a href="../symbols/wysiwygMode.html">wysiwygMode</a></li>
 				
@@ -69,7 +75,7 @@
 		
 		Documentation generator: <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0<br />
 		Template: <a href="http://www.thebrightlines.com/2010/05/06/new-template-for-jsdoctoolkit-codeview/" target="_blank">Codeview</a> 1.2<br />
-		Generated on: 2011-9-22 13:19
+		Generated on: 2011-10-25 1:19
 	</div>
 </div>
 
@@ -79,12 +85,12 @@
 	<div class="innerContent">
 		<h1 class="classTitle">
 			
-			Namespace <span>jQuery</span>
+			Namespace <span>jQuery.markupEditor</span>
 		</h1>
 		
 		<div class="intro">
 			<p class="description summary">
-				The popular DOM utility
+				jQuery hooks for markup editor
 			</p>
 				
 			
@@ -92,7 +98,7 @@
 					
 					
 					
-						<li>Defined in: <a href="../symbols/src/source_javascripts_markupEditor.js.html">markupEditor.js</a></li>
+						<li>Defined in: <a href="../symbols/src/source_javascripts_core_jqueryHook.js.html">jqueryHook.js</a></li>
 					
 						
 				</ul>
@@ -101,7 +107,7 @@
 		
 		
 			<div class="props">
-				<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class jQuery.">
+				<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class jQuery.markupEditor.">
 					<caption class="sectionTitle">Namespace Summary</caption>
 					<thead>
 						<tr>
@@ -114,7 +120,7 @@
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription" >
 								<div class="fixedFont">
-									<b><a href="../symbols/jQuery.html#constructor">jQuery</a></b>
+									<b><a href="../symbols/jQuery.markupEditor.html#constructor">jQuery.markupEditor</a></b>
 								</div>
 								<div class="description"></div>
 							</td>
@@ -135,7 +141,7 @@
 				<h2 class="sectionTitle">Method Summary</h2>
 				
 				
-					<table class="summaryTable" id="MethodsList" cellspacing="0" summary="A summary of the methods documented in the class jQuery.">
+					<table class="summaryTable" id="MethodsList" cellspacing="0" summary="A summary of the methods documented in the class jQuery.markupEditor.">
 						<thead>
 							<tr>
 								<th scope="col">Method Attributes</th>
@@ -151,20 +157,31 @@
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/jQuery.html#$.fn.isValid">$.fn.isValid</a></b>(method)
+										<div class="fixedFont"><b><a href="../symbols/jQuery.markupEditor.html#$.fn.markupEditor">$.fn.markupEditor</a></b>(method)
 										</div>
-										<div class="description">Validates forms</div>
+										<div class="description">Markupeditor method.</div>
 									</td>
 								</tr>
 							
 								<tr
 									 class='item1'
 								>
-									<td class="attributes">&nbsp;</td>
+									<td class="attributes">&lt;private&gt; &lt;static&gt; &nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/jQuery.html#$.fn.markupEditor">$.fn.markupEditor</a></b>(method)
+										<div class="fixedFont">jQuery.markupEditor.<b><a href="../symbols/jQuery.markupEditor.html#.initEditorFromHTML">initEditorFromHTML</a></b>(container, settings)
 										</div>
-										<div class="description">Markupeditor method.</div>
+										<div class="description">Initialize the editor from a given HTML element</div>
+									</td>
+								</tr>
+							
+								<tr
+									 class='item2'
+								>
+									<td class="attributes">&lt;private&gt; &lt;static&gt; &nbsp;</td>
+									<td class="nameDescription">
+										<div class="fixedFont">jQuery.markupEditor.<b><a href="../symbols/jQuery.markupEditor.html#.initEditorFromTextarea">initEditorFromTextarea</a></b>(textarea, instanceSettings)
+										</div>
+										<div class="description">Initialize the editor from a given textarea</div>
 									</td>
 								</tr>
 							
@@ -191,7 +208,7 @@
 					</h2>
 					
 					<div class="fixedFont">
-						<b>jQuery</b>
+						<b>jQuery.markupEditor</b>
 					</div>
 					
 					<div class="description">
@@ -227,49 +244,6 @@
 							<li 
 								 class='item0'
 							>
-								<div class="fixedFont heading" id="$.fn.isValid">
-									<span class='lighter'>
-									
-									</span>
-									
-									
-									
-									<b>$.fn.isValid</b>(method)
-								</div>
-								
-								<div class="description">
-									Validates forms
-									
-									
-										<br />
-										<i>Defined in: </i> <a href="../symbols/src/source_javascripts_plugins_isValid.js.html">isValid.js</a>.
-									
-									
-									
-								</div>
-								
-								
-								
-								
-									<dl class="detailList params">
-										<dt class="heading">Parameters:</dt>
-										
-											<dt>
-												<span class="light fixedFont">{String}</span> <b>method</b>
-												<i>Optional, Default: "init"</i>
-											</dt>
-											<dd>The method to call</dd>
-										
-									</dl>
-								
-								
-								
-								<div class="hr"></div>
-							</li>
-						
-							<li 
-								 class='item1'
-							>
 								<div class="fixedFont heading" id="$.fn.markupEditor">
 									<span class='lighter'>
 									
@@ -299,6 +273,98 @@
 												<i>Optional, Default: "init"</i>
 											</dt>
 											<dd>The method to call</dd>
+										
+									</dl>
+								
+								
+								
+								<div class="hr"></div>
+							</li>
+						
+							<li 
+								 class='item1'
+							>
+								<div class="fixedFont heading" id=".initEditorFromHTML">
+									<span class='lighter'>
+									&lt;private&gt; &lt;static&gt; 
+									</span>
+									
+									
+									
+									<span class="light">jQuery.markupEditor.</span><b>initEditorFromHTML</b>(container, settings)
+								</div>
+								
+								<div class="description">
+									Initialize the editor from a given HTML element
+									
+									
+									
+									
+								</div>
+								
+								
+								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<span class="light fixedFont">{jQuery}</span> <b>container</b>
+												
+											</dt>
+											<dd>The element which will be editable</dd>
+										
+											<dt>
+												<span class="light fixedFont">{Option}</span> <b>settings</b>
+												
+											</dt>
+											<dd>Settings for this editor</dd>
+										
+									</dl>
+								
+								
+								
+								<div class="hr"></div>
+							</li>
+						
+							<li 
+								 class='item2'
+							>
+								<div class="fixedFont heading" id=".initEditorFromTextarea">
+									<span class='lighter'>
+									&lt;private&gt; &lt;static&gt; 
+									</span>
+									
+									
+									
+									<span class="light">jQuery.markupEditor.</span><b>initEditorFromTextarea</b>(textarea, instanceSettings)
+								</div>
+								
+								<div class="description">
+									Initialize the editor from a given textarea
+									
+									
+									
+									
+								</div>
+								
+								
+								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<span class="light fixedFont">{jQuery}</span> <b>textarea</b>
+												
+											</dt>
+											<dd>The textarea which will be enhanced</dd>
+										
+											<dt>
+												<span class="light fixedFont">{Option}</span> <b>instanceSettings</b>
+												
+											</dt>
+											<dd>Settings for this editor</dd>
 										
 									</dl>
 								

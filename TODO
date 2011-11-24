@@ -1,8 +1,4 @@
-* [34/42] Further improvements
-  - [-] split up markupEditor.js
-    - [X] look how ender handles the extensability
-          perhaps (... ME.Mode = Mode;})(ME, jQuery) is an option
-    - [ ] split it up
+* [35/42] Further improvements
   - [ ] spec closing of editors
     - [ ] should work with external select
   - [ ] better editor loading
@@ -32,11 +28,19 @@
       - [ ] between blocks
     - [ ] spec double click
       - [ ] double click on bold word should select just the bold tag
+    - [ ] spec checkIfDeleteAll
+      - [ ] normal keys
+      - [ ] keycombos
     - [ ] show window in different awesome tab
     - [ ] use existing window (not supported in ruby bindings)
     - [ ] fire native events (not supported in awesome, try in kde or windows)
   - [ ] clean and parse pasted html
   - [ ] handle blocktags within lists
+  - [X] split up markupEditor.js
+    - [X] look how ender handles the extensability
+          perhaps (... ME.Mode = Mode;})(ME, jQuery) is an option
+    - [X] split it up
+    - [X] update docs
   - [X] wysiwyg
     - [X] Firefox: fix checkState for one bold word
     - [X] Firefox: keycombos delete selection

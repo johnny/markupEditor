@@ -1,4 +1,4 @@
-(function() {
+!function() {
   var wysiwygMode,
   $ = jQuery,
   selection = getSelection(), range = document.createRange();
@@ -545,7 +545,7 @@
   /** 
    * @name wysiwygMode
    * @namespace
-   * @augments Mode
+   * @augments ME.Mode
    */
   wysiwygMode = ME.addMode('wysiwyg', /** @scope wysiwygMode.prototype */{
     /**
@@ -891,4 +891,4 @@
       return editor.preview.html();
     }
   });
-})();
+}();

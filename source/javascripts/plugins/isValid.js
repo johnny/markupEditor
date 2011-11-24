@@ -3,10 +3,20 @@
  * invalid.
  *
  * inspired by tipsy
+ 
+ * @name jQuery.isValid
+ * @namespace a simple validation plugin
  */
+
 (function($, _) {
   var opts, errorMsgType, initialized;
 
+  /**
+   * Validate
+   *
+   * @name Validator
+   * @constructor
+   */
   function Validator($form){
     this.$form = $form;
     
@@ -68,7 +78,7 @@
   /**
    * Validates forms
    *
-   * @memberOf jQuery.prototype
+   * @memberOf jQuery.isValid.prototype
    *
    * @param {String} [method="check"] The method to call
    */
@@ -99,6 +109,10 @@
     emailErrorText: 'Please enter a valid {label}'
   };
 
+  /**
+   * @name Error
+   * @constructor
+   */
   function Error($element) {
     this.$element = $element;
     this.$tip = $('<div class="error-tip"></div>')

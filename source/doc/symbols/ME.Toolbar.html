@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8"></meta>
 		<meta name="generator" content="JsDoc Toolkit"></meta>
-		<title>ME | JsDoc Reference</title>
+		<title>ME.Toolbar | JsDoc Reference</title>
 
 		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;"></meta>
 		<meta name="mobileoptimized" content="0"></meta>
@@ -85,12 +85,12 @@
 	<div class="innerContent">
 		<h1 class="classTitle">
 			
-			Namespace <span>ME</span>
+			Class <span>ME.Toolbar</span>
 		</h1>
 		
 		<div class="intro">
 			<p class="description summary">
-				Holds all public methods
+				
 			</p>
 				
 			
@@ -98,7 +98,7 @@
 					
 					
 					
-						<li>Defined in: <a href="../symbols/src/source_javascripts_markupEditor.js.html">markupEditor.js</a></li>
+						<li>Defined in: <a href="../symbols/src/source_javascripts_core_toolbar.js.html">toolbar.js</a></li>
 					
 						
 				</ul>
@@ -107,8 +107,8 @@
 		
 		
 			<div class="props">
-				<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class ME.">
-					<caption class="sectionTitle">Namespace Summary</caption>
+				<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class ME.Toolbar.">
+					<caption class="sectionTitle">Class Summary</caption>
 					<thead>
 						<tr>
 							<th scope="col">Constructor Attributes</th>
@@ -120,9 +120,9 @@
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription" >
 								<div class="fixedFont">
-									<b><a href="../symbols/ME.html#constructor">ME</a></b>
+									<b><a href="../symbols/ME.Toolbar.html#constructor">ME.Toolbar</a></b>(editor)
 								</div>
-								<div class="description"></div>
+								<div class="description">Create a toolbar for an editor.</div>
 							</td>
 						</tr>
 					</tbody>
@@ -141,7 +141,7 @@
 				<h2 class="sectionTitle">Method Summary</h2>
 				
 				
-					<table class="summaryTable" id="MethodsList" cellspacing="0" summary="A summary of the methods documented in the class ME.">
+					<table class="summaryTable" id="MethodsList" cellspacing="0" summary="A summary of the methods documented in the class ME.Toolbar.">
 						<thead>
 							<tr>
 								<th scope="col">Method Attributes</th>
@@ -155,33 +155,33 @@
 								<tr
 									 class='item0'
 								>
-									<td class="attributes">&lt;static&gt; &nbsp;</td>
+									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont">ME.<b><a href="../symbols/ME.html#.addMode">addMode</a></b>(modeId, modeDefinition, isGenerated)
+										<div class="fixedFont"><b><a href="../symbols/ME.Toolbar.html#loadModeToolbar">loadModeToolbar</a></b>(editor)
 										</div>
-										<div class="description">Add a mode</div>
+										<div class="description">Load the toolbar for the current mode.</div>
 									</td>
 								</tr>
 							
 								<tr
 									 class='item1'
 								>
-									<td class="attributes">&lt;static&gt; &nbsp;</td>
+									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont">ME.<b><a href="../symbols/ME.html#.getMode">getMode</a></b>(modeId)
+										<div class="fixedFont"><b><a href="../symbols/ME.Toolbar.html#runAction">runAction</a></b>(action, target, target)
 										</div>
-										<div class="description">Get the specified mode.</div>
+										<div class="description">Execute the given action of the current mode</div>
 									</td>
 								</tr>
 							
 								<tr
 									 class='item2'
 								>
-									<td class="attributes">&lt;static&gt; &nbsp;</td>
+									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont">ME.<b><a href="../symbols/ME.html#.setOptions">setOptions</a></b>(options)
+										<div class="fixedFont"><b><a href="../symbols/ME.Toolbar.html#setActive">setActive</a></b>(actions)
 										</div>
-										<div class="description">Set the options</div>
+										<div class="description">Activate the buttons/selects of the given actions on the toolbar</div>
 									</td>
 								</tr>
 							
@@ -204,20 +204,34 @@
 			<div class="details props">
 				<div class="innerProps">
 					<h2 class="sectionTitle" id="constructor">
-						Namespace Detail
+						Class Detail
 					</h2>
 					
 					<div class="fixedFont">
-						<b>ME</b>
+						<b>ME.Toolbar</b>(editor)
 					</div>
 					
 					<div class="description">
-						
+						Create a toolbar for an editor. Every editor has its own toolbar, since the
+items of the toolbar can be defined on a per editor basis (save
+callback)
+TODO decouple toolbar and editor
 						
 					</div>
 					
 					
 				
+					
+						<dl class="detailList params">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									 <b>editor</b>
+									
+								</dt>
+								<dd></dd>
+							
+						</dl>
 					
 					
 					
@@ -244,18 +258,19 @@
 							<li 
 								 class='item0'
 							>
-								<div class="fixedFont heading" id=".addMode">
+								<div class="fixedFont heading" id="loadModeToolbar">
 									<span class='lighter'>
-									&lt;static&gt; 
+									
 									</span>
 									
 									
 									
-									<span class="light">ME.</span><b>addMode</b>(modeId, modeDefinition, isGenerated)
+									<b>loadModeToolbar</b>(editor)
 								</div>
 								
 								<div class="description">
-									Add a mode
+									Load the toolbar for the current mode. If a toolbar item is not
+supported, it will be hidden.
 									
 									
 									
@@ -269,25 +284,10 @@
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<span class="light fixedFont">{String}</span> <b>modeId</b>
+												<b>editor</b>
 												
 											</dt>
-											<dd>The id of the mode as referenced
-internally</dd>
-										
-											<dt>
-												<span class="light fixedFont">{Object}</span> <b>modeDefinition</b>
-												
-											</dt>
-											<dd>Defines methods and toolbaritems
-of the new Mode</dd>
-										
-											<dt>
-												<span class="light fixedFont">{Boolean}</span> <b>isGenerated</b>
-												<i>Optional</i>
-											</dt>
-											<dd>True if the mode has been added
-on the fly</dd>
+											<dd></dd>
 										
 									</dl>
 								
@@ -299,18 +299,18 @@ on the fly</dd>
 							<li 
 								 class='item1'
 							>
-								<div class="fixedFont heading" id=".getMode">
+								<div class="fixedFont heading" id="runAction">
 									<span class='lighter'>
-									&lt;static&gt; 
+									
 									</span>
 									
-									<span class="light">{Mode}</span>
 									
-									<span class="light">ME.</span><b>getMode</b>(modeId)
+									
+									<b>runAction</b>(action, target, target)
 								</div>
 								
 								<div class="description">
-									Get the specified mode. Loads it if necessary
+									Execute the given action of the current mode
 									
 									
 									
@@ -324,35 +324,26 @@ on the fly</dd>
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<span class="light fixedFont">{String}</span> <b>modeId</b>
+												<span class="light fixedFont">{String}</span> <b>action</b>
 												
 											</dt>
-											<dd>The id of the mode (e.g. textile)</dd>
+											<dd>The action to execute</dd>
+										
+											<dt>
+												<span class="light fixedFont">{HTMLElement}</span> <b>target</b>
+												
+											</dt>
+											<dd>The target of the click</dd>
+										
+											<dt>
+												<b>target</b>
+												
+											</dt>
+											<dd></dd>
 										
 									</dl>
 								
 								
-								
-									<dl class="detailList nomargin">
-									
-										
-										
-										
-										
-										
-										
-										
-											<dt class="heading">Returns:</dt>
-											
-												<dd><span class="light fixedFont">{Mode}</span> The initialized mode</dd>
-											
-										
-										
-										
-										
-										
-									
-									</dl>
 								
 								<div class="hr"></div>
 							</li>
@@ -360,18 +351,18 @@ on the fly</dd>
 							<li 
 								 class='item2'
 							>
-								<div class="fixedFont heading" id=".setOptions">
+								<div class="fixedFont heading" id="setActive">
 									<span class='lighter'>
-									&lt;static&gt; 
+									
 									</span>
 									
 									
 									
-									<span class="light">ME.</span><b>setOptions</b>(options)
+									<b>setActive</b>(actions)
 								</div>
 								
 								<div class="description">
-									Set the options
+									Activate the buttons/selects of the given actions on the toolbar
 									
 									
 									
@@ -385,35 +376,14 @@ on the fly</dd>
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<span class="light fixedFont">{Object}</span> <b>options</b>
+												<span class="light fixedFont">{Object}</span> <b>actions</b>
 												
 											</dt>
-											<dd>The options object</dd>
+											<dd>The actions which should be active</dd>
 										
 									</dl>
 								
 								
-								
-									<dl class="detailList nomargin">
-									
-										
-										
-										
-										
-										
-										
-										
-										
-										
-										
-										
-											<dt class="heading">See:</dt>
-											
-												<dd>ME#options for settable options</dd>
-											
-										
-									
-									</dl>
 								
 								
 							</li>

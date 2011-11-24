@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8"></meta>
 		<meta name="generator" content="JsDoc Toolkit"></meta>
-		<title>Mode | JsDoc Reference</title>
+		<title>ME.Mode | JsDoc Reference</title>
 
 		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;"></meta>
 		<meta name="mobileoptimized" content="0"></meta>
@@ -40,25 +40,31 @@
 				
 					<li><a href="../symbols/Builder.html">Builder</a></li>
 				
-					<li><a href="../symbols/Editor.html">Editor</a></li>
+					<li><a href="../symbols/Error.html">Error</a></li>
 				
-					<li><a href="../symbols/jQuery.html">jQuery</a></li>
+					<li><a href="../symbols/jQuery.isValid.html">jQuery<span class='break'> </span>.<span class='break'> </span>isValid</a></li>
+				
+					<li><a href="../symbols/jQuery.markupEditor.html">jQuery<span class='break'> </span>.<span class='break'> </span>markupEditor</a></li>
 				
 					<li><a href="../symbols/ME.html">ME</a></li>
 				
+					<li><a href="../symbols/ME.Editor.html">ME<span class='break'> </span>.<span class='break'> </span>Editor</a></li>
+				
+					<li><a href="../symbols/ME.Mode.html">ME<span class='break'> </span>.<span class='break'> </span>Mode</a></li>
+				
 					<li><a href="../symbols/ME.options.html">ME<span class='break'> </span>.<span class='break'> </span>options</a></li>
 				
-					<li><a href="../symbols/Mode.html">Mode</a></li>
+					<li><a href="../symbols/ME.Toolbar.html">ME<span class='break'> </span>.<span class='break'> </span>Toolbar</a></li>
+				
+					<li><a href="../symbols/ME.ToolbarButton.html">ME<span class='break'> </span>.<span class='break'> </span>ToolbarButton</a></li>
+				
+					<li><a href="../symbols/ME.ToolbarSelect.html">ME<span class='break'> </span>.<span class='break'> </span>ToolbarSelect</a></li>
 				
 					<li><a href="../symbols/textileCompiler.html">textileCompiler</a></li>
 				
 					<li><a href="../symbols/textileMode.html">textileMode</a></li>
 				
-					<li><a href="../symbols/Toolbar.html">Toolbar</a></li>
-				
-					<li><a href="../symbols/ToolbarButton.html">ToolbarButton</a></li>
-				
-					<li><a href="../symbols/ToolbarSelect.html">ToolbarSelect</a></li>
+					<li><a href="../symbols/Validator.html">Validator</a></li>
 				
 					<li><a href="../symbols/wysiwygMode.html">wysiwygMode</a></li>
 				
@@ -69,7 +75,7 @@
 		
 		Documentation generator: <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0<br />
 		Template: <a href="http://www.thebrightlines.com/2010/05/06/new-template-for-jsdoctoolkit-codeview/" target="_blank">Codeview</a> 1.2<br />
-		Generated on: 2011-9-22 13:19
+		Generated on: 2011-10-25 1:19
 	</div>
 </div>
 
@@ -79,7 +85,7 @@
 	<div class="innerContent">
 		<h1 class="classTitle">
 			
-			Class <span>Mode</span>
+			Class <span>ME.Mode</span>
 		</h1>
 		
 		<div class="intro">
@@ -92,7 +98,7 @@
 					
 					
 					
-						<li>Defined in: <a href="../symbols/src/source_javascripts_markupEditor.js.html">markupEditor.js</a></li>
+						<li>Defined in: <a href="../symbols/src/source_javascripts_core_mode.js.html">mode.js</a></li>
 					
 						
 				</ul>
@@ -101,7 +107,7 @@
 		
 		
 			<div class="props">
-				<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class Mode.">
+				<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class ME.Mode.">
 					<caption class="sectionTitle">Class Summary</caption>
 					<thead>
 						<tr>
@@ -114,7 +120,7 @@
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription" >
 								<div class="fixedFont">
-									<b><a href="../symbols/Mode.html#constructor">Mode</a></b>(customFunctions)
+									<b><a href="../symbols/ME.Mode.html#constructor">ME.Mode</a></b>(customFunctions)
 								</div>
 								<div class="description">Create a new Mode</div>
 							</td>
@@ -135,7 +141,7 @@
 				<h2 class="sectionTitle">Method Summary</h2>
 				
 				
-					<table class="summaryTable" id="MethodsList" cellspacing="0" summary="A summary of the methods documented in the class Mode.">
+					<table class="summaryTable" id="MethodsList" cellspacing="0" summary="A summary of the methods documented in the class ME.Mode.">
 						<thead>
 							<tr>
 								<th scope="col">Method Attributes</th>
@@ -151,7 +157,7 @@
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#activate">activate</a></b>(editor)
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#activate">activate</a></b>(editor, callback)
 										</div>
 										<div class="description">Activate this mode for the editor</div>
 									</td>
@@ -162,7 +168,7 @@
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#afterActivation">afterActivation</a></b>(editor)
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#afterActivation">afterActivation</a></b>(editor)
 										</div>
 										<div class="description">Run after activation.</div>
 									</td>
@@ -173,7 +179,18 @@
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#buildStateObject">buildStateObject</a></b>(nodes, currentNodes)
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#atBeginningOfLine">atBeginningOfLine</a></b>(editor)
+										</div>
+										<div class="description"></div>
+									</td>
+								</tr>
+							
+								<tr
+									 class='item3'
+								>
+									<td class="attributes">&nbsp;</td>
+									<td class="nameDescription">
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#buildStateObject">buildStateObject</a></b>(nodes, currentNodes)
 										</div>
 										<div class="description">A helper function that builds a state object from the given
 nodes, that defines the active buttons
@@ -183,24 +200,13 @@ CONSIDER make currentNodes a property</div>
 								</tr>
 							
 								<tr
-									 class='item3'
-								>
-									<td class="attributes">&nbsp;</td>
-									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#clicked">clicked</a></b>()
-										</div>
-										<div class="description">Handle clicks on the textarea or html div</div>
-									</td>
-								</tr>
-							
-								<tr
 									 class='item4'
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#extendLeftSelection">extendLeftSelection</a></b>(regexp, regexp)
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#clicked">clicked</a></b>()
 										</div>
-										<div class="description">Extend the left selection with a regexp.</div>
+										<div class="description">Handle clicks on the textarea or html div</div>
 									</td>
 								</tr>
 							
@@ -209,9 +215,9 @@ CONSIDER make currentNodes a property</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#extendRightSelection">extendRightSelection</a></b>(regexp, regexp)
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#extendLeftSelection">extendLeftSelection</a></b>(editor, regexp)
 										</div>
-										<div class="description">Extend the right selection with a regexp.</div>
+										<div class="description">Extend the left selection with a regexp.</div>
 									</td>
 								</tr>
 							
@@ -220,9 +226,9 @@ CONSIDER make currentNodes a property</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#getSelection">getSelection</a></b>(boundary, boundary)
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#extendRightSelection">extendRightSelection</a></b>(editor, regexp)
 										</div>
-										<div class="description"></div>
+										<div class="description">Extend the right selection with a regexp.</div>
 									</td>
 								</tr>
 							
@@ -231,9 +237,9 @@ CONSIDER make currentNodes a property</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#getSelectionStates">getSelectionStates</a></b>(editor)
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#extendSelection">extendSelection</a></b>(editor, boundary)
 										</div>
-										<div class="description">Get the state of the current selection.</div>
+										<div class="description">Extend the selection to the given boundary and return it.</div>
 									</td>
 								</tr>
 							
@@ -242,10 +248,9 @@ CONSIDER make currentNodes a property</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#getStates">getStates</a></b>(editor)
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#getSelection">getSelection</a></b>(editor, boundary)
 										</div>
-										<div class="description">Get a state object which sets defines the states of the buttons
-and the selects.</div>
+										<div class="description">Get the selection.</div>
 									</td>
 								</tr>
 							
@@ -254,9 +259,9 @@ and the selects.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#pressed">pressed</a></b>(keyCode)
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#getSelectionStates">getSelectionStates</a></b>(editor)
 										</div>
-										<div class="description">The default pressed function to handle key combos (shift + x)</div>
+										<div class="description">Get the state of the current selection.</div>
 									</td>
 								</tr>
 							
@@ -265,9 +270,10 @@ and the selects.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#released">released</a></b>(keyCode)
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#getStates">getStates</a></b>(editor)
 										</div>
-										<div class="description">Handle special keys (shift press) to deal with key combos</div>
+										<div class="description">Get a state object which sets defines the states of the buttons
+and the selects.</div>
 									</td>
 								</tr>
 							
@@ -276,9 +282,9 @@ and the selects.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#replaceSelection">replaceSelection</a></b>(string, collapseToStart, collapseToStart)
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#pressed">pressed</a></b>(editor, keyCode)
 										</div>
-										<div class="description">Replace the current selection with the given string</div>
+										<div class="description">The default pressed function to handle key combos (shift + x)</div>
 									</td>
 								</tr>
 							
@@ -287,11 +293,9 @@ and the selects.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#updatePreview">updatePreview</a></b>(editor)
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#released">released</a></b>(editor, keyCode)
 										</div>
-										<div class="description">Update the preview html div with the html representation of the
-mode
-CONSIDER move to editor</div>
+										<div class="description">Handle special keys (shift press) to deal with key combos</div>
 									</td>
 								</tr>
 							
@@ -300,7 +304,31 @@ CONSIDER move to editor</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Mode.html#updateTextArea">updateTextArea</a></b>(editor)
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#replaceSelection">replaceSelection</a></b>(editor, string, collapseToStart)
+										</div>
+										<div class="description">Replace the current selection with the given string</div>
+									</td>
+								</tr>
+							
+								<tr
+									 class='item14'
+								>
+									<td class="attributes">&nbsp;</td>
+									<td class="nameDescription">
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#updatePreview">updatePreview</a></b>(editor, callback)
+										</div>
+										<div class="description">Update the preview html div with the html representation of the
+mode
+CONSIDER move to editor</div>
+									</td>
+								</tr>
+							
+								<tr
+									 class='item15'
+								>
+									<td class="attributes">&nbsp;</td>
+									<td class="nameDescription">
+										<div class="fixedFont"><b><a href="../symbols/ME.Mode.html#updateTextArea">updateTextArea</a></b>(editor, callback)
 										</div>
 										<div class="description">Update the textarea with the text representation of the mode</div>
 									</td>
@@ -329,7 +357,7 @@ CONSIDER move to editor</div>
 					</h2>
 					
 					<div class="fixedFont">
-						<b>Mode</b>(customFunctions)
+						<b>ME.Mode</b>(customFunctions)
 					</div>
 					
 					<div class="description">
@@ -383,7 +411,7 @@ CONSIDER move to editor</div>
 									
 									
 									
-									<b>activate</b>(editor)
+									<b>activate</b>(editor, callback)
 								</div>
 								
 								<div class="description">
@@ -401,7 +429,13 @@ CONSIDER move to editor</div>
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<b>editor</b>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
+												
+											</dt>
+											<dd>The editor to work on</dd>
+										
+											<dt>
+												<b>callback</b>
 												
 											</dt>
 											<dd></dd>
@@ -442,10 +476,10 @@ its own version
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<b>editor</b>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
 												
 											</dt>
-											<dd></dd>
+											<dd>The editor to work on</dd>
 										
 									</dl>
 								
@@ -456,6 +490,68 @@ its own version
 						
 							<li 
 								 class='item2'
+							>
+								<div class="fixedFont heading" id="atBeginningOfLine">
+									<span class='lighter'>
+									
+									</span>
+									
+									<span class="light">{Boolean}</span>
+									
+									<b>atBeginningOfLine</b>(editor)
+								</div>
+								
+								<div class="description">
+									
+									
+									
+									
+									
+								</div>
+								
+								
+								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
+												
+											</dt>
+											<dd>The editor to work on</dd>
+										
+									</dl>
+								
+								
+								
+									<dl class="detailList nomargin">
+									
+										
+										
+										
+										
+										
+										
+										
+											<dt class="heading">Returns:</dt>
+											
+												<dd><span class="light fixedFont">{Boolean}</span> True if the cursor is at the beginning of
+the line</dd>
+											
+										
+										
+										
+										
+										
+									
+									</dl>
+								
+								<div class="hr"></div>
+							</li>
+						
+							<li 
+								 class='item3'
 							>
 								<div class="fixedFont heading" id="buildStateObject">
 									<span class='lighter'>
@@ -525,7 +621,7 @@ CONSIDER make currentNodes a property
 							</li>
 						
 							<li 
-								 class='item3'
+								 class='item4'
 							>
 								<div class="fixedFont heading" id="clicked">
 									<span class='lighter'>
@@ -554,7 +650,7 @@ CONSIDER make currentNodes a property
 							</li>
 						
 							<li 
-								 class='item4'
+								 class='item5'
 							>
 								<div class="fixedFont heading" id="extendLeftSelection">
 									<span class='lighter'>
@@ -563,7 +659,7 @@ CONSIDER make currentNodes a property
 									
 									
 									
-									<b>extendLeftSelection</b>(regexp, regexp)
+									<b>extendLeftSelection</b>(editor, regexp)
 								</div>
 								
 								<div class="description">
@@ -587,16 +683,16 @@ String in textile
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
+												
+											</dt>
+											<dd>The editor to work on</dd>
+										
+											<dt>
 												<span class="light fixedFont">{RegExp}</span> <b>regexp</b>
 												
 											</dt>
 											<dd>The regexp.</dd>
-										
-											<dt>
-												<b>regexp</b>
-												
-											</dt>
-											<dd></dd>
 										
 									</dl>
 								
@@ -606,7 +702,7 @@ String in textile
 							</li>
 						
 							<li 
-								 class='item5'
+								 class='item6'
 							>
 								<div class="fixedFont heading" id="extendRightSelection">
 									<span class='lighter'>
@@ -615,7 +711,7 @@ String in textile
 									
 									
 									
-									<b>extendRightSelection</b>(regexp, regexp)
+									<b>extendRightSelection</b>(editor, regexp)
 								</div>
 								
 								<div class="description">
@@ -639,16 +735,16 @@ String in textile
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
+												
+											</dt>
+											<dd>The editor to work on</dd>
+										
+											<dt>
 												<span class="light fixedFont">{RegExp}</span> <b>regexp</b>
 												
 											</dt>
 											<dd>The regexp</dd>
-										
-											<dt>
-												<b>regexp</b>
-												
-											</dt>
-											<dd></dd>
 										
 									</dl>
 								
@@ -658,20 +754,20 @@ String in textile
 							</li>
 						
 							<li 
-								 class='item6'
+								 class='item7'
 							>
-								<div class="fixedFont heading" id="getSelection">
+								<div class="fixedFont heading" id="extendSelection">
 									<span class='lighter'>
 									
 									</span>
 									
 									<span class="light">{String}</span>
 									
-									<b>getSelection</b>(boundary, boundary)
+									<b>extendSelection</b>(editor, boundary)
 								</div>
 								
 								<div class="description">
-									
+									Extend the selection to the given boundary and return it.
 									
 									
 									
@@ -685,17 +781,17 @@ String in textile
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
+												
+											</dt>
+											<dd>The editor to work on</dd>
+										
+											<dt>
 												<span class="light fixedFont">{String}</span> <b>boundary</b>
 												<i>Optional</i>
 											</dt>
 											<dd>The right and left boundary the
 selection should be extended to</dd>
-										
-											<dt>
-												<b>boundary</b>
-												
-											</dt>
-											<dd></dd>
 										
 									</dl>
 								
@@ -726,7 +822,76 @@ selection should be extended to</dd>
 							</li>
 						
 							<li 
-								 class='item7'
+								 class='item8'
+							>
+								<div class="fixedFont heading" id="getSelection">
+									<span class='lighter'>
+									
+									</span>
+									
+									<span class="light">{String}</span>
+									
+									<b>getSelection</b>(editor, boundary)
+								</div>
+								
+								<div class="description">
+									Get the selection. If a boundary is given, returned string is
+extended to this boundary. The selection itself is not extended.
+									
+									
+									
+									
+								</div>
+								
+								
+								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
+												
+											</dt>
+											<dd>The editor to work on</dd>
+										
+											<dt>
+												<span class="light fixedFont">{String}</span> <b>boundary</b>
+												<i>Optional</i>
+											</dt>
+											<dd>The right and left boundary the
+selection should be extended to</dd>
+										
+									</dl>
+								
+								
+								
+									<dl class="detailList nomargin">
+									
+										
+										
+										
+										
+										
+										
+										
+											<dt class="heading">Returns:</dt>
+											
+												<dd><span class="light fixedFont">{String}</span> The currently selected string</dd>
+											
+										
+										
+										
+										
+										
+									
+									</dl>
+								
+								<div class="hr"></div>
+							</li>
+						
+							<li 
+								 class='item9'
 							>
 								<div class="fixedFont heading" id="getSelectionStates">
 									<span class='lighter'>
@@ -754,10 +919,10 @@ Each mode should define its version
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<b>editor</b>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
 												
 											</dt>
-											<dd></dd>
+											<dd>The editor to work on</dd>
 										
 									</dl>
 								
@@ -793,7 +958,7 @@ Each mode should define its version
 							</li>
 						
 							<li 
-								 class='item8'
+								 class='item10'
 							>
 								<div class="fixedFont heading" id="getStates">
 									<span class='lighter'>
@@ -821,10 +986,10 @@ and the selects.
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<b>editor</b>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
 												
 											</dt>
-											<dd></dd>
+											<dd>The editor to work on</dd>
 										
 									</dl>
 								
@@ -855,7 +1020,7 @@ and the selects.
 							</li>
 						
 							<li 
-								 class='item9'
+								 class='item11'
 							>
 								<div class="fixedFont heading" id="pressed">
 									<span class='lighter'>
@@ -864,7 +1029,7 @@ and the selects.
 									
 									
 									
-									<b>pressed</b>(keyCode)
+									<b>pressed</b>(editor, keyCode)
 								</div>
 								
 								<div class="description">
@@ -882,6 +1047,12 @@ and the selects.
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
+												
+											</dt>
+											<dd>The editor to work on</dd>
+										
+											<dt>
 												<b>keyCode</b>
 												
 											</dt>
@@ -895,7 +1066,7 @@ and the selects.
 							</li>
 						
 							<li 
-								 class='item10'
+								 class='item12'
 							>
 								<div class="fixedFont heading" id="released">
 									<span class='lighter'>
@@ -904,7 +1075,7 @@ and the selects.
 									
 									
 									
-									<b>released</b>(keyCode)
+									<b>released</b>(editor, keyCode)
 								</div>
 								
 								<div class="description">
@@ -922,6 +1093,12 @@ and the selects.
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
+												
+											</dt>
+											<dd>The editor to work on</dd>
+										
+											<dt>
 												<b>keyCode</b>
 												
 											</dt>
@@ -935,7 +1112,7 @@ and the selects.
 							</li>
 						
 							<li 
-								 class='item11'
+								 class='item13'
 							>
 								<div class="fixedFont heading" id="replaceSelection">
 									<span class='lighter'>
@@ -944,7 +1121,7 @@ and the selects.
 									
 									
 									
-									<b>replaceSelection</b>(string, collapseToStart, collapseToStart)
+									<b>replaceSelection</b>(editor, string, collapseToStart)
 								</div>
 								
 								<div class="description">
@@ -962,6 +1139,12 @@ and the selects.
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
+												
+											</dt>
+											<dd>The editor to work on</dd>
+										
+											<dt>
 												<span class="light fixedFont">{String}</span> <b>string</b>
 												
 											</dt>
@@ -973,12 +1156,6 @@ and the selects.
 											</dt>
 											<dd>If the selection should collapse</dd>
 										
-											<dt>
-												<b>collapseToStart</b>
-												
-											</dt>
-											<dd></dd>
-										
 									</dl>
 								
 								
@@ -987,7 +1164,7 @@ and the selects.
 							</li>
 						
 							<li 
-								 class='item12'
+								 class='item14'
 							>
 								<div class="fixedFont heading" id="updatePreview">
 									<span class='lighter'>
@@ -996,7 +1173,7 @@ and the selects.
 									
 									
 									
-									<b>updatePreview</b>(editor)
+									<b>updatePreview</b>(editor, callback)
 								</div>
 								
 								<div class="description">
@@ -1016,7 +1193,13 @@ CONSIDER move to editor
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<b>editor</b>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
+												
+											</dt>
+											<dd>The editor to work on</dd>
+										
+											<dt>
+												<b>callback</b>
 												
 											</dt>
 											<dd></dd>
@@ -1029,7 +1212,7 @@ CONSIDER move to editor
 							</li>
 						
 							<li 
-								 class='item13'
+								 class='item15'
 							>
 								<div class="fixedFont heading" id="updateTextArea">
 									<span class='lighter'>
@@ -1038,7 +1221,7 @@ CONSIDER move to editor
 									
 									
 									
-									<b>updateTextArea</b>(editor)
+									<b>updateTextArea</b>(editor, callback)
 								</div>
 								
 								<div class="description">
@@ -1056,7 +1239,13 @@ CONSIDER move to editor
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<b>editor</b>
+												<span class="light fixedFont">{Editor}</span> <b>editor</b>
+												
+											</dt>
+											<dd>The editor to work on</dd>
+										
+											<dt>
+												<b>callback</b>
 												
 											</dt>
 											<dd></dd>

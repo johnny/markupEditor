@@ -135,7 +135,7 @@ $(document).ready(function(){
           endTrace = parseParam(textile,selections[i+1],true);
         }
         results = selections[i+2];
-        console.log(startTrace, endTrace, textile.slice(startTrace, endTrace));
+        // console.log(startTrace, endTrace, textile.slice(startTrace, endTrace));
         trace = textileCompiler.trace(textile, startTrace, endTrace);
         // console.log(trace);
         equals(trace.length, results.length, "Sequence: " + textile.slice(startTrace, endTrace));

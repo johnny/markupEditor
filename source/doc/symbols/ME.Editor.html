@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8"></meta>
 		<meta name="generator" content="JsDoc Toolkit"></meta>
-		<title>Editor | JsDoc Reference</title>
+		<title>ME.Editor | JsDoc Reference</title>
 
 		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;"></meta>
 		<meta name="mobileoptimized" content="0"></meta>
@@ -40,25 +40,31 @@
 				
 					<li><a href="../symbols/Builder.html">Builder</a></li>
 				
-					<li><a href="../symbols/Editor.html">Editor</a></li>
+					<li><a href="../symbols/Error.html">Error</a></li>
 				
-					<li><a href="../symbols/jQuery.html">jQuery</a></li>
+					<li><a href="../symbols/jQuery.isValid.html">jQuery<span class='break'> </span>.<span class='break'> </span>isValid</a></li>
+				
+					<li><a href="../symbols/jQuery.markupEditor.html">jQuery<span class='break'> </span>.<span class='break'> </span>markupEditor</a></li>
 				
 					<li><a href="../symbols/ME.html">ME</a></li>
 				
+					<li><a href="../symbols/ME.Editor.html">ME<span class='break'> </span>.<span class='break'> </span>Editor</a></li>
+				
+					<li><a href="../symbols/ME.Mode.html">ME<span class='break'> </span>.<span class='break'> </span>Mode</a></li>
+				
 					<li><a href="../symbols/ME.options.html">ME<span class='break'> </span>.<span class='break'> </span>options</a></li>
 				
-					<li><a href="../symbols/Mode.html">Mode</a></li>
+					<li><a href="../symbols/ME.Toolbar.html">ME<span class='break'> </span>.<span class='break'> </span>Toolbar</a></li>
+				
+					<li><a href="../symbols/ME.ToolbarButton.html">ME<span class='break'> </span>.<span class='break'> </span>ToolbarButton</a></li>
+				
+					<li><a href="../symbols/ME.ToolbarSelect.html">ME<span class='break'> </span>.<span class='break'> </span>ToolbarSelect</a></li>
 				
 					<li><a href="../symbols/textileCompiler.html">textileCompiler</a></li>
 				
 					<li><a href="../symbols/textileMode.html">textileMode</a></li>
 				
-					<li><a href="../symbols/Toolbar.html">Toolbar</a></li>
-				
-					<li><a href="../symbols/ToolbarButton.html">ToolbarButton</a></li>
-				
-					<li><a href="../symbols/ToolbarSelect.html">ToolbarSelect</a></li>
+					<li><a href="../symbols/Validator.html">Validator</a></li>
 				
 					<li><a href="../symbols/wysiwygMode.html">wysiwygMode</a></li>
 				
@@ -69,7 +75,7 @@
 		
 		Documentation generator: <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0<br />
 		Template: <a href="http://www.thebrightlines.com/2010/05/06/new-template-for-jsdoctoolkit-codeview/" target="_blank">Codeview</a> 1.2<br />
-		Generated on: 2011-9-22 13:19
+		Generated on: 2011-10-25 1:19
 	</div>
 </div>
 
@@ -79,7 +85,7 @@
 	<div class="innerContent">
 		<h1 class="classTitle">
 			
-			Class <span>Editor</span>
+			Class <span>ME.Editor</span>
 		</h1>
 		
 		<div class="intro">
@@ -92,7 +98,7 @@
 					
 					
 					
-						<li>Defined in: <a href="../symbols/src/source_javascripts_markupEditor.js.html">markupEditor.js</a></li>
+						<li>Defined in: <a href="../symbols/src/source_javascripts_core_editor.js.html">editor.js</a></li>
 					
 						
 				</ul>
@@ -101,7 +107,7 @@
 		
 		
 			<div class="props">
-				<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class Editor.">
+				<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class ME.Editor.">
 					<caption class="sectionTitle">Class Summary</caption>
 					<thead>
 						<tr>
@@ -114,7 +120,7 @@
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription" >
 								<div class="fixedFont">
-									<b><a href="../symbols/Editor.html#constructor">Editor</a></b>(textArea, settings)
+									<b><a href="../symbols/ME.Editor.html#constructor">ME.Editor</a></b>(textArea, settings)
 								</div>
 								<div class="description">Create a new Editor
 
@@ -137,7 +143,7 @@ An editor has a current mode and a textarea mode.</div>
 				<h2 class="sectionTitle">Method Summary</h2>
 				
 				
-					<table class="summaryTable" id="MethodsList" cellspacing="0" summary="A summary of the methods documented in the class Editor.">
+					<table class="summaryTable" id="MethodsList" cellspacing="0" summary="A summary of the methods documented in the class ME.Editor.">
 						<thead>
 							<tr>
 								<th scope="col">Method Attributes</th>
@@ -153,9 +159,9 @@ An editor has a current mode and a textarea mode.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Editor.html#blur">blur</a></b>()
+										<div class="fixedFont"><b><a href="../symbols/ME.Editor.html#beginModeChange">beginModeChange</a></b>()
 										</div>
-										<div class="description">Blur (unfocus) the Editor, hide the toolbar etc.</div>
+										<div class="description">Lock the Editor, idempotent</div>
 									</td>
 								</tr>
 							
@@ -164,9 +170,9 @@ An editor has a current mode and a textarea mode.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Editor.html#changeDataMode">changeDataMode</a></b>(modeId)
+										<div class="fixedFont"><b><a href="../symbols/ME.Editor.html#blur">blur</a></b>()
 										</div>
-										<div class="description">Change the current underlying data format</div>
+										<div class="description">Blur (unfocus) the Editor, hide the toolbar etc.</div>
 									</td>
 								</tr>
 							
@@ -175,9 +181,9 @@ An editor has a current mode and a textarea mode.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Editor.html#changeMode">changeMode</a></b>(modeId)
+										<div class="fixedFont"><b><a href="../symbols/ME.Editor.html#changeDataMode">changeDataMode</a></b>(modeId, silent)
 										</div>
-										<div class="description">Change the current mode to the given id</div>
+										<div class="description">Change the current underlying data format</div>
 									</td>
 								</tr>
 							
@@ -186,9 +192,9 @@ An editor has a current mode and a textarea mode.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Editor.html#checkState">checkState</a></b>()
+										<div class="fixedFont"><b><a href="../symbols/ME.Editor.html#changeMode">changeMode</a></b>(modeId, silent)
 										</div>
-										<div class="description">Check the state of the current selection (bold/italic etc.</div>
+										<div class="description">Change the current mode to the given id</div>
 									</td>
 								</tr>
 							
@@ -197,9 +203,9 @@ An editor has a current mode and a textarea mode.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Editor.html#close">close</a></b>()
+										<div class="fixedFont"><b><a href="../symbols/ME.Editor.html#checkState">checkState</a></b>()
 										</div>
-										<div class="description">Close the editor and restore the original div/textarea</div>
+										<div class="description">Check the state of the current selection (bold/italic etc.</div>
 									</td>
 								</tr>
 							
@@ -208,20 +214,20 @@ An editor has a current mode and a textarea mode.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Editor.html#focus">focus</a></b>()
+										<div class="fixedFont"><b><a href="../symbols/ME.Editor.html#close">close</a></b>()
 										</div>
-										<div class="description">Focus the editor, which will show the toolbar etc.</div>
+										<div class="description">Close the editor and restore the original div/textarea</div>
 									</td>
 								</tr>
 							
 								<tr
 									 class='item6'
 								>
-									<td class="attributes">&nbsp;</td>
+									<td class="attributes">&lt;static&gt; &nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Editor.html#getDataMode">getDataMode</a></b>()
+										<div class="fixedFont">ME.Editor.<b><a href="../symbols/ME.Editor.html#.extractDataType">extractDataType</a></b>(classString, select)
 										</div>
-										<div class="description"></div>
+										<div class="description">Extract the datatype from the given class string.</div>
 									</td>
 								</tr>
 							
@@ -230,9 +236,9 @@ An editor has a current mode and a textarea mode.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Editor.html#is">is</a></b>(modeId)
+										<div class="fixedFont"><b><a href="../symbols/ME.Editor.html#finalizeModeChange">finalizeModeChange</a></b>(silent)
 										</div>
-										<div class="description">Check which mode is loaded.</div>
+										<div class="description"></div>
 									</td>
 								</tr>
 							
@@ -241,9 +247,9 @@ An editor has a current mode and a textarea mode.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Editor.html#setDataType">setDataType</a></b>(classString)
+										<div class="fixedFont"><b><a href="../symbols/ME.Editor.html#focus">focus</a></b>()
 										</div>
-										<div class="description">Extract the datatype from the given class string</div>
+										<div class="description">Focus the editor, which will show the toolbar etc.</div>
 									</td>
 								</tr>
 							
@@ -252,7 +258,51 @@ An editor has a current mode and a textarea mode.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/Editor.html#synchronize">synchronize</a></b>()
+										<div class="fixedFont"><b><a href="../symbols/ME.Editor.html#getDataMode">getDataMode</a></b>()
+										</div>
+										<div class="description"></div>
+									</td>
+								</tr>
+							
+								<tr
+									 class='item10'
+								>
+									<td class="attributes">&nbsp;</td>
+									<td class="nameDescription">
+										<div class="fixedFont"><b><a href="../symbols/ME.Editor.html#initSelectionProperties">initSelectionProperties</a></b>(text)
+										</div>
+										<div class="description"></div>
+									</td>
+								</tr>
+							
+								<tr
+									 class='item11'
+								>
+									<td class="attributes">&nbsp;</td>
+									<td class="nameDescription">
+										<div class="fixedFont"><b><a href="../symbols/ME.Editor.html#is">is</a></b>(modeId)
+										</div>
+										<div class="description">Check which mode is loaded.</div>
+									</td>
+								</tr>
+							
+								<tr
+									 class='item12'
+								>
+									<td class="attributes">&nbsp;</td>
+									<td class="nameDescription">
+										<div class="fixedFont"><b><a href="../symbols/ME.Editor.html#setDataType">setDataType</a></b>(classString)
+										</div>
+										<div class="description">Extract the datatype from the given class string</div>
+									</td>
+								</tr>
+							
+								<tr
+									 class='item13'
+								>
+									<td class="attributes">&nbsp;</td>
+									<td class="nameDescription">
+										<div class="fixedFont"><b><a href="../symbols/ME.Editor.html#synchronize">synchronize</a></b>(callback)
 										</div>
 										<div class="description">Synchronize the changes between preview div and the text area</div>
 									</td>
@@ -281,7 +331,7 @@ An editor has a current mode and a textarea mode.</div>
 					</h2>
 					
 					<div class="fixedFont">
-						<b>Editor</b>(textArea, settings)
+						<b>ME.Editor</b>(textArea, settings)
 					</div>
 					
 					<div class="description">
@@ -300,7 +350,7 @@ html directly.
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<span class="light fixedFont">{<a href="../symbols/jQuery.html">jQuery</a>}</span>  <b>textArea</b>
+									<span class="light fixedFont">{jQuery}</span>  <b>textArea</b>
 									
 								</dt>
 								<dd>The textarea</dd>
@@ -338,6 +388,35 @@ html directly.
 							<li 
 								 class='item0'
 							>
+								<div class="fixedFont heading" id="beginModeChange">
+									<span class='lighter'>
+									
+									</span>
+									
+									
+									
+									<b>beginModeChange</b>()
+								</div>
+								
+								<div class="description">
+									Lock the Editor, idempotent
+									
+									
+									
+									
+								</div>
+								
+								
+								
+								
+								
+								
+								<div class="hr"></div>
+							</li>
+						
+							<li 
+								 class='item1'
+							>
 								<div class="fixedFont heading" id="blur">
 									<span class='lighter'>
 									
@@ -365,7 +444,7 @@ html directly.
 							</li>
 						
 							<li 
-								 class='item1'
+								 class='item2'
 							>
 								<div class="fixedFont heading" id="changeDataMode">
 									<span class='lighter'>
@@ -374,7 +453,7 @@ html directly.
 									
 									
 									
-									<b>changeDataMode</b>(modeId)
+									<b>changeDataMode</b>(modeId, silent)
 								</div>
 								
 								<div class="description">
@@ -397,6 +476,12 @@ html directly.
 											</dt>
 											<dd>The id of the mode (e.g. textile)</dd>
 										
+											<dt>
+												<b>silent</b>
+												
+											</dt>
+											<dd></dd>
+										
 									</dl>
 								
 								
@@ -405,7 +490,7 @@ html directly.
 							</li>
 						
 							<li 
-								 class='item2'
+								 class='item3'
 							>
 								<div class="fixedFont heading" id="changeMode">
 									<span class='lighter'>
@@ -414,7 +499,7 @@ html directly.
 									
 									
 									
-									<b>changeMode</b>(modeId)
+									<b>changeMode</b>(modeId, silent)
 								</div>
 								
 								<div class="description">
@@ -437,6 +522,12 @@ html directly.
 											</dt>
 											<dd>The id of the mode (e.g. textile)</dd>
 										
+											<dt>
+												<b>silent</b>
+												
+											</dt>
+											<dd></dd>
+										
 									</dl>
 								
 								
@@ -445,7 +536,7 @@ html directly.
 							</li>
 						
 							<li 
-								 class='item3'
+								 class='item4'
 							>
 								<div class="fixedFont heading" id="checkState">
 									<span class='lighter'>
@@ -475,7 +566,7 @@ change the toolbar.
 							</li>
 						
 							<li 
-								 class='item4'
+								 class='item5'
 							>
 								<div class="fixedFont heading" id="close">
 									<span class='lighter'>
@@ -504,7 +595,116 @@ change the toolbar.
 							</li>
 						
 							<li 
-								 class='item5'
+								 class='item6'
+							>
+								<div class="fixedFont heading" id=".extractDataType">
+									<span class='lighter'>
+									&lt;static&gt; 
+									</span>
+									
+									<span class="light">{String|undefined}</span>
+									
+									<span class="light">ME.Editor.</span><b>extractDataType</b>(classString, select)
+								</div>
+								
+								<div class="description">
+									Extract the datatype from the given class string. It looks for
+known modes or valid options in the given select
+									
+									
+									
+									
+								</div>
+								
+								
+								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<span class="light fixedFont">{String}</span> <b>classString</b>
+												
+											</dt>
+											<dd>The css class string to scan</dd>
+										
+											<dt>
+												<span class="light fixedFont">{HTMLSelect}</span> <b>select</b>
+												<i>Optional</i>
+											</dt>
+											<dd>The select with all available modes
+(even undefined ones, which will be created on the fly)</dd>
+										
+									</dl>
+								
+								
+								
+									<dl class="detailList nomargin">
+									
+										
+										
+										
+										
+										
+										
+										
+											<dt class="heading">Returns:</dt>
+											
+												<dd><span class="light fixedFont">{String|undefined}</span> The mode id of the data mode, if it exists</dd>
+											
+										
+										
+										
+										
+										
+									
+									</dl>
+								
+								<div class="hr"></div>
+							</li>
+						
+							<li 
+								 class='item7'
+							>
+								<div class="fixedFont heading" id="finalizeModeChange">
+									<span class='lighter'>
+									
+									</span>
+									
+									
+									
+									<b>finalizeModeChange</b>(silent)
+								</div>
+								
+								<div class="description">
+									
+									
+									
+									
+									
+								</div>
+								
+								
+								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<b>silent</b>
+												
+											</dt>
+											<dd></dd>
+										
+									</dl>
+								
+								
+								
+								<div class="hr"></div>
+							</li>
+						
+							<li 
+								 class='item8'
 							>
 								<div class="fixedFont heading" id="focus">
 									<span class='lighter'>
@@ -533,14 +733,14 @@ change the toolbar.
 							</li>
 						
 							<li 
-								 class='item6'
+								 class='item9'
 							>
 								<div class="fixedFont heading" id="getDataMode">
 									<span class='lighter'>
 									
 									</span>
 									
-									<span class="light">{<a href="../symbols/Mode.html">Mode</a>}</span>
+									<span class="light">{Mode}</span>
 									
 									<b>getDataMode</b>()
 								</div>
@@ -569,7 +769,7 @@ change the toolbar.
 										
 											<dt class="heading">Returns:</dt>
 											
-												<dd><span class="light fixedFont">{<a href="../symbols/Mode.html">Mode</a>}</span> The current datamode</dd>
+												<dd><span class="light fixedFont">{Mode}</span> The current datamode</dd>
 											
 										
 										
@@ -583,7 +783,48 @@ change the toolbar.
 							</li>
 						
 							<li 
-								 class='item7'
+								 class='item10'
+							>
+								<div class="fixedFont heading" id="initSelectionProperties">
+									<span class='lighter'>
+									
+									</span>
+									
+									
+									
+									<b>initSelectionProperties</b>(text)
+								</div>
+								
+								<div class="description">
+									
+									
+									
+									
+									
+								</div>
+								
+								
+								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<span class="light fixedFont">{String}</span> <b>text</b>
+												
+											</dt>
+											<dd>The text inside the textarea to save one
+   dom call</dd>
+										
+									</dl>
+								
+								
+								
+								<div class="hr"></div>
+							</li>
+						
+							<li 
+								 class='item11'
 							>
 								<div class="fixedFont heading" id="is">
 									<span class='lighter'>
@@ -645,7 +886,7 @@ given modeId</dd>
 							</li>
 						
 							<li 
-								 class='item8'
+								 class='item12'
 							>
 								<div class="fixedFont heading" id="setDataType">
 									<span class='lighter'>
@@ -685,7 +926,7 @@ given modeId</dd>
 							</li>
 						
 							<li 
-								 class='item9'
+								 class='item13'
 							>
 								<div class="fixedFont heading" id="synchronize">
 									<span class='lighter'>
@@ -694,7 +935,7 @@ given modeId</dd>
 									
 									
 									
-									<b>synchronize</b>()
+									<b>synchronize</b>(callback)
 								</div>
 								
 								<div class="description">
@@ -707,6 +948,17 @@ given modeId</dd>
 								
 								
 								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<b>callback</b>
+												
+											</dt>
+											<dd></dd>
+										
+									</dl>
 								
 								
 								

@@ -40,25 +40,31 @@
 				
 					<li><a href="../symbols/Builder.html">Builder</a></li>
 				
-					<li><a href="../symbols/Editor.html">Editor</a></li>
+					<li><a href="../symbols/Error.html">Error</a></li>
 				
-					<li><a href="../symbols/jQuery.html">jQuery</a></li>
+					<li><a href="../symbols/jQuery.isValid.html">jQuery<span class='break'> </span>.<span class='break'> </span>isValid</a></li>
+				
+					<li><a href="../symbols/jQuery.markupEditor.html">jQuery<span class='break'> </span>.<span class='break'> </span>markupEditor</a></li>
 				
 					<li><a href="../symbols/ME.html">ME</a></li>
 				
+					<li><a href="../symbols/ME.Editor.html">ME<span class='break'> </span>.<span class='break'> </span>Editor</a></li>
+				
+					<li><a href="../symbols/ME.Mode.html">ME<span class='break'> </span>.<span class='break'> </span>Mode</a></li>
+				
 					<li><a href="../symbols/ME.options.html">ME<span class='break'> </span>.<span class='break'> </span>options</a></li>
 				
-					<li><a href="../symbols/Mode.html">Mode</a></li>
+					<li><a href="../symbols/ME.Toolbar.html">ME<span class='break'> </span>.<span class='break'> </span>Toolbar</a></li>
+				
+					<li><a href="../symbols/ME.ToolbarButton.html">ME<span class='break'> </span>.<span class='break'> </span>ToolbarButton</a></li>
+				
+					<li><a href="../symbols/ME.ToolbarSelect.html">ME<span class='break'> </span>.<span class='break'> </span>ToolbarSelect</a></li>
 				
 					<li><a href="../symbols/textileCompiler.html">textileCompiler</a></li>
 				
 					<li><a href="../symbols/textileMode.html">textileMode</a></li>
 				
-					<li><a href="../symbols/Toolbar.html">Toolbar</a></li>
-				
-					<li><a href="../symbols/ToolbarButton.html">ToolbarButton</a></li>
-				
-					<li><a href="../symbols/ToolbarSelect.html">ToolbarSelect</a></li>
+					<li><a href="../symbols/Validator.html">Validator</a></li>
 				
 					<li><a href="../symbols/wysiwygMode.html">wysiwygMode</a></li>
 				
@@ -69,7 +75,7 @@
 		
 		Documentation generator: <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0<br />
 		Template: <a href="http://www.thebrightlines.com/2010/05/06/new-template-for-jsdoctoolkit-codeview/" target="_blank">Codeview</a> 1.2<br />
-		Generated on: 2011-9-22 13:19
+		Generated on: 2011-10-25 1:19
 	</div>
 </div>
 
@@ -174,6 +180,17 @@ selection</div>
 								>
 									<td class="attributes">&lt;static&gt; &nbsp;</td>
 									<td class="nameDescription">
+										<div class="fixedFont">Builder.<b><a href="../symbols/Builder.html#.closeTagIfOpen">closeTagIfOpen</a></b>(tag, before, after)
+										</div>
+										<div class="description">Close a tag if the tag is open.</div>
+									</td>
+								</tr>
+							
+								<tr
+									 class='item3'
+								>
+									<td class="attributes">&lt;static&gt; &nbsp;</td>
+									<td class="nameDescription">
 										<div class="fixedFont">Builder.<b><a href="../symbols/Builder.html#.finalizeTrace">finalizeTrace</a></b>()
 										</div>
 										<div class="description">Definitly ends the trace</div>
@@ -181,7 +198,7 @@ selection</div>
 								</tr>
 							
 								<tr
-									 class='item3'
+									 class='item4'
 								>
 									<td class="attributes">&lt;static&gt; &nbsp;</td>
 									<td class="nameDescription">
@@ -192,7 +209,7 @@ selection</div>
 								</tr>
 							
 								<tr
-									 class='item4'
+									 class='item5'
 								>
 									<td class="attributes">&lt;static&gt; &nbsp;</td>
 									<td class="nameDescription">
@@ -203,7 +220,7 @@ selection</div>
 								</tr>
 							
 								<tr
-									 class='item5'
+									 class='item6'
 								>
 									<td class="attributes">&lt;static&gt; &nbsp;</td>
 									<td class="nameDescription">
@@ -214,7 +231,7 @@ selection</div>
 								</tr>
 							
 								<tr
-									 class='item6'
+									 class='item7'
 								>
 									<td class="attributes">&lt;static&gt; &nbsp;</td>
 									<td class="nameDescription">
@@ -225,7 +242,7 @@ selection</div>
 								</tr>
 							
 								<tr
-									 class='item7'
+									 class='item8'
 								>
 									<td class="attributes">&lt;static&gt; &nbsp;</td>
 									<td class="nameDescription">
@@ -236,7 +253,7 @@ selection</div>
 								</tr>
 							
 								<tr
-									 class='item8'
+									 class='item9'
 								>
 									<td class="attributes">&lt;static&gt; &nbsp;</td>
 									<td class="nameDescription">
@@ -247,7 +264,7 @@ selection</div>
 								</tr>
 							
 								<tr
-									 class='item9'
+									 class='item10'
 								>
 									<td class="attributes">&lt;static&gt; &nbsp;</td>
 									<td class="nameDescription">
@@ -258,7 +275,7 @@ selection</div>
 								</tr>
 							
 								<tr
-									 class='item10'
+									 class='item11'
 								>
 									<td class="attributes">&lt;static&gt; &nbsp;</td>
 									<td class="nameDescription">
@@ -269,7 +286,18 @@ selection</div>
 								</tr>
 							
 								<tr
-									 class='item11'
+									 class='item12'
+								>
+									<td class="attributes">&lt;static&gt; &nbsp;</td>
+									<td class="nameDescription">
+										<div class="fixedFont">Builder.<b><a href="../symbols/Builder.html#.pushTagUnlessOpen">pushTagUnlessOpen</a></b>(tag)
+										</div>
+										<div class="description">Push a tag to the build stack unless the tag is already open</div>
+									</td>
+								</tr>
+							
+								<tr
+									 class='item13'
 								>
 									<td class="attributes">&lt;static&gt; &nbsp;</td>
 									<td class="nameDescription">
@@ -427,6 +455,61 @@ tag is closed
 							<li 
 								 class='item2'
 							>
+								<div class="fixedFont heading" id=".closeTagIfOpen">
+									<span class='lighter'>
+									&lt;static&gt; 
+									</span>
+									
+									
+									
+									<span class="light">Builder.</span><b>closeTagIfOpen</b>(tag, before, after)
+								</div>
+								
+								<div class="description">
+									Close a tag if the tag is open. If its not open push the
+String to the top node of the stack
+									
+									
+									
+									
+								</div>
+								
+								
+								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<span class="light fixedFont">{String}</span> <b>tag</b>
+												
+											</dt>
+											<dd>The tag to close</dd>
+										
+											<dt>
+												<span class="light fixedFont">{String}</span> <b>before</b>
+												
+											</dt>
+											<dd>The string before the tag identifier</dd>
+										
+											<dt>
+												<span class="light fixedFont">{String}</span> <b>after</b>
+												
+											</dt>
+											<dd>The string after the tag identifier,
+which is still mached to ensure valid markup. Normally its
+whitespace</dd>
+										
+									</dl>
+								
+								
+								
+								<div class="hr"></div>
+							</li>
+						
+							<li 
+								 class='item3'
+							>
 								<div class="fixedFont heading" id=".finalizeTrace">
 									<span class='lighter'>
 									&lt;static&gt; 
@@ -454,7 +537,7 @@ tag is closed
 							</li>
 						
 							<li 
-								 class='item3'
+								 class='item4'
 							>
 								<div class="fixedFont heading" id=".getTrace">
 									<span class='lighter'>
@@ -504,7 +587,7 @@ tag is closed
 							</li>
 						
 							<li 
-								 class='item4'
+								 class='item5'
 							>
 								<div class="fixedFont heading" id=".init">
 									<span class='lighter'>
@@ -533,7 +616,7 @@ tag is closed
 							</li>
 						
 							<li 
-								 class='item5'
+								 class='item6'
 							>
 								<div class="fixedFont heading" id=".initTrace">
 									<span class='lighter'>
@@ -585,7 +668,7 @@ tag is closed
 							</li>
 						
 							<li 
-								 class='item6'
+								 class='item7'
 							>
 								<div class="fixedFont heading" id=".isOpen">
 									<span class='lighter'>
@@ -646,7 +729,7 @@ tag is closed
 							</li>
 						
 							<li 
-								 class='item7'
+								 class='item8'
 							>
 								<div class="fixedFont heading" id=".popLineEnd">
 									<span class='lighter'>
@@ -676,7 +759,7 @@ For example "*" or "_"
 							</li>
 						
 							<li 
-								 class='item8'
+								 class='item9'
 							>
 								<div class="fixedFont heading" id=".popParagraphEnd">
 									<span class='lighter'>
@@ -705,7 +788,7 @@ For example "*" or "_"
 							</li>
 						
 							<li 
-								 class='item9'
+								 class='item10'
 							>
 								<div class="fixedFont heading" id=".pushString">
 									<span class='lighter'>
@@ -751,7 +834,7 @@ For example "*" or "_"
 							</li>
 						
 							<li 
-								 class='item10'
+								 class='item11'
 							>
 								<div class="fixedFont heading" id=".pushTag">
 									<span class='lighter'>
@@ -797,7 +880,47 @@ For example "*" or "_"
 							</li>
 						
 							<li 
-								 class='item11'
+								 class='item12'
+							>
+								<div class="fixedFont heading" id=".pushTagUnlessOpen">
+									<span class='lighter'>
+									&lt;static&gt; 
+									</span>
+									
+									
+									
+									<span class="light">Builder.</span><b>pushTagUnlessOpen</b>(tag)
+								</div>
+								
+								<div class="description">
+									Push a tag to the build stack unless the tag is already open
+									
+									
+									
+									
+								</div>
+								
+								
+								
+								
+									<dl class="detailList params">
+										<dt class="heading">Parameters:</dt>
+										
+											<dt>
+												<span class="light fixedFont">{String}</span> <b>tag</b>
+												
+											</dt>
+											<dd>The tag to push on top of the stack</dd>
+										
+									</dl>
+								
+								
+								
+								<div class="hr"></div>
+							</li>
+						
+							<li 
+								 class='item13'
 							>
 								<div class="fixedFont heading" id=".toHtml">
 									<span class='lighter'>
