@@ -29,14 +29,20 @@ $(document).ready(function(){
       selection: selection,
       range: range
     });
+
+    w2.set('othertext\n\nsecond paragraph');
     w.set('text')
       .select('p');
     w2.click('.bold');
-    w.notMatch('b');
+    w.notMatch('b')
+      .match('p');
     w.set('text')
       .select('p');
     w2.change(".formatBlock", "h1");
-    w.notMatch('h1');
+    w.notMatch('h1')
+      .match('p');
+    w2.match('p')
+      .match('h1');
   });
 
   test("default paragraph", function(){
@@ -245,6 +251,24 @@ $(document).ready(function(){
         .match(tag,1)
         .match(tag + " :first-child:contains(firstList)")
         .match("li",3)
+        .notMatch('p')
+        .on(listType);
+    });
+
+    test("List " + listType + " do not join adjacent lists of different type", function(){
+      var otherBullet = bullet == '*' ? '#' : '*',
+      otherTag = tag == 'ul' ? 'ol' : 'ul',
+      otherListType = listType == 'orderedList' ? 'unorderedList' : 'orderedList';
+      
+      w.set(otherBullet + " firstList\n\ntest\n\n" + otherBullet + " secondList")
+        .select("p")
+        .off(listType)
+        .off(otherListType)
+        .click("."+listType)
+        .match(tag,1)
+        .match(tag + " :first-child:contains(test)")
+        .match("li",3)
+        .match(otherTag,2)
         .notMatch('p')
         .on(listType);
     });

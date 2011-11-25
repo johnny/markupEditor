@@ -1,9 +1,14 @@
-* [35/42] Further improvements
-  - [ ] spec closing of editors
-    - [ ] should work with external select
+* [1/10] Further improvements
+  - [-] fix specs in Firefox
+    - [ ] general specs
+    - [X] general wysiwyg specs
+    - [X] list specs
+    - [X] config.current error (Border find error)
+  - [ ] fix specs in chrome again
+  - [ ] update docs
   - [ ] better editor loading
     - [ ] handle multiple init gracefully. Currently it stacks two editors on top of each other
-    - [ ] loading from textarea with an unknown mode, that is inside a textarea, should work
+    - [ ] loading from textarea with an unknown mode, that is a select option, should work
   - [ ] flexible toolbar, which stays on top
   - [ ] wysiwyg
     - [ ] checkIfDeleteAll should work with holding a neutral key combined with a destructive action
@@ -18,6 +23,10 @@
       - [ ] in list
         - [ ] pressing enter on empty list item should remove the list item and add a paragraph
       - [ ] in heading
+        - [ ] at the end
+        - [ ] in the middle
+      - [ ] also in textile
+        - [ ] at the beginning of a list should not add a *#
     - [ ] spec press shift enter
       - [ ] in list
     - [ ] spec press entf
@@ -30,173 +39,24 @@
       - [ ] double click on bold word should select just the bold tag
     - [ ] spec checkIfDeleteAll
       - [ ] normal keys
-      - [ ] keycombos
+      - [ ] keycombos (most should not delete the selection)
+    - [ ] spec keycombos
+      - [ ] strg-r should work
     - [ ] show window in different awesome tab
     - [ ] use existing window (not supported in ruby bindings)
     - [ ] fire native events (not supported in awesome, try in kde or windows)
   - [ ] clean and parse pasted html
   - [ ] handle blocktags within lists
-  - [X] split up markupEditor.js
-    - [X] look how ender handles the extensability
-          perhaps (... ME.Mode = Mode;})(ME, jQuery) is an option
-    - [X] split it up
-    - [X] update docs
-  - [X] wysiwyg
-    - [X] Firefox: fix checkState for one bold word
-    - [X] Firefox: keycombos delete selection
-    - [X] expand selection to word boundaries, just as in textile
-    - [X] pressing enter on empty list item should remove the list item and add a paragraph
+    - [ ] h1. * item1
+          does not compile right
+  - [X] join should strip log lines (and comments)
 
-    - [X] join lists on backspace/entf between lists
-    - [X] Toolbar should work only if there is a range inside the preview
-          (also the state checking)
-    - [X] handle delete key
-    - [X] selecting all and pressing bold should bolden each (part of a) paragraph in turn
-    - [X] ignore special keyCodes on deletion
-    - [X] on keyup check if the content is still in a valid block tag
-      - [X] chrome problems
-        - [X] return at the end of a heading
-        - [X] backspace into another paragraph
-              this will keep the style of the backspaced paragraph with span tags
-      - [X] firefox problems
-        - [X] selecting all and deleting/overwriting it
-              overwriting with normal keys won't work
-        - [X] respect the top blockformat on overwriting
-        - [X] return at the end of a heading
-        - [X] enter in the middle of a heading does not move the rest of the heading down
-        - [X] selecting all by hand and deleting it leaves empty tags
-              this is a result of the current implementation of checkIfDeletedAll
-  - [X] Improve dialog
-    - [X] merge tipsy and isValid
-  - [X] Better Dialogs (for inspiration see gollum)
-    - [X] display errors as tooltips
-    - [X] add tooltips
-    - [X] reset errors on open
-    - [X] enhancedTextfield: type, click clear, type again (no button), click cancel (button appears and button click did not work)
-    - [X] style clearButton + autocomplete
-    - [X] use errors
-    - [X] autocomplete select should trigger change (file bug)
-    - [X] support prompts in textfields
-    - [X] add a clear button to text fields
-    - [X] dialogs should be created on the fly
-    - [X] values for the selects should be defined by a method call if functions are defined
-    - [X] fields should share the combobox
-  - [X] localization
-  - [X] fix multiple.html
-  - [X] textile: fix align with single caret
-  - [X] fix wysiwyg specs. probably an error in initFromHTMLDiv
-  - [X] provide support for external mode select
-    - [X] basics
-    - [X] hide select if it has just one option
-    - [X] handle and spec different edgecases
-      - [X] toHTML/toText
-      - [X] getText or similar
-      - [X] loadFromDiv in case mode has no toText/getText
-  - [X] Support haml in preview mode
-    - [X] basics
-    - [X] handle asynchronus update
-    - [X] fix spec
-    - [X] should block all other actions until mode change is finished
-    - [X] should block all other actions if a dialog is open
-  - [X] fix enter in lists
-    - [X] doesn't add #*
-    - [X] at the beginning of the line it should not add tags
-  - [X] list trace at the end of a line does not work
-  - [X] textileCompiler
-    - [X] "* item1":src should compile as a link
-  - [X] Decouple mode and editor
-    - [X] fix all specs
-    - [X] add link error: place cursor at the end of a word and click link -> add uri -> ok -> link is after word
-    - [X] remove mode param in textileMode / wysiwygMode
-    - [X] holdShift should live on a global object
-    - [X] fix selection on link creation. currently it selects the whole paragraph
-  - [X] click in blank area should not raise error
-  - [X] add close editor
-    - [X] basics
-    - [X] show only if configured
-    - [X] reopen should be possible
-  - [X] textile
-    - [X] replace this.tag
-  - [X] decouple preview and data-modes
-  - [X] publish project
-    - [X] documentation
-    - [X] better static files handling:
-    - [X] package files
-      - [X] join and compress js files
-    - [X] push to github
-  - [X] list functionality
-    - [X] wysiwyg
-      - [X] button click
-        - [X] own
-          - [X] on
-          - [X] off
-          - [X] off in the middle should seperate the list
-        - [X] align
-        - [X] bold/italic 
-          - [X] conversion to textile should handle linebreaks
-        - [X] link
-        - [X] image
-        - [X] paragraph
-      - [X] backspace out of list (also at the beginning of the div) should remove list
-            and replace it with a paragraph
-      - [X] ensure <br> only inside block tags (this is now handled during conversion. 
-            this way html import is easier)
-      - [X] shift + enter throws error
-      - [X] enter in list (by default)
-      - [X] fix conversion
-    - [X] refactor selection api to mode
-    - [X] fix textile compiler
-    - [X] textile
-      - [X] shift enter in list
-      - [X] enter in list
-      - [X] button click
-        - [X] own
-        - [X] align
-        - [X] bold/italic
-        - [X] link
-        - [X] image
-        - [X] paragraph (ignore it)
-      - [X] create own selenium view template
-      - [X] load firebug into selenium window
-      - [X] fix selection on end of textfield
-  - [X] should not catch strg-r
-  - [X] fix joined file
-  - [X] generalize spec helpers
-  - [X] load editor from any html element
-    - [X] optimize hiding and showing. use least possible dom calls
-    - [X] dynamically change the toolbar. Each mode should define the
-          visible fields. If save is visible is defined by the
-          presence of the save setting. The order is defined in markupEditor and not
-          changeable. It would confuse the user otherwise
-    - [X] spec
-    - [X] add save button which calls a submit callback
-    - [X] basics
-    - [X] keep styles from the original html element
-  - [X] different toolbars for different modes.
-  - [X] Fix bugs in textileCompiler
-  - [X] get specs running in Firefox
-    - [X] W: check if selection is in preview before calculating states
-      and doing things: Firefox select text -> h1 -> p -> all gone
-  - [X] formatBlock should select multiple paragraphs
-  - [X] refactor to use prototypes
-  - [X] abstract getStates
-  - [X] update preview periodically (and track changes)
-  - [X] prevent link click follow
-  - [X] preview div should always have a p-tag inside
-  - [X] on mode change clear selection (select something in ta
-        -> preview -> ta selection should be gone)
-  - [X] fix rare bug: updating preview in preview mode should not write textile into preview
-        reproduce: load dev.html -> press any key -> wait
-
-* [1/3] Bugs
-  - [X] pressing enter at the end of a heading sets the cursor outside
-    any paragraph
-  - [ ] h1. * item1
-        does not compile right
+* [0/1] Bugs
   - [ ] set cursor between _a and click italic two times -> not the
     same situation as before. Such two clicks should be idempotent
 
 * [0/6] Consider
+  - [ ] should only setup sync between editors, that are initialized in the same collection
   - [ ] Partial list change should either
         change the whole list (currently wysiwyg)
         change part off the list (currently textile and the norm)

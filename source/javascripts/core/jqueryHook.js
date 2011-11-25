@@ -119,7 +119,7 @@
       editor.changeMode('wysiwyg');
     } else {
       editor.currentMode.activate(editor, function(){
-        editor.currentMode.afterActivation();
+        editor.currentMode.afterActivation(editor);
       });
     }
 

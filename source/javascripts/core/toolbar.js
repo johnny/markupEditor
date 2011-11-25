@@ -134,7 +134,7 @@
 
     toolbarDiv.html(getToolbarHTML());
 
-    if(select){
+    if(select && select[0]){
       useExternalChangeDataModeSelect(select, toolbarDiv, editor.id);
     }
 

@@ -185,7 +185,7 @@ WysiwygHelper.prototype = (function(){
       } else {
         node = identifier;
       }
-
+      this.preview.focus();
       if(node.is("img")){
         this.range.selectNode(node[0]);
       } else {

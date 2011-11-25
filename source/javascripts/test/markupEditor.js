@@ -46,13 +46,13 @@ $(function(){
       async(function(){
         start();
         ok(!previewButton.is('.on'), 'preview off');
-        ok(changeMode.val() === 'haml', 'The datamode should stay the same');
+        ok(changeMode.val() === 'haml', 'The datamode should stay the same, was ' + changeMode.val());
         previewButton.mouseup();
 
         async(function(){
           start();
           ok(previewButton.is('.on'), 'preview on');
-          ok(changeMode.val() === 'haml', 'The datamode should stay the same');
+          ok(changeMode.val() === 'haml', 'The datamode should stay the same, was ' + changeMode.val());
         });
       });
     });
@@ -77,7 +77,8 @@ $(function(){
     ok(div.attr('contentEditable') === 'false', 'content should no longer be editable');
     div.click();
     ok(div.attr('contentEditable') === 'true', 'editor should be reopened');
-    ok(div.parent().find("a.save").is(":visible"), "settings should be remembered");
+    ok(div.parent().find("a.save").is(":visible"), "save settings should be remembered");
+    ok(div.parent().find("select.changeDataMode option[value='unknown']")[0], "select settings should be remembered");
   });
 
   var externalSelect = $('select.availableModes'),
@@ -95,8 +96,19 @@ $(function(){
     ok(externalSelect.is(':hidden'), 'external select should be hidden');
   });
 
+  test('should ignore non existant select', function(){
+    var select = $('#wrongExternalSelect .changeDataMode');
+    ok(select.is(':visible'), 'select should be visible');
+    ok(select.find('option').length > 0, 'select should contain items');
+  });
+
   test('should sync the different select boxes', function(){
     var newVal = 'completeSyncMode';
+    
+    if(editor1.find('.wysiwyg').is('.on')){
+      helper1.click('.wysiwyg');
+    }
+    
     changeMode1.val(newVal).change();
     ok(externalSelect.val() === newVal, 'change in one editor should change external select');
     ok(changeMode2.val() === newVal, 'change in one editor should change select in other editor');
@@ -106,7 +118,10 @@ $(function(){
     ok(changeMode1.val() === newVal, 'change in external select should change editor 1');
     ok(changeMode2.val() === newVal, 'change in external select should change editor 2');
 
-    helper1.click('.wysiwyg');
+    helper1.off('wysiwyg')
+      .click('.wysiwyg')
+      .on('wysiwyg');
+
     ok(editor2.find('.wysiwyg').is('.on'), 'preview mode change should sync');
     
     newVal = 'completeSyncMode';

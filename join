@@ -17,9 +17,11 @@ File.open('source/javascripts/joined.js','w') do |file|
     \/          # Closing delimiter.
     |           # Or
     $\s*\/\/.*      # One line comments
+    |
+    $\s*console\..*
     )/x
 
-    file.puts File.open('source/javascripts/' + filename + '.js').read #.gsub(regexp, '')
+    file.puts File.open('source/javascripts/' + filename + '.js').read.gsub(regexp, '')
   end
 end
 

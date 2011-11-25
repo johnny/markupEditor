@@ -10,41 +10,30 @@
   function endNode(){
     return jQuery(selection.getRangeAt(0).endContainer);
   }
-  
-  function lastParentBeforePreview(node){
-    if(node.parent().is(".preview")){
-      return node;
-    } else {
-      return node.parentsUntil(".preview").last();
-    }
-  }
-  
-  function getParagraphs() {
-    var anchor, focus, paragraphs, matchIndex = -1;
 
-    anchor = lastParentBeforePreview(startNode());
-    focus = lastParentBeforePreview(endNode())[0];
-    
-    if(anchor[0] !== focus){
-      paragraphs = anchor.nextAll().filter(function(i){
-        if(this == focus){
-          matchIndex = i;
-        }
-        if(matchIndex === -1 || matchIndex === i){
-          return true;
-        }
-      }).add(anchor);
-    } else {
-      paragraphs = anchor;
-    }
+  function replaceEachParagraph(editor, functor){
+    var paragraph, children, i, l,
+    newParagraphs = $(),
+    contents = wysiwygMode.getSelection(editor);
 
-    return paragraphs;
+    if(!/h\d|p|(o|u)l/i.test(contents.childNodes[0].nodeName)){
+      contents = contents.firstChild;
+    }
+    children = contents.childNodes;
+    l = children.length;
+
+    for(i = 0; i < l ; i++){
+      newParagraphs = newParagraphs.add(functor(children[i]));
+    }
+    wysiwygMode.replaceSelection(editor, newParagraphs);
   }
-  
-  function align(direction) {
-    getParagraphs().removeClass("left")
-      .removeClass("right").removeClass("center")
-      .addClass(direction);
+
+  function align(editor, direction) {
+    replaceEachParagraph(editor, function(paragraph){
+      return $(paragraph).removeClass("left")
+        .removeClass("right").removeClass("center")
+        .addClass(direction);
+    });
   }
 
   function selectNodes(nodes,collapse){
@@ -122,16 +111,33 @@
    */
   function Border(node, borderType, nextProperty){
     this.nextProperty = nextProperty;
+
+    if(node.is('.preview')){ // select all (even selection of all
+      // nodes within preview) in firefox does select the whole preview div
+      if(nextProperty === 'nextSibling'){
+        node = $(node[0].lastChild);
+      } else {
+        node = $(node[0].firstChild);
+      }
+    }
+    
     this.ancestors = node.parentsUntil(".preview");
     this.block = this.ancestors[this.ancestors.length - 1] || node[0];
-    this.borderNode = this.ancestors[this.ancestors.length -2] || node[0];
+    
+    var depth = borderType ? 2 : 1;
+    this.borderNode = this.ancestors[this.ancestors.length -depth] || node[0];
+    
     while(this.borderNode){
       this.node = this.borderNode;
-      if(!borderType || this.borderNode.nodeName.toLowerCase() === borderType){
+      if(this.borderNode.nodeName.toLowerCase() === borderType){
+        break;
+      } else if (/preview/.test(this.node.parentNode.className)){
+        this.borderNode = null;
         break;
       }
       this.borderNode = this.borderNode[nextProperty];
     }
+    
     this.safeBlock = this.borderNode ? this.block : this.block[nextProperty];
   }
 
@@ -182,7 +188,7 @@
    */
   function joinAdjacentList(border, list){
     var children;
-    if(border.safeBlock && /ul/i.test(border.safeBlock.nodeName)){
+    if(border.safeBlock && border.safeBlock.nodeName === list[0].nodeName){
       next = border.safeBlock[border.nextProperty];
 
       children = $(border.safeBlock).remove().children();
@@ -571,18 +577,18 @@
         tag: 'i'
       },
       alignLeft: {
-        clicked: function(){
-          align('left');
+        clicked: function(editor){
+          align(editor, 'left');
         }
       },
       alignRight: {
-        clicked: function(){
-          align('right');
+        clicked: function(editor){
+          align(editor, 'right');
         }
       },
       alignCenter: {
-        clicked: function(){
-          align('center');
+        clicked: function(editor){
+          align(editor, 'center');
         }
       },
       unorderedList: {
@@ -705,23 +711,14 @@
       },
       formatBlock: {
         clicked: function(editor, target) {
-          var paragraph, newParagraphs = [], tag;
-
-          getParagraphs().replaceWith(function(){
-
-            if(/(u|o)l/i.test(this.nodeName)){ // ignore lists
-              // TODO update jquery and try returning the list. File
-              // bug when it won't work
-              tag = this.nodeName;
-            } else {
-              tag = target.value;
+          replaceEachParagraph(editor, function(paragraph){
+            if(!/(u|o)l/i.test(paragraph.nodeName)){ // ignore lists
+              paragraph = $('<' + target.value + '>')
+                .addClass(paragraph.className).append(paragraph.childNodes);
             }
-            paragraph = $('<' + tag + '>')
-              .addClass(this.className).append(this.childNodes);
-            newParagraphs.push(paragraph[0]);
             return paragraph;
           });
-          selectNodes(newParagraphs);
+
         }
       }
     },
@@ -735,13 +732,29 @@
      * @returns {HTMLFragment} The selected nodes
      */
     getSelection: function(editor, nodeType){
-      var range = selection.getRangeAt(0);
+      var range = selection.getRangeAt(0),
+      start = startNode(),
+      end = endNode();
 
       editor.collapsed = range.collapsed;
 
-      editor.leftBorder = new Border(startNode(), nodeType, 'previousSibling');
-      editor.rightBorder = new Border(endNode(), nodeType, 'nextSibling');
+      // Fix firefox bug: a focused element that is contentEditable
+      // does not place the cursor inside an inner tag, but just
+      // selects the whole node
+      if(start.is('.preview')){
+        start = $(start[0].firstChild);
+      }
+      if(end.is('.preview')){
+        if(editor.collapsed){
+          end = start;
+        } else {
+          end = $(end[0].lastChild);
+        }
+      }
       
+      editor.leftBorder = new Border(start, nodeType, 'previousSibling');
+      editor.rightBorder = new Border(end, nodeType, 'nextSibling');
+
       range.setStartBefore(editor.leftBorder.node);
       range.setEndAfter(editor.rightBorder.node);
 
@@ -752,14 +765,14 @@
           .insertAfter(editor.rightBorder.block);
       }
 
-      return range.extractContents();
+     return range.extractContents();
     },
     /**
      * Insert the given nodes into the DOM tree at the place where
      * getSelection extracted the nodes
      *
      * @param {Editor} editor The editor to work on
-     * @param {HTMLFragment} nodes The nodes which will be inserted
+     * @param {jQuery} nodes The nodes which will be inserted
      */
     replaceSelection: function(editor, nodes){
       if(editor.leftBorder.safeBlock){
@@ -825,12 +838,12 @@
 
         return node.parentsUntil(".preview").add(node);
       }
-      
-      var nodes = [], startNodes, endNodes,
-      content = selection.getRangeAt(0).cloneContents().firstChild;
 
-      startNodes = getParents(startNode(), content);
-      endNodes = getParents(endNode(), content);
+      var nodes = [], startNodes, endNodes,
+      contents = selection.getRangeAt(0).cloneContents();
+
+      startNodes = getParents(startNode(), contents.firstChild);
+      endNodes = getParents(endNode(), contents.lastChild);
 
       if(/(u|o)l/i.test(startNodes[0].nodeName) && startNodes[0].nodeName !== endNodes[0].nodeName){
         nodes = startNodes.toArray();
