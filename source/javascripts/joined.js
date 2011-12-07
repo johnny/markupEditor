@@ -1,876 +1,234 @@
-(function($) {
-  // TODO cache fields
-  var opts, errorMsgType, initialized, methods;
+(function ($) {
+  var availableModes = {};
 
-  methods = {
-    check: function(options) {
-      var $this = this, valid = true;
-      //Hide any errors that are already showing
-      $this.find(opts.errorElement + '.' + opts.errorClass).remove();
-      $this.find(':input.' + opts.inputErrorClass).removeClass(opts.inputErrorClass);
+  
+  ME = {
+    
+    addMode: function(modeId, modeDefinition, isGenerated) {
+      modeDefinition.id = modeId;
+      
+      modeDefinition.supportedItems = ME.Toolbar.getSupportedItems(
+        modeId,
+        modeDefinition.name,
+        modeDefinition.items );
 
-      //Get all the required inputs
-      $this.find(':input.required').each(function() {
+      return availableModes[modeId] = new ME.Mode(modeDefinition);
+    },
+    hasMode: function(modeId){
+      return !!availableModes[modeId];
+    },
+    
+    getMode: function(modeId) {
+      var mode = availableModes[modeId];
+      if (mode) {
+        return mode;
+      }
+      else {
+        return this.addMode(modeId, {
+          name: modeId
+        }, true)
+      }
+    },
+    
+    options: {},
+    
+    setOptions: function(options){
+      this.options = options;
+    }
+  };
+}(jQuery));
+!function(){
+  var currentDefinition = {};
+  
+  ME.t10n = function(id){
+    return currentDefinition[id];
+  };
+
+  ME.t10n.load = function(definition){
+    currentDefinition = definition;
+  };
+}();
+
+ME.t10n.load({
+  noticeTitle: 'Notice',
+  noticeMissingToHTML: 'The old mode could not convert to HTML. You will have to convert the markup manually.',
+  noticeMissingToText: 'This mode can not convert HTML to your markup. You will have to convert the markup manually',
+  noticeMissingDatamode: 'Datamode not found. Please specify a valid datamode',
+  linkTitle: 'Link',
+  insertImageTitle: 'Image',
+  uri: 'Link',
+  uriPrompt: 'Enter or select link',
+  title: 'Title',
+  titlePrompt: 'Enter title',
+  imageUri: 'Image Source',
+  p: "Paragraph",
+  h1: "Heading 1",
+  h2: "Heading 2",
+  h3: "Heading 3",
+  bold: 'Bold',
+  italic: 'Italic',
+  alignLeft: 'align left',
+  alignCenter: 'align center',
+  alignRight: 'align right',
+  unorderedList: 'unordered list',
+  orderedList: 'ordered list',
+  link: 'link',
+  insertImage: 'image',
+  save: 'save',
+  wysiwyg: 'edit preview directly',
+  close: 'close',
+  changeDataMode: 'change the markup format',
+  formatBlock: 'change paragraph format',
+  errorText: '{label} is a required field.',
+  emailErrorText: 'Please enter a valid {label}'
+});
+
+
+(function($, _) {
+  var opts, errorMsgType, initialized;
+
+  
+  function Validator($form){
+    this.$form = $form;
+    this.inputs = $form.find(':input.required');
+  }
+
+  Validator.prototype = {
+    check: function() {
+      var valid = true;
+
+      this.reset(true);
+      
+      this.inputs.each(function() {
         var $input = $(this),
         fieldValue = $.trim($input.val()),
-        labelText = $input.siblings('label').text().replace(opts.removeLabelChar, ''),
-        errorMsg = '';
-        
-        //Check if it's empty or an invalid email
+        labelText = $input.parent().prev().text(),
+        errorMsg;
         if(fieldValue === '') {
-	  errorMsg = hasLabelPlaceholder ? errorMsg = opts.errorText.replace('{label}',labelText) : errorMsg = opts.errorText;
+          errorMsg = _('errorText') || opts.errorText;
 	  valid = false;
         } else if($input.hasClass('email')) {
 	  if(!(/^([_a-z0-9-]+)(\.[_a-z0-9-]+)*@([a-z0-9-]+)(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/.test(fieldValue))) {
-	    errorMsg = hasLabelPlaceholder ? errorMsg = opts.emailErrorText.replace('{label}',labelText) : errorMsg = opts.emailErrorText;
+	    errorMsg = _('emailErrorText') || opts.emailErrorText;
 	    valid = false;
 	  }
         }
-        
-        //If there is an error, display it
-        if(errorMsg !== '') {
-          $input.parent().addClass(opts.errorClass);
-	  //$input.addClass(opts.inputErrorClass).after('<'+opts.errorElement+' class="'+opts.errorClass+'">' + errorMsg + '</'+opts.errorElement+'>');
+        if(errorMsg) {
+          errorMsg = errorMsg.replace('{label}',labelText);
+          $input.parent()
+            .addClass(opts.errorClass)
+            .error('show', errorMsg);
         }
       });
 
       return valid;
     },
-    reset: function(){
-      return this.find(':input.required').each(function(){
-        $(this).parent().removeClass(opts.errorClass);
+    reset: function(fadeOut){
+      return this.inputs.each(function(){
+        $(this).parent()
+          .removeClass(opts.errorClass)
+          .error('hide', fadeOut);
       });
     }
   };
 
-  $.fn.isValid = function(method) {
-    if (!methods[method]) {
-      method = 'check';
+  function get($element, constructor, dataField){
+    var data = $element.data(dataField);
+    if (!data) {
+      data = new constructor($element);
+      $element.data(dataField, data);
     }
-    return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+    return data;
+  }
+  
+  $.fn.isValid = function(method, options) {
+    var valid = true;
+
+    this.each(function(){
+      var validator = get( $(this), Validator, 'isValid');
+      
+      if (!validator[method]) {
+        method = 'check';
+      }
+      
+      valid = validator[method](options) ? valid : false;
+    });
+    
+    return valid;
   };
   
   $.fn.isValid.init = function(options){
     opts = $.extend({}, $.fn.isValid.defaults, options);
-    hasLabelPlaceholder = opts.errorText.indexOf("{label}") > -1;
   };
-
-  // default options
   $.fn.isValid.defaults = {
     errorClass: 'error',
     errorText: '{label} is a required field.',
-    emailErrorText: 'Please enter a valid {label}',
-    errorElement: 'strong',
-    removeLabelChar: '*'
+    emailErrorText: 'Please enter a valid {label}'
   };
-})(jQuery);
-(function ($) {
-  var globalSettings = {}, availableModes = {}, toolbarItems = {}, toolbarHTML = "",
-  availableItems = ['bold','italic','alignLeft','alignCenter','alignRight','unorderedList','orderedList','link','insertImage','save','wysiwyg','changeDataMode','formatBlock'],
-  globalItems = [],
-  emptyFunction = $.noop;
 
-  /**
-   * Create a new Mode
-   * @constructor
-   * @name Mode
-   * @param {Object} customFunctions these functions will be added to the Mode object
-   */
-  function Mode(customFunctions){
-    $.extend(this, customFunctions);
-    this.prototype = Mode.prototype;
+  
+  function Error($element) {
+    this.$element = $element;
+    this.$tip = $('<div class="error-tip"></div>')
+      .html('<div class="arrow"></div><div class="inner"></div>')
+      .prependTo(document.body);
   }
   
-  Mode.prototype = /** @scope Mode.prototype */ {
-    /**
-     * This loads the mode for the current Editor
-     * TODO this is ugly. why should every editor have every mode?
-     * @param {Editor} editor
-     */
-    load: function(editor) {
-      this.editor = editor;
-      this.htmlDiv = editor.htmlDiv;
-      this.textArea = editor.textArea;
-
-      console.log("loaded Mode " + this.name);
-    },
-    /**
-     * The default pressed function to handle key combos (shift + x)
-     */
-    pressed: function(keyCode){
-      if(keyCode === 16){
-        this.holdShift = true;
-      }
-      if(ME.util.isNeutralKey(keyCode)){
-        this.holdNeutralKey = true;
-      }
-    },
-    /**
-     * Handle special keys (shift press) to deal with key combos
-     */
-    released: function(keyCode){
-      if(keyCode === 16){
-        this.holdShift = false;
-      }
-      if(ME.util.isNeutralKey(keyCode)){
-        this.holdNeutralKey = false;
-      }
-    },
-    /**
-     * Handle clicks on the textarea or html div
-     *
-     * @function
-     */
-    clicked: emptyFunction,
-    /**
-     * Activate this mode for the editor
-     */
-    activate: function() {
-      if(this.htmlDiv.is(":empty")) {
-        this.updatePreview();
-      } else {
-        this.updateTextArea();
-      }
-      this.editor.toolbar.loadModeToolbar();
-      this.afterActivation();
-    },
-    /**
-     * Update the preview html div with the html representation of the mode
-     */
-    updatePreview: function() {
-      console.log("updating preview in Mode " + this.name);
-      this.htmlDiv.html(this.toHTML() || "<p>&nbsp;</p>");
-    },
-    /**
-     * Update the textarea with the text representation of the mode
-     */
-    updateTextArea: function() {
-      console.log("updating TA in Mode " + this.name);
-      this.textArea.val(this.toText());
-    },
-    /**
-     * Run after activation. Default behaviour for text modes. wysiwyg mode has 
-     * its own version
-     */
-    afterActivation: function() {
-      this.textArea
-        .parent().show()
-        .find(":first-child").focus()[0]
-        .setSelectionRange(0,0);
-      this.htmlDiv.attr("contentEditable",false);
-    },
-    /**
-     * Get a state object which sets defines the states of the buttons
-     * and the selects.
-     * @returns {Object} an object that describes the states
-     */
-    getStates: function(){
-      var states = this.getSelectionStates();
-      if(this.id === 'wysiwyg'){
-        states.wysiwyg = true;
-      } else {
-        states.changeDataMode = this.id;
-      }
-      return states;
-    },
-    /**
-     * This is a placeholder. Each mode should define its version
-     * @returns {Object} an object that describes the states
-     * @see Toolbar#getStates
-     * @api
-     */
-    getSelectionStates: function(){
-      return {};
-    },
-    /**
-     * A helper function that builds a state object from the given
-     * nodes, that defines the active buttons
-     * 
-     * CONSIDER make currentNodes a property
-     * @param {Array} nodes The active nodes (e.g. a,li). The highest node is on the right
-     * @param {Object} currentNodes A reference that will be filled with important nodes (e.g. a) to be used by the mode
-     * 
-     * @returns {Object} The state object
-     */
-    buildStateObject: function(nodes, currentNodes){
-      function getTag(node){
-        return node.tag ? node.tag : node.nodeName.toLowerCase();
-      }
-      var node, i = nodes.length, states = {};
-      while(i--){
-        node = nodes[i];
-        switch (getTag(node)){
-        case "a":
-          currentNodes.a = node;
-          states.link = true;
-          break;
-        case "img":
-          currentNodes.img = node;
-          states.insertImage = true;
-          break;
-        case "i":
-          states.italic = true;
-          break;
-        case "b":
-          states.bold = true;
-          break;
-        case "ol":
-          states.orderedList = true;
-          states.unorderedList = false;
-          states.formatBlock = 'disable';
-          states.alignLeft = 'disable';
-          states.alignRight = 'disable';
-          states.alignCenter = 'disable';
-          currentNodes.list = node;
-          break;
-        case "ul":
-          states.orderedList = false;
-          states.unorderedList = true;
-          states.formatBlock = 'disable';
-          states.alignLeft = 'disable';
-          states.alignRight = 'disable';
-          states.alignCenter = 'disable';
-          currentNodes.list = node;
-          break;
-        case "li":
-          break;
-        default:
-          states.formatBlock = getTag(node);
-          currentNodes.block = node;
-          break;
-        }
-      }
-      return states;
-    },
-    /**
-     * @param {String} [boundary] The right and left boundary the
-     * selection should be extended to
-     * @returns {String} The currently selected string
-     */
-    getSelection: function(boundary) {
-      var textArea = this.textArea, text = textArea.val(), boundaryPosition, subString;
-      textArea.focus();
-
-      // gecko & webkit
-      this.scrollPosition = textArea.scrollTop;
-      this.selectionStart = textArea[0].selectionStart;
-      this.selectionEnd = textArea[0].selectionEnd;
-
-      if(text[this.selectionEnd-1] === "\n"){
-        this.selectionEnd -= 1;
-      }
-
-      if(boundary) {
-        // find left boundary
-        boundaryPosition = Math.max(text.lastIndexOf(boundary, this.selectionStart), text.lastIndexOf("\n", this.selectionStart));
-        if(boundaryPosition !== -1) {
-          this.selectionStart = boundaryPosition + 1;
-        } else {
-          this.selectionStart = 0;
-        }
-        
-        // find right boundary, first limit the text to the
-        // next new line
-        boundaryPosition = text.indexOf("\n", this.selectionEnd); 
-        if(boundaryPosition === -1) {
-          subString = text.slice(this.selectionStart);
-        } else {
-          subString = text.slice(this.selectionStart, boundaryPosition);
-        }
-
-        // Then find the next boundary
-        boundaryPosition = 0;
-        do{
-          boundaryPosition = subString.indexOf(boundary, boundaryPosition + 1);
-        } while(boundaryPosition !== -1 && this.selectionEnd > this.selectionStart + boundaryPosition);
-
-        // when it doesn't exist, extend the selection to the
-        // paragraph end
-        if(boundaryPosition === -1) {
-          boundaryPosition = subString.length;
-        }
-        this.selectionEnd = this.selectionStart + boundaryPosition;
-      }
-      this.selection = text.slice(this.selectionStart, this.selectionEnd);
-      return this.selection;
-    },
-    /**
-     * Replace the current selection with the given string
-     * @param {String} string The replacement string
-     * @param {Boolean} collapseToStart If the selection should collapse
-     */
-    replaceSelection: function(string, collapseToStart) {
-      var textArea = this.textArea,
-      newSelectionStart = this.selectionStart,
-      newSelectionEnd = this.selectionStart + string.length;
-
-      // gecko & webkit
-      textArea.val(textArea.val().slice(0, this.selectionStart) + string + textArea.val().slice(this.selectionEnd, textArea.val().length));
-
-      // move caret gecko
-      if(collapseToStart === true){
-        newSelectionEnd = newSelectionStart;
-      } else if(collapseToStart === false){
-        newSelectionStart = newSelectionEnd;
-      }
-
-      textArea[0].setSelectionRange(newSelectionStart, newSelectionEnd);
-      textArea.focus();
-    },
-    /**
-     * Extend the right selection with a regexp. Everything matched will be added
-     * to the selection. Useful for special cases like toggling parts of a bolded
-     * String in textile
-     * 
-     * @param {Regexp} regexp The regexp
-     * 
-     * @example
-     * extendRightSelection(/ +/)
-     */
-    extendRightSelection: function(regexp){
-      var match;
-      regexp = new RegExp(regexp.source,'g');
-      regexp.lastIndex = this.selectionEnd;
-      match = regexp.exec(this.textArea.val());
-
-      if(match && regexp.lastIndex == this.selectionEnd + match[0].length){
-        this.selectionEnd += match[0].length;
-        return match[0];
-      }
-    },
-    /**
-     * Extend the left selection with a regexp. Everything matched will be added
-     * to the selection. Useful for special cases like toggling parts of a bolded
-     * String in textile
-     * 
-     * @param {Regexp} regexp The regexp.
-     * 
-     * @example
-     * extendLeftSelection(/[ .]+/)
-     */
-    extendLeftSelection: function(regexp){
-      var match, substring = this.textArea.val().slice(0,this.selectionStart);
-      regexp = new RegExp(regexp.source + "$");
-      match = regexp.exec(substring);
+  Error.prototype = {
+    opacity: 0.8,
+    show: function(message) {
+      var $tip = this.$tip;
+      this.hidden = false;
       
-      if(match){
-        this.selectionStart -= match[0].length;
-        return match[0];
-      }
-    }};
-  
-  
+      $tip.find('.inner').text(message);
+      $tip.css({top: 0, left: 0, visibility: 'hidden', display: 'block'});
+      
+      var pos = $.extend({}, this.$element.offset(), {
+        width: this.$element[0].offsetWidth,
+        height: this.$element[0].offsetHeight
+      });
+      
+      var actualHeight = $tip[0].offsetHeight;
+      
+      $tip.css({
+        top: pos.top + pos.height / 2 - actualHeight / 2,
+        left: pos.left + pos.width
+      });
 
-  /**
-   * Create a button for the toolbar
-   *
-   * @constructor
-   * @name ToolbarButton
-   *
-   * @param {String} name The class name of the button
-   * @param {Function} [clicked] The default action if the button is clicked
-   */
-  function ToolbarButton(name, clicked){
-    this.name = name;
-    if(clicked){
-      this.clicked = clicked;
-      globalItems.push(name);
-    }
-  }
-  ToolbarButton.prototype = /** @scope ToolbarButton.prototype */{
-    /**
-     * @returns {String} A html string of the button
-     */
-    getButton: function() {
-      return '<a href="#" class=\"'+ this.name +'" ><span>'+ this.name +'</span></a>';
+      $tip.stop().css({opacity: 0, display: 'block', visibility: 'visible'})
+        .animate({opacity: this.opacity});
+    },
+    
+    hide: function(fadeOut) {
+      var that = this;
+      if(this.hidden){
+        return;
+      }
+      if (fadeOut) {
+        this.$tip.stop().fadeOut(function() { that.hidden = true; });
+      } else {
+        this.$tip.hide();
+        this.hidden = true;
+      }
     }
   };
 
-  /**
-   * Create a select for the toolbar
-   *
-   * @constructor
-   * @name ToolbarSelect
-   * 
-   * @param {String} name The class name of the button
-   * @param {Array} [options] The options of the select dropdown
-   * @param {Function} [clicked] The default action if the button is clicked
-   */
-  function ToolbarSelect(name, options, clicked){
-    ToolbarButton.apply(this, [name, clicked]);
-    this.options = options || [];
+  function getError($ele) {
+    var error = $ele.data('error');
+    if (!error) {
+      error = new Error($ele);
+      $ele.data('error', error);
+    }
+    return error;
   }
-  ToolbarSelect.prototype = /** @scope ToolbarSelect.prototype */{
-    /**
-     * @returns {String} A html string of the button
-     */
-    getButton: function() {
-      var select = "<select class=\"" + this.name +  "\">",
-      optionsLength = this.options.length,
-      i;
 
-      select.className = this.name;
-
-      for (i = 0; i < optionsLength; i += 1){
-        select += "<option value=\"" + this.options[i][0] + "\">" + this.options[i][1] + "</option>";
-      }
-      return select + "</select>";
-    }
-  };  // end ToolbarSelect
-
-  function getToolbarHTML(){
-    var i,l, item;
-
-    if(!toolbarHTML){
-      for(i=0,l=availableItems.length; i < l ; i++){
-        item = toolbarItems[availableItems[i]];
-        if(item){
-          toolbarHTML += item.getButton();
-        }
-      }
-    }
-
-    return toolbarHTML;
-  }
-  
-  /**
-   * Create a toolbar for an editor. Every editor has its own toolbar, since the
-   * items of the toolbar can be defined on a per editor basis (save callback)
-   *
-   * @constructor
-   * @name Toolbar
-   */
-  function Toolbar(editor) {
-
-    // init Toolbar Items
-    var button, buttonTags = '',
-    toolbarDiv = $("<div class=\"toolbar\"></div>"),
-    that = this;
-    
-    this.textArea = editor.textArea;
-    this.htmlDiv = editor.htmlDiv;
-    this.editor = editor;
-    this.div = toolbarDiv;
-
-    toolbarDiv.html(getToolbarHTML());
-    
-    toolbarDiv.mouseup(function(e) { // Trigger on button click
-      var target = e.target;
-
-      if(!(/(select|option)/i).test(target.nodeName)) {
-        // When the span is clicked change the Target to the
-        // containing div
-        if(/span/i.test(target.nodeName)) {
-          target = target.parentNode;
-        }
-        if(target.disabled){
-          // TODO handle focus somewhere
-          if(editor.is('wysiwyg')){
-            editor.htmlDiv.focus();
-          } else {
-            editor.textArea.focus();
-          }
-          return false;
-        }
-        var action = target.className;
-
-        action = action.split(" ")[0];
-        that.runAction(action, target);
-        // TODO this does not work with dialogs
-        // in dialogs this gets set manually, but perhaps there is a
-        // more general way?
-        editor.checkState();
-      }
-    }).change(function(e) { // trigger on select change
-      var target = e.target;
-      that.runAction(target.className, target);
-      return false;
-    }).click(function(e){return false; }); //
-
-    editor.container.prepend(toolbarDiv);
-  } // end initToolbar
-
-  Toolbar.prototype = /** @scope Toolbar.prototype */{
-    /**
-     * Load the toolbar for the current mode. If a toolbar item is not
-     * supported, it will be hidden.
-     */
-    loadModeToolbar: function(){
-      var supportedItems = this.editor.currentMode.supportedItems,
-      hasSave = this.editor.settings.save,
-      oldVisibleItems = this.visibleItems,
-      newVisibleItems = [];
-      
-      // Optimize: better scheme. Calculate the differences between
-      // the modes once and use them here
-      this.div.children().each(function(){
-        var item = this.className;
-        if(supportedItems.indexOf(item) != -1 && (item !== "save" || hasSave)){
-          if(!oldVisibleItems || oldVisibleItems.indexOf(item) == -1){
-            $(this).show();
-          }
-          newVisibleItems.push(item);
-        } else {
-          if(!oldVisibleItems || oldVisibleItems.indexOf(item) != -1){
-            $(this).hide();
-          }
-        }
-      });
-      this.visibleItems = newVisibleItems;
-    },
-    /**
-     * Execute the given action of the current mode
-     * 
-     * @param {String} action The action to execute
-     * @param {HTMLElement} target The target of the click
-     */
-    runAction: function(action,target) {
-      var item = toolbarItems[action],
-      editor = this.editor,
-      mode = editor.currentMode;
-      (item[mode.id] || item).clicked(editor, mode, target);
-      // Update Preview in case something has changed
-      if(action != "changeMode" && !editor.is("wysiwyg")) {
-        mode.updatePreview();
-      }
-    },
-    /**
-     * Activate the buttons/selects of the given actions on the toolbar
-     * 
-     * @param {Object} actions The actions which should be active
-     */
-    setActive: function( actions ) {
-      // activate each action in actions
-      if(actions) {
-        this.div.children().each(function(i) {
-          var action = this.className.split(" ")[0];
-          if (actions[action] == 'disable') { // deactivate
-            this.disabled = true;
-            this.className = action + " disabled";
-          } else {
-            this.disabled = false;
-            this.className = action;
-            if(actions[action] === true) { // buttons
-              this.className = action + " on";
-            } else if(actions[action]){ // selects
-              this.value = actions[action];
-            }
-          }
-        });
-      }
-    }
-  }; // end Toolbar prototype
-  
-  /**
-   * Create a new Editor
-   * 
-   * An editor has a current mode and a textarea mode. Both are the same if you 
-   * edit the textarea directly (e.g. textile). In the wysiwyg mode you edit the
-   * html directly.
-   *
-   * @constructor
-   * @name Editor
-   * 
-   * @param {jQuery} textArea The textarea
-   * @param {Object} settings Editor specific settings
-   */
-  function Editor(textArea, settings) {
-    var container, editor = this, timer = 0;
-
-    this.loadedModes = {};
-    this.setDataType(textArea.attr("class"));
-    this.settings = settings;
-
-    if(!this.dataType) { return ;}
-
-    function addKeyListeners(object, isTextarea){
-      object.keydown(function(e){
-        if(isTextarea || editor.is('wysiwyg')){
-          return editor.currentMode.pressed(e.keyCode);
-        }
-      }).keyup(function(e){
-        if(isTextarea || editor.is('wysiwyg')){
-          return editor.currentMode.released(e.keyCode);
-        }
-      }).mouseup(function(){
-        if(isTextarea || editor.is('wysiwyg')){
-          return editor.currentMode.clicked();
-        }
-      });
-    }
-    
-    this.textArea = textArea.bind("mouseup keyup", function() {
-      // TODO check for specific mouse keys
-      editor.checkState();
-      clearTimeout(timer);
-      timer = setTimeout(function(){
-        editor.currentMode.updatePreview();
-      },1000);
+  $.fn.error = function(method, options) {
+    return this.each(function(){
+      get( $(this), Error, 'error' )[method](options);
     });
-    addKeyListeners(textArea,true);
-    
-    this.htmlDiv = $("<div class=\"preview\"></div>")
-      .bind("mouseup keyup", function() {
-        // TODO check for specific mouse keys
-        if(editor.is("wysiwyg")) {
-          editor.checkState();
-        }
-      });
-    addKeyListeners(this.htmlDiv);
-    
-    this.container = textArea.wrap("<div class=\"markupEditor\"></div>")
-      .parent().append(editor.htmlDiv);
-    textArea.wrap("<div class=\"textarea\">");
-    this.toolbar = new Toolbar(this);
-  } // Editor
-
-  Editor.prototype = /** @scope Editor.prototype */{
-    /**
-     * Change the current mode to the given id
-     * 
-     * @param {String} modeId The id of the mode (e.g. textile)
-     */
-    changeMode: function(modeId) {
-      var nextMode;
-      nextMode = this.getMode(modeId);
-      this.commit();
-      this.currentMode = nextMode;
-      nextMode.activate();
-    },
-    /**
-     * Change the current underlying data format
-     * 
-     * @param {String} modeId The id of the mode (e.g. textile)
-     */
-    changeDataMode: function(modeId){
-      var isInWysiwyg = this.is('wysiwyg');
-      if(!modeId || modeId === this.currentMode.id) {
-        return false;
-      }
-      this.changeMode(modeId);
-      if(isInWysiwyg){
-        this.changeMode('wysywyg');
-      }
-    },
-    /**
-     * @returns {Mode} The current datamode
-     */
-    getDataMode: function() {
-      return this.getMode(this.dataType);
-    },
-    /**
-     * Get the specified mode. Loads it if necessary
-     *
-     * @param {String} modeId The id of the mode (e.g. textile)
-     *
-     * @returns {Mode} The initialized mode
-     */
-    getMode: function(modeId) {
-      if(this.loadedModes[modeId]) {
-        return this.loadedModes[modeId];
-      }
-      else if (availableModes[modeId]) {
-        this.loadedModes[modeId] = availableModes[modeId](this);
-        return this.loadedModes[modeId];
-      }
-      else {
-        console.log("Mode " + modeId + " is not defined");
-      }
-    },
-    setDataType: function(classString) {
-      var i, cssClass,
-      cssClasses = classString.split(/\s+/);
-
-      for(i = 0; i < cssClasses.length; i += 1) {
-        cssClass = cssClasses[i];
-
-        if(cssClass !== "wysiwyg" && availableModes[cssClass]) {
-          this.dataType = cssClass;
-        }
-      }
-    },
-    commit: function() {
-      if(this.is("wysiwyg")) {
-        this.getMode(this.dataType).updateTextArea();
-      } else {
-        this.currentMode.updatePreview();
-      }
-    },
-    is: function(modeId) {
-      return this.currentMode.id === modeId;
-    },
-    checkState: function () {
-      // check if the current Selection is inside a bold/italic etc.
-      this.toolbar.setActive(this.currentMode.getStates());
-    }
-  }; // end Editor prototype
-
-  /**
-   * Initialize the editor from a given HTML element
-   *
-   * @memberOf ME
-   * @inner
-   * @param {jQuery} container The element which will be editable
-   * @param {Option} settings Settings for this editor
-   */
-  function initEditorFromHTML(container, settings){
-    container.css("min-height", container.height());
-    var editor,
-    textarea = $("<textarea class=\"" + container[0].className + "\">")
-      .prependTo(container); // needs to be attached to DOM in firefox
-    
-    editor = initEditorFromTextarea(textarea, settings);
-    editor.htmlDiv.append(editor.container.nextAll());
-    editor.currentMode.updateTextArea();
-    editor.changeMode("wysiwyg");
-    editor.checkState();
-    
-    container.append(editor.container);
-  }
-  
-  /**
-   * Initialize the editor from a given textarea
-   *
-   * @memberOf ME
-   * @inner
-   * @param {jQuery} textarea The textarea which will be enhanced
-   * @param {Option} instanceSettings Settings for this editor
-   */
-  function initEditorFromTextarea(textarea,instanceSettings){
-    var editor,settings = {};
-    $.extend(settings,globalSettings,instanceSettings);
-    editor = new Editor(textarea, settings);
-
-    editor.currentMode = editor.getDataMode();
-
-    if(textarea.hasClass("wysiwyg")) {
-      // TODO better flow here
-      editor.currentMode.activate();
-      editor.currentMode = editor.getMode("wysiwyg");
-    }
-    editor.currentMode.activate();
-    editor.checkState();
-    return editor;
-  }
-
-  /**
-   * @namespace Holds all public methods
-   */
-  ME = {
-    /**
-     * Add a mode
-     *
-     * TODO change spec to object
-     * @param {String} modeId The id of the mode as referenced
-     * internally
-     * @param {Function} spec The definiton of the mode
-     */
-    addMode: function(modeId, spec) {
-      var mode = spec(), items = mode.items, constructor, supportedItems = globalItems.slice();
-      mode.id = modeId;
-      
-      if(items) {
-        for( item in items) {
-          if(items.hasOwnProperty(item) && item !== "default") {
-            supportedItems.push(item);
-            if(!toolbarItems[item]) {
-              constructor = items[item].options ? ToolbarSelect : ToolbarButton;
-              toolbarItems[item] = new constructor(item);
-            }
-            toolbarItems[item][modeId] = $.extend({name: item}, items["default"], items[item]);
-          }
-        }
-      }
-
-      if(modeId !== 'wysiwyg'){
-        toolbarItems.changeDataMode.options.push([modeId, mode.name]);
-      }
-
-      mode.supportedItems = supportedItems;
-      
-      availableModes[modeId] = function(editor) {
-        var modeInstance = new Mode(mode);
-        
-        modeInstance.load(editor);
-        
-        return modeInstance;
-      };
-      return mode;
-    },
-    /**
-     * The global options of markup editor
-     *
-     * @class
-     * @property {Function} save The save callback. Takes the editor
-     * as parameter
-     */
-    options: {},
-    /**
-     * Set the options
-     *
-     * @see ME#options for settable options
-     *
-     * @param {Object} options The options object
-     */
-    setOptions: function(options){
-      this.options = options;
-    }
   };
-
-  /**
-   * @name jQuery
-   * @namespace The popular DOM utility
-   */
-
-  /**
-   * Create the markup editor
-   *
-   * @memberOf jQuery.prototype
-   *
-   * @param {Object} settings The specific settings for the editor
-   * @see ME#settings
-   */
-  $.fn.initMarkupEditor = function(settings) {
-    ME.settings = settings;
-    this.each(function(index,element) {
-      var $element = $(element);
-      if($element.is("textarea")) {
-        initEditorFromTextarea($element, settings);
-      } else {
-        initEditorFromHTML($element, settings);
-      }
-    });
-    return this;
-  };
-
-  toolbarItems.changeDataMode = new ToolbarSelect("changeDataMode", [], function(editor, mode, target) {
-    editor.changeDataMode(target.value);
-  });
-
-  toolbarItems.formatBlock = new ToolbarSelect("formatBlock",[
-    ["p", "Paragraph"],
-    ["h1", "Heading 1"],
-    ["h2", "Heading 2"],
-    ["h3", "Heading 3"]
-  ]);
-
-  toolbarItems.save = new ToolbarButton("save", function(editor){
-    editor.commit();
-    editor.settings.save(editor);
-  });
-
-  toolbarItems.wysiwyg = new ToolbarButton("wysiwyg", function(editor, mode){
-    if(editor.is('wysiwyg')){
-      editor.changeMode(editor.dataType);
-    } else {
-      editor.changeMode('wysiwyg');
-    }
-  });
-
-  return ME;
-})(jQuery);
+})(jQuery, ME.t10n);
 (function(ME){
-  // Do not include Enter, Backspace, Delete
   neutralKeys = "9.16.17.18.20.27.33.34.35.36.37.38.39.40.45.91.93.93";
   
   ME.util = {
@@ -934,7 +292,6 @@
           })
           .keydown(function(e){
             if(!isNeutralKey(e.which) &&
-               // User may try to delete the prompt. Help him with that
                (!keyPressed || isRemovalKey(e.which)) &&
                $t.val() === options.prompt){
               clearField();
@@ -943,8 +300,6 @@
           .keyup(function(e){
             if(!keyPressed && (
               !isNeutralKey(e.which) &&
-                // Prevent reapearing of the prompt after it has just
-                // been deleted
                 !isRemovalKey(e.which)
             )){
               keyPressed = true;
@@ -960,11 +315,7 @@
             }
           })
           .parent().append($btn);
-        if($t.hasClass("ui-corner-left")){
-          $p.addClass("ui-corner-left");
-        } else {
-          $p.addClass("ui-corner-all");
-        }
+        $p.addClass("ui-corner-all");
       }
     });
   };
@@ -1018,7 +369,7 @@
           input.val(ui.item.value).change();
         }
       })
-	.addClass( "ui-corner-left" );
+	.addClass( "ui-corner-right short" );
 
       input.data( "autocomplete" )._renderItem = function( ul, item ) {
 	return $( "<li></li>" )
@@ -1030,29 +381,25 @@
       this.button = $( "<button type='button'>&nbsp;</button>" )
 	.attr( "tabIndex", -1 )
 	.attr( "title", "Show All Items" )
-	.insertAfter( input )
 	.button({
 	  icons: {
 	    primary: "ui-icon-triangle-1-s"
 	  },
 	  text: false
 	})
-	.removeClass( "ui-corner-all" )
 	.addClass( "ui-corner-right ui-button-icon" )
 	.click(function() {
-	  // close if already visible
 	  if ( input.autocomplete( "widget" ).is( ":visible" ) ) {
 	    input.autocomplete( "close" );
 	  } else {
-	    // pass empty string as value to search for, displaying
-            // all results
             if(input.data("hasPrompt")){
               input.val("");
             }
 	    input.autocomplete( "search", "" );
 	    input.focus();
           }
-	});
+	})
+	.appendTo( input.parent() );
     },
 
     destroy: function() {
@@ -1061,15 +408,96 @@
     }
   });
 })(jQuery, ME);
-(function($){
+(function($, _){
   var callback;
+
   $.fn.isValid.init();
-  function initDialog(dialogNode, fields, availableButtons){
-    var fieldsLength = fields.length, $form = dialogNode.find(":first-child");
-    dialogNode.dialog({
+  
+  function Proxy($dialogNode, availableButtons, $textNode){
+    this.dialogNode = $dialogNode;
+    this.availableButtons = availableButtons;
+    this.textNode = $textNode;
+  }
+  
+  Proxy.prototype = {
+    dialog: function(task, cb){
+      if(cb){
+        callback = cb;
+      }
+      this.dialogNode.dialog(task);
+    },
+    find: function(query){
+      return this.dialogNode.find(query);
+    },
+    selectButtons: function(buttonNames){
+      var buttons={},i=buttonNames.length;
+      while(i--){
+        buttons[buttonNames[i]] = this.availableButtons[buttonNames[i]];
+      }
+      this.dialogNode.dialog('option','buttons',buttons);
+    },
+    setText: function(text){
+      if(this.textNode){
+        this.textNode.html(text);
+      }
+    },
+    val: function(query,value){
+      this.find(query).val(value);
+    }
+  };
+
+  function initDialog($dialogNode){
+    var $textNode = $dialogNode.append('<p>');
+    
+    $dialogNode.dialog({
       autoOpen: false,
       width: 600,
+      modal: true,
       close: function() {
+        if(callback && callback.close){
+          callback.close();
+        }
+      }
+    });
+
+    return new Proxy($dialogNode, {
+      Ok: function(){
+        if(callback && callback.submit){
+          callback.submit();
+        }
+        $dialogNode.dialog("close");
+      },
+      Cancel: function(){
+        if(callback && callback.cancel){
+          callback.cancel();
+        }
+        $dialogNode.dialog("close");
+      }
+    }, $textNode);
+  }
+
+  function initFormDialog($dialogNode, fieldDefinitions){
+    var fieldsLength = fieldDefinitions.length,
+    $form = $dialogNode.append('<form>'),
+    fields = initFields($form, fieldDefinitions);
+    
+    submit = function() {
+      var args = [],i;
+      for(i=0; i < fieldsLength; i++){
+        args[i] = fields[i].submit().val();
+      }
+      if($form.isValid()){
+        callback.submit.apply(this,args);
+        $dialogNode.dialog("close");
+      }
+    };
+
+    $dialogNode.dialog({
+      autoOpen: false,
+      width: 600,
+      modal: true,
+      close: function() {
+        $form.isValid('reset');
         if(callback.close){
           callback.close();
         }
@@ -1084,83 +512,10 @@
           fields[i].change();
         }
         fields[0][0].setSelectionRange(0,0);
-        $form.isValid('reset');
       }
     });
 
-    return {
-      dialog: function(task, cb){
-        if(cb){
-          callback = cb;
-        }
-        dialogNode.dialog(task);
-      },
-      find: function(query){ return dialogNode.find(query); },
-      selectButtons: function(buttonNames){
-        var buttons={},i=buttonNames.length;
-        while(i--){
-          buttons[buttonNames[i]] = availableButtons[buttonNames[i]];
-        }
-        dialogNode.dialog('option','buttons',buttons);
-      },
-      val: function(query,value){
-        this.find(query).val(value);
-      }
-    };
-  }
-
-  var t10n = {
-    linkTitle: 'Link',
-    insertImageTitle: 'Image',
-    uri: 'Link',
-    uriPrompt: 'Enter or select link',
-    title: 'Title',
-    titlePrompt: 'Enter title',
-    imageUri: 'Image Source'
-  };
-
-  function createDialog(name, fields){
-    var $dialogNode, proxy, i, fieldName, jQueryFunctions, method, args,
-    fieldsLength = fields.length,
-    $fields = [];
-
-    $dialogNode = $('<div id=\"'+ name + '-dialog\" title=\"' + 
-                    t10n[name + "Title"] + '\"><form>');
-    var $form = $dialogNode.find(":first-child");
-    
-    for(i=0; i < fieldsLength; i++){
-      fieldName = fields[i][0];
-      jQueryFunctions = fields[i][1];
-      
-      $form.append(
-        '<label for=\"' + fieldName + '\">'+ t10n[fieldName] + '</label>'
-      );
-      $fields[i] = $('<input type=\"text\" class=\"' + fieldName + '\" name=\"' + fieldName + "\">")
-        .appendTo($form);
-      
-      if(jQueryFunctions){
-        for(method in jQueryFunctions){
-          if(jQueryFunctions.hasOwnProperty(method)){
-            args = jQueryFunctions[method];
-            $fields[i][method](args);
-          }
-        }
-      }
-      $fields[i].enhanceTextfield({prompt: t10n[fieldName+"Prompt"]});
-    }
-    
-    submit = function() {
-      var args = [],i;
-      for(i=0; i < fieldsLength; i++){
-        args[i] = $fields[i].submit().val();
-      }
-      if($form.isValid()){
-        callback.submit.apply(this,args);
-        $dialogNode.dialog("close");
-      }
-    };
-
-    proxy = initDialog($dialogNode, $fields, {
+    return new Proxy($dialogNode, {
       Create: submit,
       Update: submit,
       Remove: function(){
@@ -1171,9 +526,52 @@
 	$dialogNode.dialog("close");
       }
     });
+  }
+
+  function initFields($form, fieldDefinitions){
+    var jQueryFunctions, fieldName, method, args, i,
+    fields = [],
+    fieldsLength = fieldDefinitions.length;
     
-    return function(buttonNames){
+    for(i=0; i < fieldsLength; i++){
+      fieldName = fieldDefinitions[i][0];
+      jQueryFunctions = fieldDefinitions[i][1];
+      
+      $form.append(
+        '<label for=\"' + fieldName + '\">'+ _(fieldName) + '</label>'
+      );
+      fields[i] = $('<input type=\"text\" class=\"' + fieldName + '\" name=\"' + fieldName + "\">")
+        .appendTo($form);
+      
+      fields[i].enhanceTextfield({prompt: _(fieldName+"Prompt")});
+      
+      if(jQueryFunctions){
+        for(method in jQueryFunctions){
+          if(jQueryFunctions.hasOwnProperty(method)){
+            args = jQueryFunctions[method];
+            fields[i][method](args);
+          }
+        }
+      }
+    }
+    return fields;
+  }
+
+  function createDialog(name, fieldDefinitions){
+    var $dialogNode, proxy;
+
+    $dialogNode = $('<div id=\"'+ name + '-dialog\" title=\"' + 
+                    _(name + "Title") + '\">');
+
+    if(fieldDefinitions){
+      proxy = initFormDialog($dialogNode, fieldDefinitions);
+    } else {
+      proxy = initDialog($dialogNode);
+    }
+
+    return function(buttonNames, text){
       proxy.selectButtons(buttonNames);
+      proxy.setText(text);
       return proxy;
     };
   }
@@ -1197,36 +595,878 @@
       ['uri', {
         combobox: {key: 'uri'}
       }]
-    ])
+    ]),
+    notice: createDialog('notice')
   };
-})(jQuery);
-ME.addMode("textile", function() {
-  var text, selectionStart, startOfParagraphs, endOfParagraphs, oldExtendedSelectionLength, currentNodes = {},
-  $ = jQuery;
+})(jQuery, ME.t10n);
+!function ($){
+  
 
-  /**
-   * Iterate over each paragraph and call the functor on it and set the paragraphs
-   * CONSIDER rename or move setParagraphs out of it
-   * 
-   * @param {Mode} mode The current mode
-   * @param {Function} functor The functor will be applied on each paragraph
-   */
-  function eachParagraph(mode, functor) {
-    var paragraphs = mode.getParagraphs(), paragraphsLength = paragraphs.length;
+  var globalSettings = {},
+  methods = {
+    
+    init: function(settings) {
+      ME.settings = settings;
+      return this.each(function(index,element) {
+        var $element = $(element), editor;
+        if($element.is("textarea")) {
+          initEditorFromTextarea($element, settings);
+        } else {
+          initEditorFromHTML($element, settings);
+        }
+      });
+    },
+    close: function(){
+    },
+    prepare: function(settings) {
+      return this.one('click', function(){
+        $(this).markupEditor(settings);
+      });
+    }
+  };
+  
+  
+  $.fn.markupEditor= function(method) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    if(typeof method === 'object'){
+      args.push(method);
+    }
+    if (!methods[method]) {
+      method = 'init';
+    }
+    return methods[method].apply(this, args);
+  };
+
+  function isValidDatatype(cssClass, changeDatamodeSelect){
+    if(!ME.Editor.extractDataType(cssClass, changeDatamodeSelect)){
+      ME.dialog.notice(['Ok'], ME.t10n('noticeMissingDatamode'))
+        .dialog('open');
+    } else {
+      return true;
+    }
+  }
+  
+  
+  function initEditorFromHTML(container, settings){
+    if(!isValidDatatype(container[0].className)){
+      return;
+    }
+    var editor,src,
+    textarea = $("<textarea class=\"" + container[0].className + "\">");
+
+    container.css("min-height", container.height());
+    container.before(textarea); // needs to be attached to DOM in firefox
+
+    settings = settings || {};
+    settings.preview = container;
+    editor = initEditorFromTextarea(textarea, settings);
+
+    src = container.attr('src');
+    if(src){
+      $.get(src, {
+      }, function(text, status, response){
+        textarea.val(text);
+        editor.checkState();
+        editor.currentMode.updatePreview(editor);
+      });
+    } else {
+      editor.currentMode.updateTextArea(editor);
+      editor.changeMode("wysiwyg");
+    }
+  }
+  
+  
+  function initEditorFromTextarea(textarea,instanceSettings){
+    if(!isValidDatatype(textarea[0].className)){
+      return;
+    }
+    var editor,settings = {};
+    $.extend(settings,globalSettings,instanceSettings);
+    editor = new ME.Editor(textarea, settings);
+
+    editor.currentMode = editor.getDataMode();
+
+    if(textarea.hasClass("wysiwyg")) {
+      editor.changeMode('wysiwyg');
+    } else {
+      editor.currentMode.activate(editor, function(){
+        editor.currentMode.afterActivation(editor);
+      });
+    }
+
+    return editor;
+  }
+
+}(jQuery);
+
+!function ($) {
+  
+  ME.Mode = function Mode(customFunctions){
+    $.extend(this, customFunctions);
+    this.prototype = Mode.prototype;
+  };
+  
+  ME.Mode.prototype = {
+    
+    pressed: function(editor, keyCode){
+      if(keyCode === 16){
+        ME.holdShift = true;
+      }
+      if(ME.util.isNeutralKey(keyCode)){
+        ME.holdNeutralKey = true;
+      }
+    },
+    
+    released: function(editor, keyCode){
+      if(keyCode === 16){
+        ME.holdShift = false;
+      }
+      if(ME.util.isNeutralKey(keyCode)){
+        ME.holdNeutralKey = false;
+      }
+    },
+    
+    clicked: $.noop,
+    
+    activate: function(editor, callback) {
+      if(editor.preview.is(":empty")) {
+        this.updatePreview(editor, callback);
+      } else {
+        this.updateTextArea(editor, callback);
+      }
+      editor.toolbar.loadModeToolbar(editor);
+    },
+    
+    updatePreview: function(editor, callback) {
+      var html;
+      if(this.toHTML){
+
+        html = this.toHTML(editor, callback);
+        if(html !== undefined){
+          editor.preview.html(html || "<p>&nbsp;</p>");
+          
+          if(callback){
+            callback();
+          }
+        }
+      } else if(callback){
+        callback();
+      }
+    },
+    
+    updateTextArea: function(editor, callback) {
+      var text, dialogProxy;
+      if(this.toText && (!editor.oldMode || editor.oldMode.toHTML)){
+
+        text = this.toText(editor, callback);
+        if(text !== undefined){
+          editor.textArea.val(text);
+          
+          if(callback){
+            callback();
+          }
+        }
+      } else {
+        if(callback){
+          callback();
+        }
+      }
+    },
+    
+    afterActivation: function(editor) {
+      var preview = editor.preview;
+      editor.textArea
+        .parent().show()
+        .find(":first-child").focus()[0]
+        .setSelectionRange(0,0);
+      editor.dataType = this.id;
+      preview.attr("contentEditable",false);
+      if(this.toHTML){
+        preview.show();
+      } else {
+        preview.hide();
+      }
+    },
+    
+    getStates: function(editor){
+      var states = this.getSelectionStates(editor);
+      if(this.id === 'wysiwyg'){
+        states.wysiwyg = true;
+        states.changeDataMode = editor.dataType;
+      } else {
+        states.changeDataMode = this.id;
+      }
+      return states;
+    },
+    
+    getSelectionStates: function(editor){
+      return {};
+    },
+    
+    buildStateObject: function(nodes, currentNodes){
+      function getTag(node){
+        return node.tag ? node.tag : node.nodeName.toLowerCase();
+      }
+      var node, i = nodes.length, states = {};
+      while(i--){
+        node = nodes[i];
+        switch (getTag(node)){
+        case "a":
+          currentNodes.a = node;
+          states.link = true;
+          break;
+        case "img":
+          currentNodes.img = node;
+          states.insertImage = true;
+          break;
+        case "i":
+          states.italic = true;
+          break;
+        case "b":
+          states.bold = true;
+          break;
+        case "ol":
+          states.orderedList = true;
+          states.unorderedList = false;
+          states.formatBlock = 'disable';
+          states.alignLeft = 'disable';
+          states.alignRight = 'disable';
+          states.alignCenter = 'disable';
+          currentNodes.list = node;
+          break;
+        case "ul":
+          states.orderedList = false;
+          states.unorderedList = true;
+          states.formatBlock = 'disable';
+          states.alignLeft = 'disable';
+          states.alignRight = 'disable';
+          states.alignCenter = 'disable';
+          currentNodes.list = node;
+          break;
+        case "li":
+          break;
+        default:
+          states.formatBlock = getTag(node);
+          currentNodes.block = node;
+          break;
+        }
+      }
+      return states;
+    },
+    
+    atBeginningOfLine: function(editor){
+      var text = editor.textArea.val();
+      return text[editor.selectionStart-1] === "\n";
+    },
+    
+    getSelection: function(editor, boundary) {
+      var boundaryPosition, subString, outerLimit, outerLimitLength, searchLimit, boundaryStart, boundaryEnd, selectionEnd, selectionStart,
+      textArea = editor.textArea,
+      text = textArea.val();
+      textArea.focus();
+
+      editor.initSelectionProperties(text);
+      selectionEnd = editor.selectionEnd;
+      selectionStart = editor.selectionStart;
+
+      if(boundary) {
+        if(boundary.indexOf('\n') === -1){
+          outerLimit = "\n";
+        } else {
+          outerLimit = "\n\n";
+        }
+        outerLimitLength = outerLimit.length;
+        searchLimit = selectionStart - outerLimit.length;
+        boundaryPosition = Math.max(text.lastIndexOf(boundary, searchLimit), text.lastIndexOf(outerLimit, searchLimit));
+        if(boundaryPosition !== -1) {
+          boundaryStart = boundaryPosition + outerLimitLength;
+        } else {
+          boundaryStart = 0;
+        }
+        boundaryPosition = text.indexOf(outerLimit, selectionEnd); 
+        if(boundaryPosition === -1) {
+          subString = text.slice(boundaryStart);
+        } else {
+          subString = text.slice(boundaryStart, boundaryPosition);
+        }
+        boundaryPosition = 0;
+        do{
+          boundaryPosition = subString.indexOf(boundary, boundaryPosition + outerLimitLength);
+        } while(boundaryPosition !== -1 && selectionEnd > boundaryStart + boundaryPosition);
+        if(boundaryPosition === -1) {
+          boundaryPosition = subString.length;
+        }
+        boundaryEnd = boundaryStart + boundaryPosition;
+      }
+      
+      editor.boundaryStart = boundary ? boundaryStart : selectionStart;
+      editor.boundaryEnd = boundary ? boundaryEnd : selectionEnd;
+      editor.boundaryDistance = boundary ? boundaryPosition : (selectionStart - selectionEnd);
+
+      return text.slice(editor.boundaryStart, editor.boundaryEnd);
+    },
+    
+    extendSelection: function(editor, boundary){
+      var selection = this.getSelection(editor, boundary);
+      editor.setSelectionRange(editor.boundaryStart, editor.boundaryEnd);
+      return selection;
+    },
+    
+    replaceSelection: function(editor, string, collapseToStart) {
+      var textArea = editor.textArea,
+      newSelectionStart = editor.selectionStart,
+      newSelectionEnd = editor.selectionStart + string.length;
+      textArea.val(textArea.val().slice(0, editor.selectionStart) + string + textArea.val().slice(editor.selectionEnd, textArea.val().length));
+      if(collapseToStart === true){
+        newSelectionEnd = newSelectionStart;
+      } else if(collapseToStart === false){
+        newSelectionStart = newSelectionEnd;
+      }
+
+      editor.setSelectionRange(newSelectionStart, newSelectionEnd);
+      textArea.focus();
+    },
+    
+    extendRightSelection: function(editor, regexp){
+      var match;
+      regexp = new RegExp(regexp.source,'g');
+      regexp.lastIndex = editor.selectionEnd;
+      match = regexp.exec(editor.textArea.val());
+
+      if(match && regexp.lastIndex == editor.selectionEnd + match[0].length){
+        editor.selectionEnd += match[0].length;
+        return match[0];
+      }
+    },
+    
+    extendLeftSelection: function(editor, regexp){
+      var match, substring = editor.textArea.val().slice(0,editor.selectionStart);
+      regexp = new RegExp(regexp.source + "$");
+      match = regexp.exec(substring);
+      
+      if(match){
+        editor.selectionStart -= match[0].length;
+        return match[0];
+      }
+    }}; // ME.Mode.prototype
+}(jQuery);
+
+!function ($, _){
+  var toolbarItems = {},
+  toolbarHTML = "",
+  globalItems = [],
+  availableItems = ['bold','italic','alignLeft','alignCenter','alignRight','unorderedList','orderedList','link','insertImage','save','wysiwyg','close','changeDataMode','formatBlock'];
+  
+  ME.ToolbarButton = function (name, clicked, isAvailable){
+    this.name = name;
+    this.isAvailable = isAvailable;
+    if(clicked){
+      this.clicked = clicked;
+      globalItems.push(name);
+    }
+  };
+  
+  ME.ToolbarButton.prototype = {
+    
+    getButton: function() {
+      return '<a href="#" class=\"'+ this.name +'\" title="' + _(this.name) + '"><span>'+ this.name +'</span></a>';
+    }
+  };
+
+  
+  ME.ToolbarSelect = function (name, options, clicked, isAvailable){
+    ME.ToolbarButton.apply(this, [name, clicked, isAvailable]);
+    this.options = options || [];
+  };
+  
+  ME.ToolbarSelect.prototype = {
+    
+    getButton: function() {
+      var select = "<select class=\"" + this.name +  '\" title="' + _(this.name) + '">',
+      optionsLength = this.options.length,
+      i;
+
+      select.className = this.name;
+
+      for (i = 0; i < optionsLength; i += 1){
+        select += "<option value=\"" + this.options[i][0] + "\">" + this.options[i][1] + "</option>";
+      }
+      return select + "</select>";
+    }
+  };  // end ToolbarSelect
+
+  
+  function getToolbarHTML(){
+    var i,l, item;
+
+    if(!toolbarHTML){
+      for(i=0,l=availableItems.length; i < l ; i++){
+        item = toolbarItems[availableItems[i]];
+        if(item){
+          toolbarHTML += item.getButton();
+        }
+      }
+    }
+
+    return toolbarHTML;
+  }
+  
+  function changeIfNecessary(select, newVal){
+    if(select.val() !== newVal){
+      select.val(newVal).change();
+    }
+  }
+
+  function useExternalChangeDataModeSelect(select, toolbarDiv, editorID) {
+    var toolbarSelect = toolbarDiv.find('.changeDataMode');
+    toolbarSelect.html(select.find('option').clone())
+      .change(function(){
+        changeIfNecessary(select, $(this).val());
+      });
+
+    var editorIDs = select.data('editorIDs') || [];
+    if(!editorIDs[0]){
+      select.hide().change(function(){
+        changeIfNecessary(toolbarSelect, $(this).val());
+      });
+    }
+    editorIDs.push(editorID);
+    select.data('editorIDs', editorIDs);
+  }
+
+  
+  ME.Toolbar = function Toolbar(editor) {
+    var button, buttonTags = '',
+    toolbarDiv = $("<div class=\"toolbar\"></div>"),
+    that = this,
+    select = editor.settings.select;
+
+    this.div = toolbarDiv;
+
+    toolbarDiv.html(getToolbarHTML());
+
+    if(select && select[0]){
+      useExternalChangeDataModeSelect(select, toolbarDiv, editor.id);
+    }
+
+    toolbarDiv.mouseup(function(e) { // Trigger on button click
+      target = e.target;
+
+      if((/(a|span)/i).test(target.nodeName)) {
+        if(/span/i.test(target.nodeName)) {
+          target = target.parentNode;
+        }
+        if(target.disabled){
+          if(editor.is('wysiwyg')){
+            editor.preview.focus();
+          } else {
+            editor.textArea.focus();
+          }
+          return false;
+        }
+        var action = target.className;
+
+        action = action.split(" ")[0];
+        
+        that.runAction(editor, action, target);
+      }
+    }).change(function(e) { // trigger on select change
+      var target = e.target;
+      that.runAction(editor, target.className, target);
+      return false;
+    }).click(function(e){return false; }); //
+  }; // ME.Toolbar
+
+  ME.Toolbar.getSupportedItems = function(modeId, modeName, items){
+    var constructor,
+    supportedItems = globalItems.slice(); // global items (like
+    
+    if(items) {
+      for( item in items) {
+        if(items.hasOwnProperty(item) && item !== "default") {
+          supportedItems.push(item);
+          if(!toolbarItems[item]) {
+            constructor = items[item].options ? ME.ToolbarSelect : ME.ToolbarButton;
+            toolbarItems[item] = new constructor(item);
+          }
+          toolbarItems[item][modeId] = $.extend({name: item}, items["default"], items[item]);
+        }
+      }
+    }
+
+    if(modeId !== 'wysiwyg'){
+      toolbarItems.changeDataMode.options.push([modeId, modeName]);
+    }
+
+    return supportedItems;
+  };
+
+  ME.Toolbar.prototype = {
+    
+    loadModeToolbar: function(editor){
+      var supportedItems = editor.currentMode.supportedItems,
+      oldVisibleItems = this.visibleItems,
+      newVisibleItems = [];
+      this.div.children().each(function(){
+        var item = this.className.split(' ')[0], isAvailable = toolbarItems[item].isAvailable;
+        if(supportedItems.indexOf(item) != -1 && (!isAvailable || isAvailable(editor))){
+          if(!oldVisibleItems || oldVisibleItems.indexOf(item) == -1){
+            $(this).show();
+          }
+          newVisibleItems.push(item);
+        } else {
+          if(!oldVisibleItems || oldVisibleItems.indexOf(item) != -1){
+            $(this).hide();
+          }
+        }
+      });
+      this.visibleItems = newVisibleItems;
+    },
+    
+    runAction: function(editor,action,target) {
+      var asynchronous,
+      item = toolbarItems[action],
+      mode = editor.currentMode;
+
+      if(editor.is('wysiwyg')){
+        editor.preview.focus();
+      }
+      asynchronous = (item[mode.id] || item).clicked(editor, target);
+      
+      if(!asynchronous){
+        editor.checkState();
+        if( !editor.is("wysiwyg")) {
+          mode.updatePreview(editor);
+        }
+      }
+    },
+    
+    setActive: function( actions ) {
+      if(actions) {
+        this.div.children().each(function(i) {
+          var action = this.className.split(" ")[0];
+          if (actions[action] == 'disable') { // deactivate
+            this.disabled = true;
+            this.className = action + " disabled";
+          } else {
+            this.disabled = false;
+            this.className = action;
+            if(actions[action] === true) { // buttons
+              this.className = action + " on";
+            } else if(actions[action]){ // selects
+              this.value = actions[action];
+            }
+          }
+        });
+      }
+    }
+  }; // ME.toolbar.prototype
+
+  toolbarItems.changeDataMode = new ME.ToolbarSelect("changeDataMode", [], function(editor, target) {
+    editor.changeDataMode(target.value);
+    return true;
+  }, function(editor){
+    return editor.toolbar.div.find('.changeDataMode option').length > 1;
+  });
+
+  toolbarItems.formatBlock = new ME.ToolbarSelect("formatBlock",[
+    ["p", _("p")],
+    ["h1", _("h1")],
+    ["h2", _("h2")],
+    ["h3", _("h3")]
+  ]);
+
+  toolbarItems.save = new ME.ToolbarButton("save", function(editor){
+    editor.synchronize();
+    editor.settings.save(editor);
+    return true;
+  }, function(editor){
+    return editor.settings.save;
+  });
+
+  toolbarItems.wysiwyg = new ME.ToolbarButton("wysiwyg", function(editor){
+    if(editor.is('wysiwyg')){
+      editor.changeMode(editor.dataType);
+    } else {
+      editor.changeMode('wysiwyg');
+    }
+    return true;
+  }, function(editor){
+    var mode = editor.currentMode;
+    return mode.toHTML && mode.toText;
+  });
+
+  toolbarItems.close = new ME.ToolbarButton('close', function(editor){
+    editor.close();
+  }, function(editor) {
+    var settings = editor.settings;
+    return settings.preview || settings.closable;
+  });
+
+}(jQuery, ME.t10n);
+
+!function ($, _){
+  var focusedEditor,
+  activeEditors = [],
+  numberOfEditors = 0;
+
+  
+  ME.Editor = function Editor(textArea, settings) {
+    var editor = this, timer = 0, preview = settings.preview;
+
+    activeEditors[numberOfEditors] = editor;
+    editor.id = numberOfEditors;
+    numberOfEditors ++;
+
+    this.setDataType(textArea.attr("class"));
+    this.settings = settings;
+
+    if(!this.dataType) { return ;}
+
+    function addKeyListeners(object, isTextarea){
+      object.keydown(function(e){
+        if(isTextarea || editor.is('wysiwyg')){
+          return editor.currentMode.pressed(editor, e.keyCode);
+        }
+      }).keyup(function(e){
+        if(isTextarea || editor.is('wysiwyg')){
+          return editor.currentMode.released(editor, e.keyCode);
+        }
+      }).mouseup(function(){
+        if(isTextarea || editor.is('wysiwyg')){
+          editor.focus();
+          return editor.currentMode.clicked(editor);
+        }
+      });
+    }
+    this.textArea = textArea.bind("mouseup keyup", function() {
+      editor.checkState();
+      clearTimeout(timer);
+      timer = setTimeout(function(){
+        editor.currentMode.updatePreview(editor);
+      },1000);
+    });
+    addKeyListeners(textArea,true);
+
+    if(preview){
+      preview.addClass('preview');
+    } else {
+      preview = $("<div class=\"preview\">");
+    }
+    this.preview = preview.bind("mouseup keyup", function() {
+      if(editor.is("wysiwyg")) {
+        editor.checkState();
+      }
+    });
+    addKeyListeners(this.preview);
+
+    this.overlay = $('<div class=\"overlay\"><div class=\"background\"></div><div class=\"spinner\"></div></div>');
+    
+    this.toolbar = new ME.Toolbar(this);
+    this.container = textArea.wrap("<div class=\"markupEditor\">")
+      .parent()
+      .append(editor.preview)
+      .append(this.overlay)
+      .prepend(this.toolbar.div);
+    textArea.wrap("<div class=\"textarea\">");
+  } // Editor
+
+  
+  ME.Editor.extractDataType = function(classString, select){
+    var i, cssClass,
+    cssClasses = classString.split(/\s+/);
+
+    for(i = 0; i < cssClasses.length; i += 1) {
+      cssClass = cssClasses[i];
+
+      if(cssClass !== "wysiwyg" && ME.hasMode(cssClass)) {
+        return cssClass;
+      }
+    }
+  };
+
+  ME.Editor.prototype = {
+    
+    changeMode: function(modeId, silent) {
+      var editor = this,
+      nextMode = ME.getMode(modeId),
+      oldMode = editor.currentMode;
+      this.warnIfNecessary(oldMode,nextMode, function(){
+        editor.beginModeChange();
+        
+        editor.synchronize(function(){
+          editor.oldMode = oldMode;
+          editor.currentMode = nextMode;
+          nextMode.activate(editor, function(){
+            nextMode.afterActivation(editor);
+            editor.checkState();
+
+            delete editor.oldMode;
+            editor.finalizeModeChange(silent);
+          });
+        });
+      }, silent);
+    },
+    
+    changeDataMode: function(modeId, silent){
+      var isInWysiwyg = this.is('wysiwyg'),
+      dataMode = ME.getMode(modeId);
+      if(!modeId || modeId === this.currentMode.id) {
+        return false;
+      }
+
+      if(isInWysiwyg && dataMode.toText){
+        this.dataType = modeId;
+        this.checkState();
+        this.syncEditors(silent);
+      } else {
+        this.changeMode(modeId);
+      }
+    },
+    warnIfNecessary: function(oldMode, nextMode, callback, silent){
+      var editor = this;
+      if(silent || (nextMode.toText && oldMode.toHTML)){
+        callback();
+      } else {
+        if(nextMode.toText){
+          text = 'noticeMissingToHTML';
+        } else {
+          text = 'noticeMissingToText';
+        }
+        dialogProxy = ME.dialog.notice(['Ok', 'Cancel'], _(text));
+        dialogProxy.dialog('open', {
+          submit: function(){
+            if(callback){
+              callback();
+            }
+          },
+          cancel: function(){
+            editor.toolbar.div.find('.changeDataMode')
+              .val(oldMode.id);
+          }
+        });
+      }
+    },
+    
+    beginModeChange: function(){
+      this.overlay.show();
+    },
+    syncEditors: function(silent) {
+      var i, editorID, otherEditor, editorIDs,
+      externalSelect = this.settings.select,
+      newModeID = this.currentMode.id;
+
+      if(externalSelect && !silent){
+        editorIDs = externalSelect.data('editorIDs') || [];
+
+        for(i = editorIDs.length; --i >= 0;){
+          editorID = editorIDs[i];
+          if(editorID === this.id){
+            continue;
+          }
+
+          otherEditor = activeEditors[editorID];
+
+          if(newModeID !== otherEditor.currentMode.id){
+            otherEditor.changeMode(newModeID, true);
+          } else { // wysiwyg datamode change
+            otherEditor.changeDataMode(this.dataType, true);
+          }
+        }
+      }
+    },
+    
+    finalizeModeChange: function(silent){
+      this.overlay.hide();
+      this.syncEditors(silent);
+    },
+    
+    getDataMode: function() {
+      return ME.getMode(this.dataType);
+    },
+    
+    setDataType: function(classString) {
+      this.dataType = ME.Editor.extractDataType(classString);
+    },
+    
+    initSelectionProperties: function(text){
+      var textArea = this.textArea,
+      selectionEnd;
+      
+      this.scrollPosition = textArea.scrollTop;
+      this.selectionStart = textArea[0].selectionStart;
+      selectionEnd = textArea[0].selectionEnd;
+      if(selectionEnd != this.selectionStart && text[selectionEnd-1] === "\n"){
+        selectionEnd -= 1;
+      }
+      this.selectionEnd = selectionEnd;
+    },
+    setSelectionRange: function(selectionStart, selectionEnd){
+      this.textArea[0].setSelectionRange(selectionStart, selectionEnd);
+      this.selectionStart = selectionStart;
+      this.selectionEnd = selectionEnd;
+    },
+    
+    synchronize: function(callback) {
+      if(this.is("wysiwyg")) {
+        this.currentMode.updateTextArea(this, callback);
+      } else {
+        this.currentMode.updatePreview(this, callback);
+      }
+    },
+    
+    is: function(modeId) {
+      return this.currentMode.id === modeId;
+    },
+    
+    checkState: function () {
+      this.toolbar.setActive(this.currentMode.getStates(this));
+    },
+    
+    focus: function() {
+      if(focusedEditor){
+        activeEditors[focusedEditor].blur();
+      }
+      focusedEditor = this.id;
+    },
+    
+    blur: function(){
+      
+    },
+    
+    close: function() {
+      var replacement = this.settings.preview || this.textArea;
+      this.synchronize();
+      
+      this.container.replaceWith(replacement);
+      replacement.removeClass('preview').unbind()
+        .attr('contentEditable',false).show()
+        .markupEditor('prepare', this.settings);
+    }
+  }; // end Editor prototype
+}(jQuery, ME.t10n);
+!function() {
+  var $ = jQuery, textileMode;
+
+  
+  function eachParagraph(editor, functor) {
+    var i,
+    paragraphs = textileMode.getParagraphs(editor),
+    paragraphsLength = paragraphs.length;
 
     for(i = 0; i < paragraphsLength; i++) {
       paragraphs[i] = functor(paragraphs[i]);
     }
-    mode.setParagraphs(paragraphs);
+
+    textileMode.setParagraphs(editor, paragraphs);
   }
 
+  
   function eachLine(lines, functor){
     var linesLength = lines.length,
     i, line, lineStart, match;
     for(i = 0; i < linesLength; i++) {
       line = lines[i];
-
-      // Skip blank lines
       if( !/^\s*$/.test(line)) {
         match = line.match(/^((?:\w+\. )?(?: *[\*#] )?)\s*(.*)/);
         lineStart = match[1];
@@ -1237,36 +1477,34 @@ ME.addMode("textile", function() {
     }
   }
 
-  function replaceEachLine(mode, boundary, functor){
-    var lines = mode.getSelection(boundary).split("\n");
+  
+  function replaceEachLine(editor, boundary, functor){
+    var lines = textileMode.extendSelection(editor, boundary).split("\n");
 
     eachLine(lines, function(i, lineStart, line){
       lines[i] = functor(lineStart, line);
     });
     
-    mode.replaceSelection(lines.join("\n"));
+    textileMode.replaceSelection(editor, lines.join("\n"));
   }
 
-  function firstLine(mode){
-    var lines = mode.getSelection("\n").split("\n").slice(0,1),
+  
+  function firstLine(editor, boundary){
+    var lines = textileMode.extendSelection(editor, boundary).split("\n").slice(0,1),
     lineLength = lines[0].length;
-    mode.selectionEnd = mode.selectionStart + lineLength;
+    editor.selectionEnd = editor.selectionStart + lineLength;
     eachLine(lines, function(i, lineStart, line){
-      mode.selectionStart += lineStart.length;
+      editor.setSelectionRange( editor.selectionStart + lineStart.length, editor.selectionEnd);
       lines[i] = line;
     });
     return lines[0];
   }
 
-  /**
-   * Execute align command
-   * 
-   * @param {Mode} mode The current mode
-   * @param {String} orientation The orientation of the alignment
-   */
-  function align(mode, orientation) {
-    eachParagraph(mode, function(paragraph) {
+  
+  function align(editor, orientation) {
+    eachParagraph(editor, function(paragraph) {
       var classes, classesLength, newClasses = [];
+
       if(/^\w+\([^)]+\)\./.test(paragraph)) {
         classes = jQuery.trim(paragraph.slice(paragraph.indexOf("(") + 1, paragraph.indexOf(")"))).split(/\s+/);
         classesLength = classes.length;
@@ -1285,30 +1523,24 @@ ME.addMode("textile", function() {
     });
   }
 
-  /**
-   * Scan the textarea for the first match and set selection to it.
-   * This is useful e.g. for finding a link markup with a given source
-   * 
-   * @param {Mode} mode The current mode
-   * @param {RegExp} r The regexp to search for
-   */
-  function scanForMatch(mode,r){
-    var match = r.exec(text);
+  
+  function scanForMatch(editor, r){
+    var text = editor.textArea.val(),
+    match = r.exec(text);
     if(r.lastIndex === 0){
       return;   // TODO escalate this return to break the caller too
     }
-    while(r.lastIndex < selectionStart){
+    while(r.lastIndex < editor.selectionStart){
       match = r.exec(text);
     }
+    editor.setSelectionRange(r.lastIndex - match[0].length, r.lastIndex);
 
-    // needed for the replaceSelection call
-    mode.selectionStart = r.lastIndex - match[0].length;
-    mode.selectionEnd = r.lastIndex;
     return match;
   }
 
-  function toggleList(mode, target, bullet){
-    replaceEachLine(mode, "\n", function(lineStart, line){
+  
+  function toggleList(editor, target, bullet){
+    replaceEachLine(editor, "\n", function(lineStart, line){
       if(!/ on$/.test(target.className)){
         line = bullet + " " + line;
       }
@@ -1316,64 +1548,55 @@ ME.addMode("textile", function() {
     });
   }
 
+  
   var listTypes = {
     ul: '*',
     ol: '#'
   };
 
-  /**
-   * @returns {Boolean} return false to prevent browser
-   * CONSIDER move to object or remove mode parameter
-   */
-  function pressedEnter(mode){
-    var list = currentNodes.list, replacement;
+  
+  function pressedEnter(editor){
+    var list = editor.currentNodes.list, replacement;
 
-    if(list && /(u|o)l/i.test(list.tag)){ // only headings
-      mode.getSelection();
-      if(mode.holdShift){
+    if(list && /(u|o)l/i.test(list.tag) && // only lists
+       !textileMode.atBeginningOfLine(editor)){
+      textileMode.getSelection(editor);
+
+      if(ME.holdShift){
         replacement = " <br> ";
       } else {
         replacement = "\n" + listTypes[list.tag] + " ";
       }
-      mode.replaceSelection(replacement, false);
+      textileMode.replaceSelection(editor, replacement, false);
       return false;
     }
   }
-
-  regexpes = {
-    "*": [/^(\w+\. )?\s*\*/, /\*([\.]*)$/],
-    "_": [/^(\w+\. )?\s*_/, /_([\.]*)$/]
-  };
-  return {
+  
+  textileMode = ME.addMode('textile', {
+    
     name: "Textile Mode",
+    
     items: {
       "default": {
-        clicked: function(editor, mode, target) {
-          // TODO find left and right boundaries that are valid
+        
+        clicked: function(editor, target) {
           var match, that = this;
-          replaceEachLine(mode, " ", function(lineStart, line){
+          replaceEachLine(editor, " ", function(lineStart, line){
             if(/ on$/.test(target.className)){
-              
-              // first handle the left part
-              match = line.match(regexpes[that.delimiter][0]);
+              match = line.match(that.leftRegExp);
               if(match){
                 line = (match[1] || "") + line.slice(match[0].length);
               } else {
-                // place delimiter left and extend selection
-                line = that.delimiter + mode.extendLeftSelection(/[ .]+/) + line;
+                line = that.delimiter + textileMode.extendLeftSelection(editor, /[ .]+/) + line;
               }
-
-              // Then handle the right
-              match = line.match(regexpes[that.delimiter][1]);
+              match = line.match(that.rightRegExp);
               if(match){
                 line = line.slice(0, - match[0].length) + (match[1] || ""); 
               } else {
-                line += mode.extendRightSelection(/ +/) + that.delimiter;
+                line += textileMode.extendRightSelection(editor, / +/) + that.delimiter;
               }
               
             } else {
-              // Apply markup within a block so that "*h1. ...*" for
-              // example is never produced
               line = $.trim(that.delimiter + line) + that.delimiter;
             }
             return lineStart + line;
@@ -1381,65 +1604,68 @@ ME.addMode("textile", function() {
         }
       },
       bold: {
-        delimiter: "*"
+        delimiter: "*",
+        leftRegExp: /^(\w+\. )?\s*\*/,
+        rightRegExp: /\*([\.]*)$/
       },
       italic: {
-        delimiter: "_"
+        delimiter: "_",
+        leftRegExp: /^(\w+\. )?\s*_/,
+        rightRegExp: /_([\.]*)$/
       },
       alignLeft: {
-        clicked: function(editor, mode) {
-          align(mode, "left");
+        clicked: function(editor) {
+          align(editor, "left");
         }
       },
       alignRight: {
-        clicked: function(editor, mode) {
-          align(mode, "right");
+        clicked: function(editor) {
+          align(editor, "right");
         }
       },
       alignCenter: {
-        clicked: function(editor, mode) {
-          align(mode, "center");
+        clicked: function(editor) {
+          align(editor, "center");
         }
       },
       unorderedList: {
-        clicked: function(editor, mode, target) {
-          toggleList(mode, target, "*");
+        clicked: function(editor, target) {
+          toggleList(editor, target, "*");
         }
       },
       orderedList: {
-        clicked: function(editor, mode, target) {
-          toggleList(mode, target, "#");
+        clicked: function(editor, target) {
+          toggleList(editor, target, "#");
         }
       },
       link: {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
           var dialog, callback, titleString, href, r, match;
           
           callback = {
             submit: function(title,uri){
-              mode.replaceSelection("\"" + title + "\":" + uri);
+              textileMode.replaceSelection(editor, "\"" + title + "\":" + uri);
             },
             remove: function(){
-              mode.replaceSelection(match[1]);
+              textileMode.replaceSelection(editor, match[1]);
             },
             close: function(){
-              mode.updatePreview();
+              textileMode.updatePreview(editor);
               editor.checkState();
             }
           };
 
           if(/ on$/.test(target.className)){
             dialog = ME.dialog.link(['Update','Remove','Cancel']);
-            href = currentNodes.a.attributes.href;
+            href = editor.currentNodes.a.attributes.href;
 
-            match = scanForMatch(mode,new RegExp('\"([^\"]*)\":'+href,'g'));
-
+            match = scanForMatch(editor, new RegExp('\"([^\"]*)\":'+href,'g'));
             titleString = match[1];
             dialog.val('input.uri', href);
           }
           else {
             dialog = ME.dialog.link(['Create','Cancel']);
-            titleString = firstLine(mode);
+            titleString = firstLine(editor, " ");
           }
           
           if(!/^\s*$/.test(titleString)){
@@ -1450,7 +1676,7 @@ ME.addMode("textile", function() {
         }
       },
       insertImage: {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
           var dialog, callback, href, src, r;
 
           callback = {
@@ -1464,41 +1690,41 @@ ME.addMode("textile", function() {
                 replacement = replacement + ":" + uri;
               }
 
-              mode.replaceSelection(replacement);
+              textileMode.replaceSelection(editor, replacement);
             },
             remove: function(){
-              mode.replaceSelection("");
+              textileMode.replaceSelection(editor, "");
             },
             close: function(){
-              mode.updatePreview();
+              textileMode.updatePreview(editor);
               editor.checkState();
             }
           };
           
           if(/ on$/.test(target.className)){
             dialog = ME.dialog.insertImage(['Update','Remove','Cancel']);
-            src = currentNodes.img.attributes.src;
+            src = editor.currentNodes.img.attributes.src;
 
-            scanForMatch(mode, new RegExp('!' + src + "(\\([^\\)]*\\))?!(:[^ \n]*)?",'g'));
+            scanForMatch(editor, new RegExp('!' + src + "(\\([^\\)]*\\))?!(:[^ \n]*)?",'g'));
             
-            if(currentNodes.a){
-              href = currentNodes.a.attributes.href;
+            if(editor.currentNodes.a){
+              href = editor.currentNodes.a.attributes.href;
             }
             dialog.val('input.uri', href);
             dialog.val('input.imageUri', src);
-            dialog.val('input.title', currentNodes.img.attributes.title);
+            dialog.val('input.title', editor.currentNodes.img.attributes.title);
           }
           else {
             dialog = ME.dialog.insertImage(['Create','Cancel']);
-            firstLine(mode);
+            firstLine(editor, " ");
           }
 
           dialog.dialog('open', callback);
         }
       },
       formatBlock: {
-        clicked: function(editor, mode, target) {
-          eachParagraph(mode, function(paragraph) {
+        clicked: function(editor, target) {
+          eachParagraph(editor, function(paragraph) {
             if(/^\w+(\([\w ]+\))?\./.test(paragraph)) {
               return paragraph.replace(/^\w+(\([\w ]+\))?\.\s+/, target.value + "$1. ");
             } else if(/^[\*#] /.test(paragraph)){ // ignore lists
@@ -1510,30 +1736,22 @@ ME.addMode("textile", function() {
         }
       }
     },
-    /**
-     * Compile textile and update the preview div
-     */
-    updatePreview: function() {
-      var html = textileCompiler.compile(this.textArea.val());
-      this.htmlDiv.html(html);
+    
+    toHTML: function(editor, callback) {
+      return textileCompiler.compile(editor.textArea.val());
     },
-    /**
-     * Convert preview div to textile
-     * 
-     * @returns {String} A textile string
-     */
-    toText: function(html) {
-      if(!html){
-        html = this.htmlDiv.html();
-      }
+    
+    toText: function(editor, callback) {
+      var html = editor.preview.html();
 
+      
       function eachRegexp(tags, callback){
         var i, item,
         items = {
-          b: [/<(?:b|strong)>((.|[\r\n])*?)<\/(?:b|strong)>/gi,'*'],
-          i: [ /<(?:i|em)>((.|[\r\n])*?)<\/(?:i|em)>/gi, '_'],
-          del: [ /<(?:strike|del)>((.|[\r\n])*?)<\/(?:strike|del)>/gi, '-'],
-          u: [ /<(?:u|ins)>((.|[\r\n])*?)<\/(?:u|ins)>/gi, '+']
+          b: [/(\s*)<(?:b|strong)>((?:.|[\r\n])*?)<\/(?:b|strong)>(\s*)/gi,'*'],
+          i: [ /(\s*)<(?:i|em)>((?:.|[\r\n])*?)<\/(?:i|em)>(\s*)/gi, '_'],
+          del: [ /(\s*)<(?:strike|del)>((?:.|[\r\n])*?)<\/(?:strike|del)>(\s*)/gi, '-'],
+          u: [ /(\s*)<(?:u|ins)>((?:.|[\r\n])*?)<\/(?:u|ins)>(\s*)/gi, '+']
         };
         for(i = tags.length; i; i--){
           item = items[tags[i-1]];
@@ -1545,7 +1763,11 @@ ME.addMode("textile", function() {
         var bullet = tag == 'ul' ? '*' : '#';
         
         eachRegexp(['b','i', 'u', 'del'], function(regexp, delimiter){
-          items = items.replace(regexp, delimiter + '$1' + delimiter);
+          items = items.replace(regexp, function(match, startSpace, text, endSpace){
+            startSpace = startSpace ? ' ' : '';
+            endSpace = endSpace ? ' ' : '';
+            return startSpace + delimiter + text + delimiter + endSpace;
+          });
         });
 
         return items.replace(/\s*<li>((.|[\r\n])*?)<\/li>\s*/gi, bullet + " $1\n") + "\n";
@@ -1558,17 +1780,18 @@ ME.addMode("textile", function() {
         } else if(tag != "p"){
           front = tag + ". ";
         }
-
         eachRegexp(['b','i', 'u', 'del'], function(regexp, d){
-          content = content.replace(regexp, function(match, text){
-            return d + text.replace(/<br ?\/?>\s*/gi, d + "\n" + d) + d;
+          content = content.replace(regexp, function(match, startSpace, text, endSpace){
+            startSpace = startSpace ? ' ' : '';
+            endSpace = endSpace ? ' ' : '';
+            return startSpace + d + text.replace(/<br ?\/?>\s*/gi, d + "\n" + d) + d + endSpace;
           });
         });
         
         return front + content.replace(/<br ?\/?>\s*/gi, "\n") + "\n\n";
       });
       
-      html = html.replace(/<img[^>]*>/gi, function(match){
+      html = html.replace(/\s*<img[^>]*>\s*/gi, function(match){
         var img = $(match),
         replacement = img.attr('src'),
         title = img.attr('title');
@@ -1578,12 +1801,19 @@ ME.addMode("textile", function() {
         }
         return "!" + replacement + "!";
       });
-      html = html.replace(/<a href="([^\"]*)">((.|[\r\n])*?)<\/a>/gi, function(match, uri, content){
+      html = html.replace(/(\s*)<a href="([^\"]*)">((?:.|[\r\n])*?)<\/a>(\s*)/gi, function(match, startSpace, uri, content, endSpace){
+        var out = startSpace ? ' ' : '';
+
         if(/^\s*![^!]+!\s*$/.test(content)){
-          return $.trim(content) + ":" + uri;
+          out += $.trim(content) + ":";
         } else {
-          return "\"" + content + "\":" + uri;
+          out += "\"" + content + "\":";
         }
+        out += uri;
+        if(endSpace){
+          out += ' ';
+        }
+        return out;
       });
       html = html.replace(/\s*<code[^>]*>((.|[\r\n])*?)<\/code>\s*/gi, ' @$1@ ');
       html = html.replace(/(\r\n|\n){3,}/g, "\n\n");
@@ -1592,82 +1822,36 @@ ME.addMode("textile", function() {
 
       return html;
     },
-    /**
-     * Get the states for the current selection
-     * 
-     * @return {Object} An object representing the states
-     */
-    getSelectionStates: function() {
-      var paragraphs = this.getExtendedSelection(),
-      startTrace = selectionStart - startOfParagraphs,
-      endTrace = selectionEnd - startOfParagraphs;
+    
+    getSelectionStates: function(editor) {
+      var paragraphs = this.getSelection(editor, "\n\n"),
+      startTrace = editor.selectionStart - editor.boundaryStart,
+      endTrace = editor.selectionEnd - editor.boundaryStart,
       trace = textileCompiler.trace(paragraphs, startTrace, endTrace);
-
-      return this.buildStateObject(trace, currentNodes = {});
-    },
-    /**
-     * Get the paragraphs containing the current selection
-     * 
-     * CONSIDER remove this? is it only needed for getParagraphs?
-     * 
-     * @returns {String} The paragraphs
-     */
-    getExtendedSelection: function(){
-      var paragraphIndex, searchIndex = 0, extendedSelection;
-      selectionStart = this.textArea[0].selectionStart;
-      selectionEnd = this.textArea[0].selectionEnd;
-      text = this.textArea.val();
-      startOfParagraphs = 0; endOfParagraphs = -1;
-
-      while((paragraphIndex = text.indexOf("\n\n",searchIndex) + 2 ) !== 1) {
-        if(selectionStart > paragraphIndex) {
-          startOfParagraphs = paragraphIndex;
-        } else if (selectionEnd < paragraphIndex) {
-          endOfParagraphs = paragraphIndex - 2;
-          break;
-        }
-        searchIndex = paragraphIndex;
-      }
       
-      if(endOfParagraphs === -1) {
-        extendedSelection = text.slice(startOfParagraphs);
-      } else {
-        extendedSelection = text.slice(startOfParagraphs, endOfParagraphs);
-      }
-      oldExtendedSelectionLength = extendedSelection.length;
-
-      return extendedSelection;
+      return this.buildStateObject(trace, editor.currentNodes = {});
     },
-    /**
-     * @returns {String[]} An array of paragraphs
-     */
-    getParagraphs: function() {
-      return this.getExtendedSelection().split(/\n\n+/);
+    
+    getParagraphs: function(editor) {
+      return this.getSelection(editor, "\n\n").split(/\n\n+/);
     },
-    /**
-     * Set the paragraphs and move the caret
-     * 
-     * @param {String[]} paragraphs An array of paragraphs
-     */
-    setParagraphs: function(paragraphs) {
+    
+    setParagraphs: function(editor, paragraphs) {
+      var text = editor.textArea.val();
       paragraphs = paragraphs.join("\n\n");
 
-      if(endOfParagraphs === -1) {
-        this.textArea.val(text.slice(0,startOfParagraphs) + paragraphs);
+      if(editor.boundaryStart === -1) {
+        editor.textArea.val(text.slice(0,editor.boundaryStart) + paragraphs);
       } else {
-        this.textArea.val(text.slice(0,startOfParagraphs) + paragraphs + text.slice(endOfParagraphs));
+        editor.textArea.val(text.slice(0,editor.boundaryStart) + paragraphs + text.slice(editor.boundaryEnd));
       }
       
-      this.moveCaret(paragraphs.length - oldExtendedSelectionLength);
+      this.moveCaret(editor, paragraphs.length - editor.boundaryDistance);
     },
-    /**
-     * Move the caret by the given distance. Positive values move the caret to 
-     * the right, negative to the left.
-     * 
-     * @param {Integer} distance The distance to move the caret
-     */
-    moveCaret: function(distance) {
-      // console.log("Moving caret: " + distance);
+    
+    moveCaret: function(editor, distance) {
+      var selectionStart = editor.selectionStart,
+      startOfParagraphs = editor.startOfParagraphs;
 
       if(Math.abs(selectionStart - startOfParagraphs) > Math.abs(distance)) {
         selectionStart += distance;
@@ -1675,48 +1859,37 @@ ME.addMode("textile", function() {
         selectionStart = startOfParagraphs;
       }
       
-      this.textArea.focus();
-      this.textArea[0].setSelectionRange(selectionStart, selectionStart);
+      editor.textArea.focus();
+      editor.setSelectionRange(selectionStart, selectionStart);
     },
-    pressed: function(keyCode){
-      // console.log("pressed", keyCode);
+    
+    pressed: function(editor, keyCode){
       switch(keyCode){
       case 13: // enter
-        return pressedEnter(this);
+        return pressedEnter(editor, this);
       default: // handle keyCombos
-        this.prototype.pressed.apply(this, [keyCode]);
+        this.prototype.pressed.apply(this, [editor, keyCode]);
       }
     }
-  };
-});
-(function (){
-  /**
-   * @name Builder
-   * 
-   * The builder compiles the textile. It can also trace the common nodes between
-   * a start and an end point.
-   * 
-   * Therefore it has two stacks: one for building and one for tracing
-   */
+  });
+}();
+!function (){
   
-  /**
-   * @type Builder
-   */
+  
+  
   var builder = (function (){
     var stack, tracingStack, stackPosition, traceJustStarted, traceJustEnded, popping, pointer, sP, eP, tracing, lastTrace, unsuccessfulPush = false, stringLength,
     ignoredTags = ['li'],
     definableAttributes = {
       img: ['title','src'],
       a: ['href']
+    },
+    delimiters = {
+      i: "_",
+      b: "*"
     };
 
-    /**
-     * Iterate over the attributes of the given tag and call the callback.
-     * Used for comparison of the attributes of two nodes
-     * 
-     * @param {String} tag
-     * @param {Function} callback
-     */
+    
     function iterateOverAttributes(tag, callback){
       var attributes = ['class'],i;
       if(definableAttributes[tag]){
@@ -1727,17 +1900,10 @@ ME.addMode("textile", function() {
       }
     }
     
-    /**
-     * Test if the tracing stack can be moved down again with the given node.
-     * 
-     * @param {TraceNode} targetNode The node to test
-     * 
-     * @returns {Boolean}
-     */
+    
     function canMoveStackDown(targetNode){
       var equalTag = true, key, equalAttributes = true, blockTag = (stackPosition == -1), stackNode, i, l;
       if(blockTag){
-        // List nodes should be weaker than a paragraph node
         if(/(o|u)l/.test(tracingStack[0].tag)){
           if(/(o|u)l/.test(targetNode.tag) && targetNode.tag != tracingStack[0].tag){
             targetNode = {tag: 'p'};
@@ -1758,12 +1924,9 @@ ME.addMode("textile", function() {
       }
 
       if(stackNode){
-        // console.log("checking attributes");
         if(stackNode.attributes){
           iterateOverAttributes(stackNode.tag,function(key){
-            // console.log("checking",key);
             if(stackNode.attributes[key] !== targetNode.attributes[key]){
-              // console.log("difference in ", key, stackNode.attributes[key], targetNode.attributes[key]);
               equalAttributes = false;
               delete stackNode.attributes[key];
             }
@@ -1771,28 +1934,16 @@ ME.addMode("textile", function() {
         }
         
       }
-      // console.log("!@!@!@", stackNode, targetNode, equalAttributes);
       return stackNode && (blockTag || equalAttributes);
     }
 
-    /**
-     * Create a new TraceNode form a given node
-     * @constructor
-     * 
-     * @param {object} node 
-     */
+    
     function TraceNode(node){
       this.tag = node.tag;
       this.attributes = node.attributes;
     }
 
-    /**
-     * Create a open-tag for the given node
-     * 
-     * @param {object} node
-     * 
-     * @return {String}
-     */
+    
     function htmlOpenTag(node){
       var attributeString = "";
       for(attr in node.attributes){
@@ -1803,14 +1954,7 @@ ME.addMode("textile", function() {
       return "<" + node.tag + attributeString + ">";
     }
 
-    /**
-     * Warning! this supposes, that there is only one instance of any tag in
-     * the stack
-     * 
-     * @param {String} tag
-     * 
-     * @returns {Integer} The stack position of the given tag
-     */
+    
     function getStackPositionOf(tag){
       var i;
       for(i = stack.length;i--; ){
@@ -1820,12 +1964,9 @@ ME.addMode("textile", function() {
       }
     }
 
-    /**
-     * Start the tracing
-     */
+    
     function startTrace(){
       var length = stack.length, i, numberOfIgnoredTags = 0;
-      // console.log("################################## startTrace");
       tracing = true;
       traceJustStarted = true;
       for(i=1;i<length;i++){
@@ -1835,33 +1976,22 @@ ME.addMode("textile", function() {
           numberOfIgnoredTags += 1;
         }
       }
-      // console.log(tracingStack.length);
       stackPosition = tracingStack.length -1;
     }
     
-    /**
-     * End the tracing
-     */
+    
     function endTrace(){
-      // console.log("#################################### endTrace");
-      // console.log(tracingStack.length);
       lastTrace = false;
       tracing = false;
     }
 
-    /**
-     * @lends Builder
-     */
+    
     return {
-      /**
-       * Initialize Builder for normal operation
-       */
+      
       init: function(){
         stack = [{content:""}];
       },
-      /**
-       * Initialize Builder for tracing operation
-       */
+      
       initTrace: function(startPosition, endPosition, lengthOfString){
         tracingStack = [];
         tracing = undefined;
@@ -1870,24 +2000,18 @@ ME.addMode("textile", function() {
         eP = endPosition;
         stringLength = lengthOfString;
       },
-      /**
-       * Definitly ends the trace
-       */
+      
       finalizeTrace: function(){
         if(tracing){
           endTrace();
         }
+        if(!tracingStack[0]){
+          tracingStack[0] = {tag: 'p'};
+        }
       },
-      /**
-       * Advance the pointer by the given amount.
-       * Handles starting and ending of the trace
-       * 
-       * @param {Integer} advanceAmount
-       * @param {Boolean} forceEndTrace wether to forcably end the trace
-       */
+      
       advancePointer: function(advanceAmount, forceEndTrace){
         pointer += advanceAmount;
-        // console.log("pointer",pointer,"startPointer", sP, "endPointer", eP);
         if(tracing === undefined && (pointer > sP || pointer == stringLength)){
           startTrace();
         }
@@ -1895,26 +2019,18 @@ ME.addMode("textile", function() {
           if(lastTrace || forceEndTrace){
             endTrace();
           } else {
-            // console.log("set last trace");
             lastTrace = true;
           }
         }
       },
-      /**
-       * Push a tag to the build stack
-       * 
-       * @param {String} tag
-       * @param {Object} attributes
-       */
+      
       pushTag: function(tag, attributes){
         var node = {tag: tag,
                     attributes: attributes || {},
                     content: ""};
-        // console.log("open tag", node);
         stack.push(node);
         if(tracing && ignoredTags.indexOf(tag) == -1){
           if(traceJustStarted){
-            // console.log("inserting node ", node);
             tracingStack[stackPosition+1] = new TraceNode(node);
             stackPosition += 1;
           }
@@ -1925,15 +2041,17 @@ ME.addMode("textile", function() {
               unsuccessfulPush = true;
             }
           }
-          // console.log("stackPosition " + stackPosition);
         }
       },
-      /**
-       * Close a tag. If a tag is given find it and close it. Otherwise the top
-       * tag is closed
-       * 
-       * @param {String} [tag]
-       */
+      
+      pushTagUnlessOpen: function(tag){
+        if(this.isOpen(tag)){
+          this.pushString(delimiters[tag]);
+        } else {
+          this.pushTag(tag);
+        }
+      },
+      
       closeTag: function(tag){
         var removedNode, i;
         if(tag){
@@ -1942,39 +2060,36 @@ ME.addMode("textile", function() {
         } else {
           removedNode = stack.pop();
         }
-
-        // console.log("closing", removedNode);
         if(tracing && ignoredTags.indexOf(tag) == -1){
           traceJustStarted = false;
           if(unsuccessfulPush){
-            // console.log("slicing because of difference "+stackPosition);
             tracingStack = tracingStack.slice(0,stackPosition+1);
             unsuccessfulPush = false;
           }
-          // console.log(tracingStack, stackPosition, removedNode);
           if(tracingStack[stackPosition].tag === removedNode.tag){
-            // console.log("moving down");
             stackPosition -= 1;
-            // console.log("stackPosition " + stackPosition);
           }
           popping = true;
         }
-
-        // The part of the content, which belongs exclusively to the
-        // current tag must be commited
         this.pushString(htmlOpenTag(removedNode) + removedNode.content, stack[i-1]);
-        // The tag needs to be closed at the top, where the current string insertion occurs
         this.pushString("</"+removedNode.tag+">"); 
         popping = false;
       },
-      /**
-       * Closes all textile markup that ends at a line break.
-       * For example "*" or "_"
-       */
+      
+      closeTagIfOpen: function (tag, before, after) {
+        before = before || "";
+        after = after || "";
+        if(this.isOpen(tag)){
+          this.pushString(before);
+          this.closeTag(tag);
+          this.pushString(after);
+        } else {
+          this.pushString(before + delimiters[tag] + after);
+        }
+      },
+      
       popLineEnd: function(){
         var surpressLineBreak = false, partialMarkup = {b: "*", i: "_"}, node;
-        // If the need arises to search deeper think of the correct
-        // order in which to append the content
         while("a,i,b,li".indexOf(stack[stack.length - 1].tag) != -1){
           if("li" === stack[stack.length-1].tag){
             this.closeTag();
@@ -1986,48 +2101,29 @@ ME.addMode("textile", function() {
         }
         return surpressLineBreak;
       },
-      /**
-       * Closes all open tags
-       */
+      
       popParagraphEnd: function(){
         while(stack.length > 1){
           this.closeTag();
         }
       },
-      /**
-       * Add a string to the given node or the top node.
-       * 
-       * @param {String} string
-       * @param {Object} [node] defaults to the top node in the stack
-       */
+      
       pushString: function(string, node){
         if(!node){
           node = stack[stack.length - 1];
         }
         node.content += string;
-        // console.log("pushing", string, "to", node);
         if(!/^([ ]+|<br\/>)?$/.test(string)){ // Ignore whitespace
-          // during tracing
           if(traceJustStarted){
             traceJustStarted = false;
           }
           if(tracing && !popping && tracingStack[stackPosition+1]){
-            // console.log("cutting because of String " + stackPosition);
-            // console.log(tracingStack.length);
             tracingStack = tracingStack.slice(0,stackPosition + 1);
-            // console.log(tracingStack.length);
           }
         }
       },
-      /**
-       * Check if the given tag is open
-       * 
-       * @param {String} tag
-       * 
-       * @returns {Boolean}
-       */
+      
       isOpen: function(tag){
-        // console.log("check is Open", tag, stack.length);
         return typeof getStackPositionOf(tag) === 'number';
       },
       blockTagIsOpen: function(){
@@ -2038,17 +2134,12 @@ ME.addMode("textile", function() {
           this.closeTag();
         }
       },
-      /**
-       * @returns {Object} The trace stack
-       */
+      
       getTrace: function(){
         return tracingStack;
       },
-      /**
-       * @returns {String} The compiled html
-       */
+      
       toHtml: function(){
-        // console.log(stack);
         return stack[0].content;
       }
     };
@@ -2067,7 +2158,6 @@ ME.addMode("textile", function() {
       if(matchLength - whitespaceLength){
         builder.advancePointer(matchLength - whitespaceLength);
       }
-      // console.log("@@@@ matched: ", match, regexp);
       text = text.slice(matchLength);
       return match || true;
     }
@@ -2106,7 +2196,6 @@ ME.addMode("textile", function() {
     var match;
     if(advance(/^ *\* /)){
       if(!builder.isOpen("ul")){ // this won't work for nested uls,
-        // solve with lookahead
         builder.closeBlockTag();
         builder.pushTag("ul");
       }
@@ -2125,60 +2214,40 @@ ME.addMode("textile", function() {
         builder.pushTag("p");
       }
     }
-    // Eat Whitespace at the beginning of the Line after the tag
-    // TODO remove this and eat the whitespace at the beginning of
-    // each regexp
     match = advance(/^ */);
     builder.pushString(match[0]);
     parseLine();
   }
+
   function parseLine(){
-    var match, isInListOrTable;
+    var match, surpressLineBreak;
     while(true){
-      // Italic start
       if(match = advance(/^_(?=[^ \n]+)/)){
-        if(builder.isOpen("i")){
-          builder.pushString("_");
-        } else {
-          builder.pushTag("i");
-        }
+        builder.pushTagUnlessOpen("i");
       }
-      // bold start
       else if(match = advance(/^\*(?=[^ \n]+)/)){
-        if(builder.isOpen("b")){
-          builder.pushString("*");
-        } else {
-          builder.pushTag("b");
-        }
+        builder.pushTagUnlessOpen("b");
       }
-      // italic end
-      else if(match = advance(/^([^ \n]+)_( +|(?=\n|$))/)){
-        if(builder.isOpen("i")){
-          builder.pushString(match[1]);
-          builder.closeTag("i");
-          builder.pushString(match[2]);
-        } else {
-          builder.pushString(match[1] + "_" + match[2]);
+      else if(match = advance(/^([^ \n"\*]+)_([\*]*)( +|(?=\n|$))/)){
+        builder.closeTagIfOpen("i", match[1]);
+        if(match[2]){
+          builder.closeTagIfOpen('b');
         }
+        builder.pushString(match[3]);
       }
-      // bold end
-      else if(match = advance(/^([^ \n]+)\*( +|(?=\n|$))/)){
-        if(builder.isOpen("b")){
-          builder.pushString(match[1]);
-          builder.closeTag("b");
-          builder.pushString(match[2]);
-        } else {
-          builder.pushString(match[1] + "*" + match[2]);
+      else if(match = advance(/^([^ \n"_]+)\*([_]*)( +|(?=\n|$))/)){
+        builder.closeTagIfOpen("b", match[1]);
+        if(match[2]){
+          builder.closeTagIfOpen('i');
         }
+        builder.pushString(match[3]);
       }
-      // link
       else if(match = advance(/^( *)"([^"]*)":([^ \n]+)/)) {
         builder.pushString(match[1]);
         builder.pushTag("a", {href: match[3]});
         builder.pushString(match[2]);
         builder.closeTag();
       }
-      // Image
       else if(match = advance(/^( *)!([^!\(]+)(\(([^\)]*)\))?!(:([^ \n]+))?/)) {
         builder.pushString(match[1]);
         if(match[6]){
@@ -2194,34 +2263,41 @@ ME.addMode("textile", function() {
           builder.closeTag();
         }
       }
-      // word or blanks
       else if(match = advance(/^([^ \n]+)/)){
         builder.pushString(match[1]);
       }
-      // blanks
       else if(match = advance(/^( +)/)){
         builder.pushString(match[1]);
       }
-      // end of line
       else {
         advance(/^\n/);
-        // If in List for example, surpress line break
-        isInListOrTable = builder.popLineEnd();
-        if(!isInListOrTable && !next(/^\s*(\n|$|[\*#] )/)){
+        surpressLineBreak = builder.popLineEnd();
+        
+        if(surpressLineBreak){
+          if((builder.isOpen('ul') && !next(/^ *\*+/)) ||
+             (builder.isOpen('ol') && !next(/^ *#+/))){
+            builder.closeTag();
+          }
+        } else if(next(/^ *(\||[\*#] )/)){
+          builder.closeTag();
+        } else if(!next(/^ *(\n|$|[\*#] )/)){
           builder.pushString("<br/>");
         }
         return;
       }
     }
   }
+
   
   textileCompiler = {
+    
     compile: function(textToCompile){
       builder.init();
       text = textToCompile;
       parseParagraphs();
       return builder.toHtml();
     },
+    
     trace: function(textToCompile, startTrace, endTrace){
       builder.initTrace(startTrace, endTrace, textToCompile.length);
       this.compile(textToCompile);
@@ -2229,9 +2305,11 @@ ME.addMode("textile", function() {
       return builder.getTrace();
     }
   };
-})();
-ME.addMode("wysiwyg",function() {
-  var currentNodes = {}, $ = jQuery, selection = getSelection(), range = document.createRange();
+}();
+!function() {
+  var wysiwygMode,
+  $ = jQuery,
+  selection = getSelection(), range = document.createRange();
 
   function startNode(){
     return jQuery(selection.getRangeAt(0).startContainer);
@@ -2240,41 +2318,30 @@ ME.addMode("wysiwyg",function() {
   function endNode(){
     return jQuery(selection.getRangeAt(0).endContainer);
   }
-  
-  function lastParentBeforePreview(node){
-    if(node.parent().is(".preview")){
-      return node;
-    } else {
-      return node.parentsUntil(".preview").last();
-    }
-  }
-  
-  function getParagraphs() {
-    var anchor, focus, paragraphs, matchIndex = -1;
 
-    anchor = lastParentBeforePreview(startNode());
-    focus = lastParentBeforePreview(endNode())[0];
-    
-    if(anchor[0] !== focus){
-      paragraphs = anchor.nextAll().filter(function(i){
-        if(this == focus){
-          matchIndex = i;
-        }
-        if(matchIndex === -1 || matchIndex === i){
-          return true;
-        }
-      }).add(anchor);
-    } else {
-      paragraphs = anchor;
-    }
+  function replaceEachParagraph(editor, functor){
+    var paragraph, children, i, l,
+    newParagraphs = $(),
+    contents = wysiwygMode.getSelection(editor);
 
-    return paragraphs;
+    if(!/h\d|p|(o|u)l/i.test(contents.childNodes[0].nodeName)){
+      contents = contents.firstChild;
+    }
+    children = contents.childNodes;
+    l = children.length;
+
+    for(i = 0; i < l ; i++){
+      newParagraphs = newParagraphs.add(functor(children[i]));
+    }
+    wysiwygMode.replaceSelection(editor, newParagraphs);
   }
-  
-  function align(direction) {
-    getParagraphs().removeClass("left")
-      .removeClass("right").removeClass("center")
-      .addClass(direction);
+
+  function align(editor, direction) {
+    replaceEachParagraph(editor, function(paragraph){
+      return $(paragraph).removeClass("left")
+        .removeClass("right").removeClass("center")
+        .addClass(direction);
+    });
   }
 
   function selectNodes(nodes,collapse){
@@ -2294,78 +2361,69 @@ ME.addMode("wysiwyg",function() {
     selection.addRange(range);
   }
 
-  function handleList(editor, mode, target, listType){
+  
+  function handleList(editor, target, listType){
     var contents, lines, $p, $list;
     
     if(/ on$/.test(target.className)){
-      disableList(editor, mode);
+      disableList(editor);
     } else {
-      contents = mode.getSelection('br');
+      contents = wysiwygMode.getSelection(editor, 'br');
       
       $list = $("<" + listType + ">");
       createList($list, contents.firstChild);
 
-      joinAdjacentList(mode.leftBorder, $list);
-      joinAdjacentList(mode.rightBorder, $list);
+      joinAdjacentList(editor.leftBorder, $list);
+      joinAdjacentList(editor.rightBorder, $list);
 
-      mode.replaceSelection(editor, $list);
+      wysiwygMode.replaceSelection(editor, $list);
     }
   }
 
-  function disableList(editor, mode){
-    // get list items and detach them from the dom
-    contents = mode.getSelection('li');
+  
+  function disableList(editor){
+    contents = wysiwygMode.getSelection(editor, 'li');
 
     lines = [];
-    // insert their contents into a paragraph tag and seperate
-    // them by and <br>
     addListItems(lines, contents.firstChild);
     $p = $("<p>").html(lines.join("<br>"));
 
-    mode.replaceSelection(editor, $p);
+    wysiwygMode.replaceSelection(editor, $p);
   }
 
-  /**
-   * Create a new Border with the following properties
-   *
-   * @property {String} nextProperty The property wich holds the next
-   * sibling
-   * @property {jQuery} ancestors
-   * @property {HTMLElement} block
-   * @property {HTMLElement} safeBlock
-   * @property {HTMLElement} borderNode
-   * Is null when border node is not found. That means the node has no
-   * more siblings
-   * @property {HTMLElement} node
-   * Equals borderNode if it exists, otherwise its the last sibling
-   *
-   * @param {HTMLElement} node
-   * @param {String} borderType The nodeName of the border node
-   * @param {String} nextProperty The property wich holds the next sibling
-   * @constructor
-   */
+  
   function Border(node, borderType, nextProperty){
     this.nextProperty = nextProperty;
+
+    if(node.is('.preview')){ // select all (even selection of all
+      if(nextProperty === 'nextSibling'){
+        node = $(node[0].lastChild);
+      } else {
+        node = $(node[0].firstChild);
+      }
+    }
+    
     this.ancestors = node.parentsUntil(".preview");
     this.block = this.ancestors[this.ancestors.length - 1] || node[0];
-    this.borderNode = this.ancestors[this.ancestors.length -2] || node[0];
+    
+    var depth = borderType ? 2 : 1;
+    this.borderNode = this.ancestors[this.ancestors.length -depth] || node[0];
+    
     while(this.borderNode){
       this.node = this.borderNode;
-      if(!borderType || this.borderNode.nodeName.toLowerCase() === borderType){
+      if(this.borderNode.nodeName.toLowerCase() === borderType){
+        break;
+      } else if (/preview/.test(this.node.parentNode.className)){
+        this.borderNode = null;
         break;
       }
       this.borderNode = this.borderNode[nextProperty];
     }
+    
     this.safeBlock = this.borderNode ? this.block : this.block[nextProperty];
   }
 
-  /**
-   * Create list items from node and it siblings and join them to the
-   * given list
-   *
-   * @param {HTMLElement} list
-   * @param {HTMLElement} node
-   */
+  
   function createList(list, node){
     var li = document.createElement("li"), next;
     
@@ -2397,16 +2455,10 @@ ME.addMode("wysiwyg",function() {
     pushItem();
   }
 
-  /**
-   * Add the items of an adjcent list node defined by border to the
-   * list.
-   *
-   * @param {Border} border
-   * @param {HTMLElement} list
-   */
+  
   function joinAdjacentList(border, list){
     var children;
-    if(border.safeBlock && /ul/i.test(border.safeBlock.nodeName)){
+    if(border.safeBlock && border.safeBlock.nodeName === list[0].nodeName){
       next = border.safeBlock[border.nextProperty];
 
       children = $(border.safeBlock).remove().children();
@@ -2419,12 +2471,7 @@ ME.addMode("wysiwyg",function() {
     }
   }
 
-  /**
-   * Add the items of an (un)ordered list to the given lines array
-   *
-   * @param {String[]} lines
-   * @param {HTMLElement} node The list node
-   */
+  
   function addListItems(lines,node){
     while(node){
       if(/(o|u)l/i.test(node.nodeName)) {
@@ -2437,103 +2484,132 @@ ME.addMode("wysiwyg",function() {
   }
 
 
-  /**
-   * Check the position of the caret and adjust the container the
-   * caret is in when necessary
-   *
-   * @param {Integer} adjustment Adjust the current offset (needed for
-   * arrow keys
-   */
+  
   function checkCaret(adjustment){
-    var range = selection.getRangeAt(0),node, text;
+    var node, text,
+    range = selection.getRangeAt(0),
+    rangeIsCollapsed = range.collapsed;
+
     function checkSibling(property, collapse){
       while(!node[property]){
         node = node.parentNode;
       }
       node = node[property];
       if(node && !/br|h\d|p/i.test(node.nodeName)){
-        selectNodes([node], collapse);
+        if(rangeIsCollapsed){
+          selectNodes([node], collapse);
+        } else { // Fix a Firefox bug: double click on a bold word
+          if(collapse){
+            range.setStartBefore(node.firstChild);
+          }
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
         return false;
       }
     }
-    if(range.collapsed){
-      node = range.startContainer;
-      if(node.nodeType == 3){ // Its a textnode
-        text = node.nodeValue;
-        if(range.startOffset + adjustment === 0 && /^ /.test(text)){
-          return checkSibling('previousSibling', false);
-        } else if(range.startOffset + adjustment === node.length && / $/.test(text)){
-          return checkSibling('nextSibling', true);
-        }
+
+    node = range.startContainer;
+    if(node.nodeType == 3){ // Its a textnode
+      text = node.nodeValue;
+      if(range.startOffset + adjustment === 0 && /^ /.test(text)){
+        return checkSibling('previousSibling', false);
+      } else if(range.startOffset + adjustment === node.length && / $/.test(text)){
+        return checkSibling('nextSibling', true);
       }
     }
   }
 
-  /**
-   * @browserbug Firefox and Chrome
-   */
-  function pressedEnter(htmlDiv){
-    if(checkIfDeletedAll(htmlDiv,13) === false){
+  
+  function pressedEnter(editor, preview){
+    if(checkIfDeletedAll(preview,13) === false){
       return false;
     }
-    var lastSibling = true, node, range, endContainer,
-    block = currentNodes.block;
+    var node, range, endContainer, insertNewParagraph, listItem,
+    lastSibling = true,
+    block = editor.currentNodes.block,
+    list = editor.currentNodes.list,
+    isHeading = /h[1-5]/i.test((list || block).nodeName);
 
-    if(/h[1-5]/i.test(block.nodeName)){ // only headings
-      range = selection.getRangeAt(0);
-      node = endContainer = range.endContainer;
-
-      // only the last sibling
-      while(node.parentNode !== htmlDiv[0]){
-        if(node.nextSibling){
-          lastSibling = false;
-          break;
-        }
-        node = node.parentNode;
+    if(!(isHeading || list)){
+      return;
+    }
+    
+    range = selection.getRangeAt(0);
+    node = endContainer = range.endContainer;
+    while(node.parentNode !== preview[0]){
+      if(/li/i.test(node.nodeName)){
+        listItem = node;
       }
-      
-      if(lastSibling
-         && range.endOffset === endContainer.textContent.length // at
-         // the end
-        ){
-        node = $("<p>").insertAfter(block);
-        selectNodes(node);
+      if(node.nextSibling){
+        lastSibling = false;
+        break;
+      }
+      node = node.parentNode;
+    }
+
+    if(!lastSibling){
+      if(listItem && !$(listItem).text()){
+        disableList(editor);
         return false;
       }
+    } else if(isHeading && /* only headings */
+       range.endOffset === endContainer.textContent.length){
+        insertNewParagraph = true;
+      }
+    else if (list && !$(listItem).text()){
+      $(listItem).remove();
+      insertNewParagraph = true;
+    }
+    if(insertNewParagraph){
+      node = $("<p>").insertAfter(list || block);
+      selectNodes(node);
+      return false;
+    }
+    var atEndOfList = false;
+    if(list && atEndOfList){ // prevent addition of br in current node
+      listItem = $(listItem) || $(node).parent('li');
+      selectNodes(listItem.after('<li>').next(), true);
+      return false;
     }
   }
 
-  /**
-   * Handle the backspace key within lists and fixes a bug in Chrome.
-   *
-   * @browserbug Chrome
-   * Chrome tries to keep the styles whilst backspacing from say a
-   * paragraph to a heading. The content of the paragraph looks like a
-   * paragraph, but is a heading
-   */
-  function pressedBackspace(mode, htmlDiv, editor){
-    if(checkIfDeletedAll(htmlDiv,8) === false){
+  
+  function clearNodeEnd(node){
+    var child = node.lastChild;
+
+    while(child && (/br/i.test(child.nodeName) ||
+                    (child.nodeType === 3 && /^ *$/.test(child.textContent)))){
+      node.removeChild(child);
+      child = node.lastChild;
+    }
+  }
+
+  
+  function pressedBackspace(editor, preview){
+    if(checkIfDeletedAll(preview,8) === false){
       return false;
     }
-    var children, atBeginningOfLI,
+    var children, parent, listItem, atBeginningOfLI, atBeginningOfLineInLI, prevIsList, nextIsList,
     inFirstSibling = true,
-    block = currentNodes.block,
-    list = currentNodes.list,
+    block = editor.currentNodes.block,
+    list = editor.currentNodes.list,
     prev = (list || block).previousSibling,
+    next = (list || block).nextSibling,
     range = selection.getRangeAt(0),
     node = range.startContainer;
 
     if(!range.collapsed || !prev || range.startOffset !== 0){
       return true;
     }
-
-    // only the first sibling
-    while(node.parentNode !== htmlDiv[0]){
+    while(node.parentNode !== preview[0]){
       if(node.previousSibling){
         inFirstSibling = false;
         if(/li/i.test(node.nodeName)){
           atBeginningOfLI = true;
-        } else {
+        } else if(list && /br/i.test(node.previousSibling.nodeName)){
+          atBeginningOfLineInLI = true;
+        } else{
           return true;
         }
         break;
@@ -2541,9 +2617,15 @@ ME.addMode("wysiwyg",function() {
       node = node.parentNode;
     }
 
+    prevIsList = /(u|o)l/i.test(prev.nodeName);
+    nextIsList = /(u|o)l/i.test(next.nodeName);
+
     if(inFirstSibling){
       if(list){
         node = node.firstChild;
+      }
+      if(prevIsList){
+        prev = prev.lastChild;
       }
       node = $(node);
       children = node.contents();
@@ -2551,27 +2633,52 @@ ME.addMode("wysiwyg",function() {
       $(prev).append(children);
       node.remove();
       selectNodes([children[0]], true);
-    } else if(list && atBeginningOfLI){
-      disableList(editor,mode);
+      if(prevIsList && nextIsList){
+        $(prev).parent().append($(next).detach().contents());
+      }
+    } else if(atBeginningOfLineInLI){ // disable List
+      node.parentNode.removeChild(node.previousSibling);
+      
+      node = $(node);
+      children = node.nextAll();
+      parent = node.parent('li');
+      
+      listItem = $('<li>').append(node, children);
+      parent.after(listItem);
+      selectNodes(listItem, true);
+      
+      disableList(editor);
+    } else if(atBeginningOfLI){ // append contents to the previous
+      listItem = node.previousSibling;
+      children = $(node).detach().contents();
+      clearNodeEnd(listItem);
+
+      if(!children[0] || /br/i.test(children[0].nodeName)){
+        children[0] = document.createTextNode('\xa0') ;
+      }
+      $(listItem).append('<br>', children);
+
+      if(children[0]){
+        selectNodes(children, true);
+      } else {
+        selectNodes([listItem], false);
+      }
     }
-    
+
     return false;
   }
 
-  /**
-   * @browserbug Chrome
-   * bring Chrome to a normal behaviour
-   */
-  function pressedDelete(mode, htmlDiv, editor){
-    if(checkIfDeletedAll(htmlDiv,46) === false){
+  
+  function pressedDelete(editor, preview){
+    if(checkIfDeletedAll(preview,46) === false){
       return false;
     }
     if(!$.browser.webkit){
       return true;
     }
-    var children,
-    block = currentNodes.block,
-    list = currentNodes.list,
+    var children, nextIsList,
+    block = editor.currentNodes.block,
+    list = editor.currentNodes.list,
     next = (list || block).nextSibling,
     range = selection.getRangeAt(0),
     node = range.startContainer;
@@ -2579,23 +2686,24 @@ ME.addMode("wysiwyg",function() {
     if(!range.collapsed || !next || range.startOffset !== node.length){
       return true;
     }
-
-    // only the first sibling
-    while(node.parentNode !== htmlDiv[0]){
+    while(node.parentNode !== preview[0]){
       if(node.nextSibling){
         return true;
       }
       node = node.parentNode;
     }
 
-    if(list){
-      // append to last list item
-      node = node.lastChild;
+    nextIsList = /(u|o)l/i.test(next.nodeName);
+
+    if(!(nextIsList && list)){
+      if(list){
+        node = node.lastChild;
+      }
+      if(nextIsList){
+        next = next.firstChild;
+      }
     }
-    if(/(u|o)l/i.test(next.nodeName)){
-      // swallow only the first list item
-      next = next.firstChild;
-    }
+    
     next = $(next);
     children = next.contents();
 
@@ -2605,25 +2713,19 @@ ME.addMode("wysiwyg",function() {
     return false;
   }
 
-  /**
-   * @browserbug Firefox
-   */
-  function checkIfDeletedAll(htmlDiv, keyCode, holdNeutralKey){
+  
+  function checkIfDeletedAll(preview, keyCode, holdNeutralKey){
     var range = selection.getRangeAt(0);
     if(!$.browser.mozilla || holdNeutralKey || range.collapsed || ME.util.isNeutralKey(keyCode)){
       return true;
     }
     var node, content;
     content = range.extractContents();
-    // The second check is necessary, because extractContents might
-    // leave some empty tags when you manually select the whole div
-    // (the selection is always inside the block tags)
-    if(htmlDiv.is(":empty") || /^ *$/.test(htmlDiv.text())){
+    if(preview.is(":empty") || /^ *$/.test(preview.text())){
       node = document.createElement(content.childNodes[0].nodeName);
-      htmlDiv.html(node);
+      preview.html(node);
       selectNodes([node]);
       if(!/^8|13|46$/.test("" + keyCode)){
-        // Pass non special keystrokes upwards
         return true;
       } else {
         return false;
@@ -2631,11 +2733,46 @@ ME.addMode("wysiwyg",function() {
     }
   }
 
-  return {
+  function extendRangeToSpaces(){
+    var text, changedRange,
+    range = selection.getRangeAt(0),
+    startNode = range.startContainer,
+    startOffset = range.startOffset,
+    endNode = range.endContainer,
+    endOffset = range.endOffset;
+
+    if(startNode.nodeType == 3){ // Its a textnode
+      changedRange = true;
+      text = startNode.nodeValue;
+      range.setStart(startNode, text.lastIndexOf(' ', startOffset) + 1);
+    }
+
+    if(endNode.nodeType == 3){ // Its a textnode
+      changedRange = true;
+      text = endNode.nodeValue;
+      
+      endOffset = text.indexOf(' ', endOffset -1); // -1, otherwise it
+      if(endOffset === -1){
+        endOffset = text.length;
+      }
+      range.setEnd(endNode, endOffset);
+    }
+
+    if(changedRange){
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }
+
+  
+  wysiwygMode = ME.addMode('wysiwyg', {
+    
     name: "Preview Mode",
+    
     items: {
       "default": {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
+          extendRangeToSpaces();
           document.execCommand(this.name, false, null);
         }
       },
@@ -2646,58 +2783,55 @@ ME.addMode("wysiwyg",function() {
         tag: 'i'
       },
       alignLeft: {
-        clicked: function(){
-          align('left');
+        clicked: function(editor){
+          align(editor, 'left');
         }
       },
       alignRight: {
-        clicked: function(){
-          align('right');
+        clicked: function(editor){
+          align(editor, 'right');
         }
       },
       alignCenter: {
-        clicked: function(){
-          align('center');
+        clicked: function(editor){
+          align(editor, 'center');
         }
       },
       unorderedList: {
-        clicked: function(editor, mode, target){
-          handleList(editor, mode, target, 'ul');
+        clicked: function(editor, target){
+          handleList(editor, target, 'ul');
         }
       },
       orderedList: {
-        clicked: function(editor, mode, target){
-          handleList(editor, mode, target, 'ol');
+        clicked: function(editor, target){
+          handleList(editor, target, 'ol');
         }
       },
       link: {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
+          extendRangeToSpaces();
           var dialog, linkNode, titleString,
           range = selection.getRangeAt(0),
           callback = {
             remove: function(){
               var text = linkNode.text();
-              // on Chrome childNodes does not contain textnodes
               linkNode.replaceWith(text);
             },
             close: function(){
-              editor.htmlDiv.focus();
+              editor.preview.focus();
               editor.checkState();
             }
           };
           
           if(/ on$/.test(target.className)){
-            linkNode = $(currentNodes.a);
+            linkNode = $(editor.currentNodes.a);
             dialog = ME.dialog.link(['Update','Remove','Cancel']);
             
             callback.submit = function(title,uri){
               linkNode.attr('href',uri).text(title);
-              
-              // Firefox start
               range.selectNodeContents(linkNode[0]);
               selection.removeAllRanges();
               selection.addRange(range);
-              // Firefox end
             };
             titleString = linkNode.text();
             dialog.val('input.uri', linkNode.attr('href'));
@@ -2726,7 +2860,7 @@ ME.addMode("wysiwyg",function() {
         }
       },
       insertImage: {
-        clicked: function(editor, mode, target) {
+        clicked: function(editor, target) {
           var dialog, callback, linkNode,
           selection = window.getSelection(),
           range = selection.getRangeAt(0);
@@ -2753,19 +2887,19 @@ ME.addMode("wysiwyg",function() {
               imageNode.remove();
             },
             close: function(){
-              editor.htmlDiv.focus();
+              editor.preview.focus();
               editor.checkState();
             }
           };
 
           if(/ on$/.test(target.className)){
             dialog = ME.dialog.insertImage(['Update','Remove','Cancel']);
-            if(currentNodes.a){
-              linkNode = $(currentNodes.a);
+            if(editor.currentNodes.a){
+              linkNode = $(editor.currentNodes.a);
               dialog.val('input.uri', linkNode.attr('href'));
-              range.selectNode(currentNodes.a);
+              range.selectNode(editor.currentNodes.a);
             }
-            imageNode = $(currentNodes.img);
+            imageNode = $(editor.currentNodes.img);
 
             dialog.val('input.imageUri', imageNode.attr('src'));
             dialog.val('input.title', imageNode.attr('title'));
@@ -2778,85 +2912,86 @@ ME.addMode("wysiwyg",function() {
         }
       },
       formatBlock: {
-        clicked: function(editor, mode, target) {
-          var paragraph, newParagraphs = [], tag;
-
-          getParagraphs().replaceWith(function(){
-
-            if(/(u|o)l/i.test(this.nodeName)){ // ignore lists
-              // TODO update jquery and try returning the list. File
-              // bug when it won't work
-              tag = this.nodeName;
-            } else {
-              tag = target.value;
+        clicked: function(editor, target) {
+          replaceEachParagraph(editor, function(paragraph){
+            if(!/(u|o)l/i.test(paragraph.nodeName)){ // ignore lists
+              paragraph = $('<' + target.value + '>')
+                .addClass(paragraph.className).append(paragraph.childNodes);
             }
-            paragraph = $('<' + tag + '>')
-              .addClass(this.className).append(this.childNodes);
-            newParagraphs.push(paragraph[0]);
             return paragraph;
           });
-          selectNodes(newParagraphs);
+
         }
       }
     },
-    getSelection: function(nodeType){
-      var range = selection.getRangeAt(0);
+    
+    getSelection: function(editor, nodeType){
+      var range = selection.getRangeAt(0),
+      start = startNode(),
+      end = endNode();
 
-      this.collapsed = range.collapsed;
-
-      this.leftBorder = new Border(startNode(), nodeType, 'previousSibling');
-      this.rightBorder = new Border(endNode(), nodeType, 'nextSibling');
+      editor.collapsed = range.collapsed;
+      if(start.is('.preview')){
+        start = $(start[0].firstChild);
+      }
+      if(end.is('.preview')){
+        if(editor.collapsed){
+          end = start;
+        } else {
+          end = $(end[0].lastChild);
+        }
+      }
       
-      range.setStartBefore(this.leftBorder.node);
-      range.setEndAfter(this.rightBorder.node);
+      editor.leftBorder = new Border(start, nodeType, 'previousSibling');
+      editor.rightBorder = new Border(end, nodeType, 'nextSibling');
 
-      // split node if there are other nodes after the selection
-      if(this.rightBorder.borderNode){
-        $(this.rightBorder.borderNode).nextAll()
-          .appendTo('<' + this.rightBorder.block.nodeName + '>').parent()
-          .insertAfter(this.rightBorder.block);
+      range.setStartBefore(editor.leftBorder.node);
+      range.setEndAfter(editor.rightBorder.node);
+      if(editor.rightBorder.borderNode){
+        $(editor.rightBorder.borderNode).nextAll()
+          .appendTo('<' + editor.rightBorder.block.nodeName + '>').parent()
+          .insertAfter(editor.rightBorder.block);
       }
 
-      return range.extractContents();
+     return range.extractContents();
     },
+    
     replaceSelection: function(editor, nodes){
-      if(this.leftBorder.safeBlock){
-        nodes.insertAfter(this.leftBorder.safeBlock);
+      if(editor.leftBorder.safeBlock){
+        nodes.insertAfter(editor.leftBorder.safeBlock);
       } else {
-        editor.htmlDiv.prepend(nodes);
+        editor.preview.prepend(nodes);
       }
       
-      if(this.collapsed){
+      if(editor.collapsed){
         selectNodes(nodes, true);
       } else {
         selectNodes(nodes);
       }
-      
-      // remove empty block tags
-      // OPTIMIZE
-      if(/^\s*$/.test(this.leftBorder.block.textContent)){
-        $(this.leftBorder.block).remove();
+      if(/^\s*$/.test(editor.leftBorder.block.textContent)){
+        $(editor.leftBorder.block).remove();
       }
-      if(/^\s*$/.test(this.rightBorder.block.textContent)){
-        $(this.rightBorder.block).remove();
+      if(/^\s*$/.test(editor.rightBorder.block.textContent)){
+        $(editor.rightBorder.block).remove();
       }
     },
-    afterActivation: function() {
-      this.textArea.parent().hide();
-      this.htmlDiv.attr("contentEditable",true);
-
-      // Force Mozilla to generate tags instead of inline styles
+    
+    afterActivation: function(editor) {
+      editor.textArea.parent().hide();
+      editor.preview.attr("contentEditable",true);
       if ($.browser.mozilla) {
         document.execCommand("styleWithCSS",null, false);
       }
     },
-    getSelectionStates: function() {
+    
+    getSelectionStates: function(editor) {
       if(!$(document.activeElement).is(".preview")){
         return {};
       }
 
+      checkCaret(0);
+
       function getParents(node, content){
-        // TODO document me! why is this here?
         if(content){
           var contentNodeName = content.nodeName,
           nodeNodeName = node[0].nodeName;
@@ -2867,12 +3002,12 @@ ME.addMode("wysiwyg",function() {
 
         return node.parentsUntil(".preview").add(node);
       }
-      
-      var nodes = [], startNodes, endNodes,
-      content = selection.getRangeAt(0).cloneContents().firstChild;
 
-      startNodes = getParents(startNode(), content);
-      endNodes = getParents(endNode(), content);
+      var nodes = [], startNodes, endNodes,
+      contents = selection.getRangeAt(0).cloneContents();
+
+      startNodes = getParents(startNode(), contents.firstChild);
+      endNodes = getParents(endNode(), contents.lastChild);
 
       if(/(u|o)l/i.test(startNodes[0].nodeName) && startNodes[0].nodeName !== endNodes[0].nodeName){
         nodes = startNodes.toArray();
@@ -2880,33 +3015,65 @@ ME.addMode("wysiwyg",function() {
       } else {
         nodes = startNodes;
       }
-      return this.buildStateObject(nodes, currentNodes = {});
+      return this.buildStateObject(nodes, editor.currentNodes = {});
     },
+    
     clicked: function(){
       checkCaret(0);
     },
-    pressed: function(keyCode){
-      this.prototype.pressed.apply(this, [keyCode]);
+    
+    pressed: function(editor, keyCode){
+      this.prototype.pressed.apply(this, [editor, keyCode]);
       switch(keyCode){
       case 13: // enter
-        return pressedEnter(this.htmlDiv);
+        return pressedEnter(editor, editor.preview);
       case 8: // Backspace
-        return pressedBackspace(this, this.htmlDiv, this.editor);
+        return pressedBackspace(editor, editor.preview);
       case 46: // Delete
-        return pressedDelete(this, this.htmlDiv, this.editor);
+        return pressedDelete(editor, editor.preview);
       case 37: // left arrow
         return checkCaret(-1);
       case 39: // right arrow
         return checkCaret(1);
       default:
-        return checkIfDeletedAll(this.htmlDiv, keyCode, this.holdNeutralKey);
+        return checkIfDeletedAll(editor.preview, keyCode, ME.holdNeutralKey);
       }
     },
-    toText: function() {
-      return this.editor.getDataMode().toText();
+    
+    toText: function(editor, callback) {
+      return editor.getDataMode().toText(editor, callback);
     },
-    toHTML: function() {
-      return this.htmlDiv.html();
+    
+    toHTML: function(editor) {
+      return editor.preview.html();
+    }
+  });
+}();
+ME.addMode('haml', function(){
+  var $ = jQuery;
+  return {
+    name: "Haml Mode",
+    toHTML: function(editor, callback) {
+      $.get('/api/markup/to_html', {
+        type: 'haml',
+        content: editor.textArea.val()
+      }, function(html, status, response){
+        editor.preview.html(html);
+        if(callback){
+          callback();
+        }
+      });
+    },
+    toText: function(editor, callback) {
+      $.get('/api/markup/from_html', {
+        type: 'haml',
+        content: editor.preview.html()
+      }, function(haml, status, response){
+        editor.textArea.val(haml);
+        if(callback){
+          callback();
+        }
+      });
     }
   };
-});
+}());
