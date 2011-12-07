@@ -1,10 +1,11 @@
-* [1/10] Further improvements
+* [1/11] Further improvements
   - [-] fix specs in Firefox
     - [ ] general specs
     - [X] general wysiwyg specs
     - [X] list specs
     - [X] config.current error (Border find error)
   - [ ] fix specs in chrome again
+  - [ ] create heroku app
   - [ ] update docs
   - [ ] better editor loading
     - [ ] handle multiple init gracefully. Currently it stacks two editors on top of each other
