@@ -1,6 +1,7 @@
 * [2/11] Further improvements
   - [-] fix specs in Firefox
     - [ ] general specs
+    - [ ] better async handling. is there a global jQuery trigger
     - [X] general wysiwyg specs
     - [X] list specs
     - [X] config.current error (Border find error)

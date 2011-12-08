@@ -16,8 +16,6 @@ $(document).ready(function(){
 
   $(".markupClick").markupEditor("prepare",{
     save: function(editor){
-      console.log(editor);
-      console.log(editor.textArea.val());
     },
     select: $("#externalSelect select.availableModes")
   });

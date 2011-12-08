@@ -170,8 +170,6 @@ WysiwygHelper.prototype = (function(){
         }
         this.range.setStart(node, startOffset);
         this.range.setEnd(node, endOffset);
-      } else {
-        console.log('node is not a text node', node);
       }
 
       this.selection.removeAllRanges();
