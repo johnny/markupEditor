@@ -7,10 +7,12 @@ ME.addMode('haml', function(){
         type: 'haml',
         content: editor.textArea.val()
       }, function(html, status, response){
+        console.log('to');
         editor.preview.html(html);
         if(callback){
           callback();
         }
+        editor.container.trigger('to_html');
       });
     },
     toText: function(editor, callback) {
@@ -18,10 +20,12 @@ ME.addMode('haml', function(){
         type: 'haml',
         content: editor.preview.html()
       }, function(haml, status, response){
+        console.log('from');
         editor.textArea.val(haml);
         if(callback){
           callback();
         }
+        editor.container.trigger('from_html');
       });
     }
   };

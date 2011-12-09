@@ -1,4 +1,4 @@
-* [2/11] Further improvements
+* [2/12] Further improvements
   - [-] fix specs in Firefox
     - [ ] general specs
     - [ ] better async handling. is there a global jQuery trigger
@@ -6,6 +6,9 @@
     - [X] list specs
     - [X] config.current error (Border find error)
   - [ ] fix specs in chrome again
+  - [ ] create a class which handles the mode change in order to avoid
+    the same requests on mode change
+    - [ ] spec form submission, which currently won't work
   - [ ] update docs
   - [ ] better editor loading
     - [ ] handle multiple init gracefully. Currently it stacks two editors on top of each other

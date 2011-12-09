@@ -2,9 +2,24 @@ $(function(){
   var editor = $("div.markupClick.textile").click().parent(),
   timeout_ms = 200;
 
-  function async(callback){
+  function async(editor, trigger, callback){
+    if(!trigger){
+      asyncOld(editor);
+      return;
+    }
+    var func = function(event){
+      console.log(event);
+      event.stopPropagation();
+      editor.unbind(trigger,func);
+      callback();
+    };
+    editor.bind(trigger,func);
+  }
+
+  function asyncOld(callback) {
     setTimeout(callback, timeout_ms);
   }
+
 
   module("Markup");
   
@@ -35,25 +50,20 @@ $(function(){
     changeMode.val('haml').change();
     ok(previewButton.is(':visible'), 'preview button should be visible');
     ok(editor.find('.preview').is(':visible'), 'preview should be visible');
-    stop(3);
+    ok(previewButton.is('.on'), 'preview on');
 
-    async(function(){
+    previewButton.mouseup();
+    stop(2);
+    
+    async(editor, 'from_html', function(){
       start();
-      ok(previewButton.is('.on'), 'preview on');
-
+      ok(!previewButton.is('.on'), 'preview off');
+      ok(changeMode.val() === 'haml', 'The datamode should stay the same, was ' + changeMode.val());
       previewButton.mouseup();
-
-      async(function(){
+      async(editor, 'from_html', function(){
         start();
-        ok(!previewButton.is('.on'), 'preview off');
+        ok(previewButton.is('.on'), 'preview on');
         ok(changeMode.val() === 'haml', 'The datamode should stay the same, was ' + changeMode.val());
-        previewButton.mouseup();
-
-        async(function(){
-          start();
-          ok(previewButton.is('.on'), 'preview on');
-          ok(changeMode.val() === 'haml', 'The datamode should stay the same, was ' + changeMode.val());
-        });
       });
     });
   });
@@ -220,18 +230,24 @@ $(function(){
   });
 
   test('change mode should work with async modes', function(){
-    var text = 'some text';
-    
+    var text = 'some text',
+    previewButton = editor1.find('a.wysiwyg');
+
     changeMode1.val('textile').change();
+    
+    if(previewButton.is('.on')){
+      previewButton.mouseup();
+    }
+
     textArea1.val(text).mouseup();
 
     changeMode1.val('haml').change();
     stop();
 
-    async(function(){
+    async(editor1, 'from_html', function(){
       changeMode1.val('textile').change();
 
-      async(function(){
+      async(editor1, 'to_html', function(){
         start();
         ok(textArea1.val() === text, 'The text should not change, was ' + textArea1.val());
       });

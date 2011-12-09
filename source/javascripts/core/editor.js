@@ -259,7 +259,12 @@
      */
     synchronize: function(callback) {
       if(this.is("wysiwyg")) {
-        this.currentMode.updateTextArea(this, callback);
+        if(callback){
+          callback();
+        }
+        // TODO this is to avoid double requests. This will not
+        // synchronize on form submission
+        // this.currentMode.updateTextArea(this, callback);
       } else {
         this.currentMode.updatePreview(this, callback);
       }

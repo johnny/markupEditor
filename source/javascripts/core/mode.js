@@ -58,7 +58,7 @@
     },
     /**
      * Update the preview html div with the html representation of the
-     *mode
+     * mode
      * CONSIDER move to editor
      *
      * @param {Editor} editor The editor to work on
