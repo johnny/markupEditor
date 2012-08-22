@@ -14,7 +14,7 @@
       if(cb){
         callback = cb;
       }
-      this.dialogNode.dialog(task);
+      this.dialogNode.modal(task);
     },
     find: function(query){
       return this.dialogNode.find(query);
@@ -24,7 +24,7 @@
       while(i--){
         buttons[buttonNames[i]] = this.availableButtons[buttonNames[i]];
       }
-      this.dialogNode.dialog('option','buttons',buttons);
+      // this.dialogNode.dialog('option','buttons',buttons);
     },
     setText: function(text){
       if(this.textNode){
@@ -39,14 +39,9 @@
   function initDialog($dialogNode){
     var $textNode = $dialogNode.append('<p>');
     
-    $dialogNode.dialog({
-      autoOpen: false,
-      width: 600,
-      modal: true,
-      close: function() {
-        if(callback && callback.close){
-          callback.close();
-        }
+    $dialogNode.modal().on('hidden', function() {
+      if(callback && callback.close){
+        callback.close();
       }
     });
 
@@ -55,13 +50,13 @@
         if(callback && callback.submit){
           callback.submit();
         }
-        $dialogNode.dialog("close");
+        $dialogNode.modal("hide");
       },
       Cancel: function(){
         if(callback && callback.cancel){
           callback.cancel();
         }
-        $dialogNode.dialog("close");
+        $dialogNode.modal("hide");
       }
     }, $textNode);
   }
@@ -71,49 +66,43 @@
     $form = $dialogNode.append('<form>'),
     fields = initFields($form, fieldDefinitions);
     
-    submit = function() {
+    var submit = function() {
       var args = [],i;
       for(i=0; i < fieldsLength; i++){
         args[i] = fields[i].submit().val();
       }
       if($form.isValid()){
         callback.submit.apply(this,args);
-        $dialogNode.dialog("close");
+        $dialogNode.modal("hide");
       }
     };
 
-    $dialogNode.dialog({
-      autoOpen: false,
-      width: 600,
-      modal: true,
-      close: function() {
-        $form.isValid('reset');
-        if(callback.close){
-          callback.close();
-        }
-        for(i = 0; i < fieldsLength; i++){
-          fields[i].val('')
-            .removeAttr('checked')
-            .removeAttr('selected');
-        }
-      },
-      open: function(){
-        for(i = 0; i < fieldsLength; i++){
-          fields[i].change();
-        }
-        fields[0][0].setSelectionRange(0,0);
+    $dialogNode.modal().on('hidden', function() {
+      $form.isValid('reset');
+      if(callback.close){
+        callback.close();
       }
-    });
+      for(var i = 0; i < fieldsLength; i++){
+        fields[i].val('')
+          .removeAttr('checked')
+          .removeAttr('selected');
+      }
+    }).on('show', function(){
+      for(var i = 0; i < fieldsLength; i++){
+        fields[i].change();
+      }
+      fields[0][0].setSelectionRange(0,0);
+    })
 
     return new Proxy($dialogNode, {
       Create: submit,
       Update: submit,
       Remove: function(){
         callback.remove();
-        $dialogNode.dialog("close");
+        $dialogNode.modal("hide");
       },
       Cancel: function() {
-	$dialogNode.dialog("close");
+	      $dialogNode.modal("hide");
       }
     });
   }

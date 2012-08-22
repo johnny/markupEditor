@@ -305,7 +305,7 @@
             dialog.val('.title', titleString);
           }
           
-          dialog.dialog('open', callback);
+          dialog.dialog('show', callback);
         }
       },
       insertImage: {
@@ -352,7 +352,7 @@
             firstLine(editor, " ");
           }
 
-          dialog.dialog('open', callback);
+          dialog.dialog('show', callback);
         }
       },
       formatBlock: {

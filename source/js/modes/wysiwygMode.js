@@ -654,7 +654,7 @@
             dialog.val('.title', titleString);
           }
           
-          dialog.dialog('open', callback);
+          dialog.dialog('show', callback);
         }
       },
       insertImage: {
@@ -706,7 +706,7 @@
             dialog = ME.getDialog('insertImage')(['Create','Cancel']);
           }
 
-          dialog.dialog('open', callback);
+          dialog.dialog('show', callback);
         }
       },
       formatBlock: {
