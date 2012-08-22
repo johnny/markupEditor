@@ -1,7 +1,16 @@
 * [2/13] Further improvements
-  - [ ] make work with din
-    - [ ] remove jquery-ui
-    - [ ] use bootstrap
+  - [-] make work with din
+    - [X] remove jquery-ui
+    - [X] use bootstrap
+    - [ ] combobox should provide dropdown button
+    - [ ] style fixes
+      - [ ] selects
+      - [ ] form in modal
+    - [-] complete skeleton change
+      - [X] build
+      - [ ] remove erb calls
+      - [ ] fix dev.html / test.html
+      - [ ] versioning
   - [-] fix specs in Firefox
     - [ ] general specs
     - [ ] better async handling. is there a global jQuery trigger

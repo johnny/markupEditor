@@ -22,7 +22,7 @@ set :images_dir, 'img'
 
 # Build-specific configuration
 configure :build do
-  filename = 'source/js/jquery-sortable.js'
+  filename = 'source/js/markup-editor.js'
   VERSION = File.read("VERSION").strip
   updated_file = File.read(filename).gsub(/(^\s\*.*v)[\d\.]+$/, '\1' + VERSION)
   File.open(filename, "w") do |file|
@@ -30,7 +30,7 @@ configure :build do
   end
 
   require 'closure-compiler'
-  File.open('source/js/jquery-sortable-min.js','w') do |file|
+  File.open('source/js/markup-editor-min.js','w') do |file|
     # closure = Closure::Compiler.new(:compilation_level => 'ADVANCED_OPTIMIZATIONS')
     closure = Closure::Compiler.new
     file.puts closure.compile(updated_file)
@@ -56,7 +56,7 @@ configure :build do
   # activate :ugly_haml
   
   # set :http_prefix, "file:///home/jonas/projects/markup_editor/build/"
-  set :http_prefix, "/markupEditor"
+  set :http_prefix, "/markup-editor"
 end
 
 if development?
@@ -77,5 +77,5 @@ class Rack::Coderay::Parser
   end
 end
 
-# require 'lib/markup'
-# use Rack::Markup
+require 'lib/markup'
+use Rack::Markup
