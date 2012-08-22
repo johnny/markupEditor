@@ -1,0 +1,238 @@
+@import "compass"
+
+$overlay: rgba(255, 255, 255, .5)
+$transparent: rgba(255, 255, 255, .8)
+$width: 20px
+$error: #ff0000
+$tip-color: #000
+$tip-background: $error
+
+@mixin editorElement
+  background: none repeat scroll 0 0 #F9F9F9
+  border: 1px solid #E4E4E4
+  width: 650px
+
+@mixin overlay
+  opacity: 0.25
+  background: black
+
+.ui-dialog-overlay
+  @include overlay
+
+.markupEditor
+
+  margin-bottom: 10px
+  position: relative
+
+  .textarea
+    @include editorElement
+    border-width: 0 1px 1px
+    padding: 5px
+
+    textarea
+      height: 300px
+      width: 490px
+
+  .overlay
+    display: none
+    .background, .spinner
+      position: absolute
+      top: 0
+      left: 0
+      width: 100%
+      height: 100%
+
+    .background
+      @include overlay
+      z-index: 100
+    .spinner
+      background: no-repeat center url("images/spinner.gif")
+      z-index: 101
+
+
+  .preview
+    min-height: 300px
+    padding: 0
+    border: 1px dotted #E4E4E4
+
+    background-color: #eee
+    background-image: -webkit-repeating-linear-gradient(-45deg, $transparent, $transparent $width, $overlay $width, $overlay 2*$width)
+    background-image: -moz-repeating-linear-gradient(-45deg, $transparent, $transparent $width, $overlay $width, $overlay 2*$width)
+
+    .left
+      text-align: left
+    .right
+      text-align: right
+    .center
+      text-align: center
+    h1,h2,h3,h4,p
+      display: block
+    p
+      min-height: 1em
+
+  .toolbar
+    @include editorElement
+    padding: 3px 5px
+    height: 32px
+
+    a
+      +border-radius(0.3em)
+      filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr='#f4f4f4', endColorstr='#ececec')
+      background: -webkit-gradient(linear, left top, left bottom, from(#f4f4f4), to(#ececec))
+      background: -moz-linear-gradient(top, #f4f4f4, #ececec)
+      /* +linear-gradient(center top , #F4F4F4, #ECECEC) 
+      border: 1px solid #DDDDDD
+      color: #333333
+      display: block
+      float: left
+      height: 25px
+      margin: 0.2em 0.5em 0 0
+      overflow: hidden
+      text-shadow: 0 1px 0 #FFFFFF
+      width: 25px
+      &.on
+        background: -webkit-gradient(linear, left top, left bottom, from(#599bdc), to(#3072b3))
+        background: -moz-linear-gradient(top, #599bdc, #3072b3)
+      &.disabled, &.disabled:hover
+        background: -webkit-gradient(linear, left top, left bottom, from(#fefefe), to(#f9f9f9))
+        background: -moz-linear-gradient(top, #fefefe, #f9f9f9)
+        cursor: default
+      &:hover
+        background: -webkit-gradient(linear, left top, left bottom, from(#599bdc), to(#3072b3))
+        background: -moz-linear-gradient(top, #599bdc, #3072b3)
+        filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr='#599bdc', endColorstr='#3072b3')
+        /* +linear-gradient(center top , #599BDC, #3072B3)
+        color: #FFFFFF
+        text-decoration: none
+        text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3)
+      &.on:hover
+        background: -webkit-gradient(linear, left top, left bottom, from(#f4f4f4), to(#ececec))
+        background: -moz-linear-gradient(top, #f4f4f4, #ececec)
+      span
+        background-repeat: no-repeat
+        background-position: center
+        display: block
+        height: 25px
+        overflow: hidden
+        text-indent: -5000px
+        width: 25px
+      &.bold span
+        background-image: url("images/icons/text_bold.png")
+      &.italic span
+        background-image: url("images/icons/text_italic.png")
+      &.alignLeft span
+        background-image: url("images/icons/text_align_left.png")
+      &.alignRight span
+        background-image: url("images/icons/text_align_right.png")
+      &.alignCenter span
+        background-image: url("images/icons/text_align_center.png")
+      &.unorderedList span
+        background-image: url("images/icons/text_list_bullets.png")
+      &.orderedList span
+        background-image: url("images/icons/text_list_numbers.png")
+      &.link span
+        background-image: url("images/icons/link.png")
+      &.insertImage span
+        background-image: url("images/icons/image.png")
+      &.save span
+        background-image: url("images/icons/disk.png")
+      &.wysiwyg span
+        background-image: url("images/icons/layout.png")
+      &.close
+        float: right
+        span
+          background-image: url("images/icons/cancel.png")
+    select
+      background-color: #F9F9F9
+      border: 1px solid #F9F9F9
+      float: right
+      margin-bottom: 0
+      padding: 0.5em 0.7em
+      &:hover
+        +border-radius(0.5em)
+        background-color: #FFFFFF
+        border: 1px solid #DDDDDD
+
+#link-dialog, #insertImage-dialog
+  display: none
+
+  label
+    display: block
+    float: left
+    clear: left
+    width: 130px
+    padding: 0.53em 0
+    margin: 0 0.4em
+    text-align: right
+  span.clearButton
+    display: block
+    float: left
+    width: 342px
+    margin: 0 0 0.4em
+    border: 1px solid #d3d3d3
+    &.focus
+      border: 1px solid #eec77c
+    &.error
+      color: #666666
+      border: 1px solid $error
+    input
+      width: 312px
+      border: none
+      padding: 0.49em 0
+      margin: 0 0.4em
+      &:focus
+        border: none
+        outline: none
+      &.short
+        width: 270px
+        
+    span
+      width: 10px
+      cursor: pointer
+  input, select
+    width: 300px
+    padding: 0.6em 0
+    margin: 0.4em 0
+
+  .ui-button
+    margin: 0
+    float: right
+    border: none
+    border-left: 1px
+  .ui-icon
+    margin-left: -6px
+  .ui-icon-triangle-1-s
+    background-position: -66px -16px
+  .ui-button-icon-only .ui-button-text
+    padding: 0.36em
+
+
+
+.error-tip
+  font-size: 0.9em
+  position: absolute
+  padding: 5px
+  z-index: 100000
+
+  .inner
+    background-color: $tip-background
+    color: $tip-color
+    max-width: 200px
+    padding: 5px 8px 4px 8px
+    text-align: center
+    border-radius: 3px
+    -moz-border-radius: 3px
+    -webkit-border-radius: 3px
+
+  /* Rounded corners
+
+  .arrow
+    position: absolute
+    width: 0
+    height: 0
+    border: 5px solid transparent
+    border-right-color: $error
+    top: 50%
+    margin-top: -5px
+    left: 0
+    border-left: none

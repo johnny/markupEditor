@@ -1,4 +1,7 @@
-* [2/12] Further improvements
+* [2/13] Further improvements
+  - [ ] make work with din
+    - [ ] remove jquery-ui
+    - [ ] use bootstrap
   - [-] fix specs in Firefox
     - [ ] general specs
     - [ ] better async handling. is there a global jQuery trigger

@@ -7,28 +7,35 @@ helpers do
     label_tag(name, :caption => options.delete(:caption)) <<
       text_field_tag(name, options.merge(:class => name))
   end
+  def textarea(name)
+    File.read("source/textareas/"+ name)
+  end
 end
 
-with_layout :releaseLayout do
-  page "/index.html"
-  page "/test_joined.html"
-end
+set :css_dir, 'css'
 
-# Change the JS directory
-# set :js_dir, "scripts"
+set :js_dir, 'js'
 
-# Change the images directory
-# set :images_dir, "alternative_image_directory"
+set :images_dir, 'img'
 
 # set :views, File.dirname(__FILE__)
 
 # Build-specific configuration
 configure :build do
-  with_layout :releaseLayout do
-    page "/*"
+  filename = 'source/js/jquery-sortable.js'
+  VERSION = File.read("VERSION").strip
+  updated_file = File.read(filename).gsub(/(^\s\*.*v)[\d\.]+$/, '\1' + VERSION)
+  File.open(filename, "w") do |file|
+    file.puts updated_file
   end
 
-  `./join`
+  require 'closure-compiler'
+  File.open('source/js/jquery-sortable-min.js','w') do |file|
+    # closure = Closure::Compiler.new(:compilation_level => 'ADVANCED_OPTIMIZATIONS')
+    closure = Closure::Compiler.new
+    file.puts closure.compile(updated_file)
+  end
+
   # For example, change the Compass output style for deployment
   # activate :minify_css
   
@@ -52,5 +59,23 @@ configure :build do
   set :http_prefix, "/markupEditor"
 end
 
-require 'lib/markup'
-use Rack::Markup
+if development?
+  require 'rack-livereload'
+  use Rack::LiveReload,
+  :source => :vendored
+end
+
+require 'rack/coderay'
+use Rack::Coderay, "//pre[@lang]"
+
+# Hack to fix haml output
+class Rack::Coderay::Parser
+  private
+  def coderay_render(text, language) #:nodoc:
+    text = text.to_s.gsub(/&#x000A;/i, "\n").gsub("&lt;", '<').gsub("&gt;", '>').gsub("&amp;", '&').gsub("&quot;", '"')
+    ::CodeRay.scan(text, language.to_sym).div(self.coderay_options)
+  end
+end
+
+# require 'lib/markup'
+# use Rack::Markup
