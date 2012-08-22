@@ -3,6 +3,9 @@
     - [X] remove jquery-ui
     - [X] use bootstrap
     - [ ] combobox should provide dropdown button
+    - [ ] better loading:
+      - [ ] specify textile etc. from attribute
+      - [ ] properly convert html to textile
     - [ ] style fixes
       - [ ] selects
       - [ ] form in modal
