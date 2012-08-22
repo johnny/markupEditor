@@ -8,8 +8,9 @@
       - [ ] form in modal
     - [-] complete skeleton change
       - [X] build
-      - [ ] remove erb calls
-      - [ ] fix dev.html / test.html
+      - [X] remove erb calls
+      - [X] fix dev.html / test.html
+      - [ ] remove haml instances
       - [ ] versioning
   - [-] fix specs in Firefox
     - [ ] general specs

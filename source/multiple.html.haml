@@ -4,13 +4,13 @@
 %h1 MarkupEditor
 
 %form#textile
-  %textarea.markup.textile= erb :"textareas/textile"
+  %textarea.markup.textile= textarea 'textile'
 
 %form#wysiwyg
-  %textarea.markup.textile.wysiwyg= erb :"textareas/textile"
+  %textarea.markup.textile.wysiwyg= textarea 'textile'
 
 %form#none
-  %textarea= erb :"textareas/html"
+  %textarea= textarea 'html'
 
 %form#not_present
-  %textarea.markup.unknownMode.wysiwyg= erb :"textareas/html"
+  %textarea.markup.unknownMode.wysiwyg= textarea 'html'

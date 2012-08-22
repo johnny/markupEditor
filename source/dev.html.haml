@@ -4,10 +4,10 @@
 %h1 MarkupEditor
 
 %form#textile
-  %textarea.markup.textile.wysiwyg{:name => 'textile'}= erb :"textareas/textile"
+  %textarea.markup.textile.wysiwyg{:name => 'textile'}= textarea 'textile'
 
 %div.markup.textile
-  = erb :"textareas/html"
+  = textarea 'html'
 
 %div.markupClick.textile
-  = erb :"textareas/html"
+  = textarea 'html'
