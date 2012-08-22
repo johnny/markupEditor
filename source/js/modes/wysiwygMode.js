@@ -604,7 +604,8 @@
       link: {
         clicked: function(editor, target) {
           extendRangeToSpaces();
-          var dialog, linkNode, titleString,
+          var linkNode, titleString, buttons,
+          values = {},
           range = selection.getRangeAt(0),
           callback = {
             remove: function(){
@@ -620,7 +621,6 @@
           
           if(/ on$/.test(target.className)){
             linkNode = $(editor.currentNodes.a);
-            dialog = ME.getDialog('link')(['Update','Remove','Cancel']);
             
             callback.submit = function(title,uri){
               linkNode.attr('href',uri).text(title);
@@ -632,11 +632,11 @@
               // Firefox end
             };
             titleString = linkNode.text();
-            dialog.val('input.uri', linkNode.attr('href'));
+            
+            values['input.uri'] = linkNode.attr('href')
+            buttons = ['Update','Remove','Cancel']
           }
           else {
-            dialog = ME.getDialog('link')(['Create','Cancel']);
-            
             callback.submit = function(title,uri){
               var newNode = $("<a href=\"" + uri + "\">" + title + "</a>")[0];
               range.deleteContents();
@@ -648,21 +648,22 @@
             };
 
             titleString = range.toString();
+            
+            buttons = ['Create','Cancel']
           }
 
           if(!/^\s*$/.test(titleString)){
-            dialog.val('.title', titleString);
+            values['.title'] = titleString
           }
           
-          dialog.dialog('show', callback);
+          ME.showDialog('link', buttons, values, callback)
         }
       },
       insertImage: {
         clicked: function(editor, target) {
-          var dialog, callback, linkNode,
+          var buttons, values, linkNode, imageNode,
           selection = window.getSelection(),
-          range = selection.getRangeAt(0);
-
+          range = selection.getRangeAt(0),
           callback = {
             submit: function(imageUri,title,uri){
               var imageNode = $("<img src=\"" + imageUri + "\"/>"), parentNode = imageNode;
@@ -691,22 +692,24 @@
           };
 
           if(/ on$/.test(target.className)){
-            dialog = ME.getDialog('insertImage')(['Update','Remove','Cancel']);
+            imageNode = $(editor.currentNodes.img);
+            values = {
+              'input.imageUri': imageNode.attr('src'),
+              'input.title': imageNode.attr('title')
+            }
             if(editor.currentNodes.a){
               linkNode = $(editor.currentNodes.a);
-              dialog.val('input.uri', linkNode.attr('href'));
+              values['input.uri'] = linkNode.attr('href')
               range.selectNode(editor.currentNodes.a);
             }
-            imageNode = $(editor.currentNodes.img);
 
-            dialog.val('input.imageUri', imageNode.attr('src'));
-            dialog.val('input.title', imageNode.attr('title'));
+            buttons = ['Update','Remove','Cancel']
           }
           else {
-            dialog = ME.getDialog('insertImage')(['Create','Cancel']);
+            buttons = ['Create','Cancel']
           }
 
-          dialog.dialog('show', callback);
+          ME.showDialog('insertImage', buttons, values, callback)
         }
       },
       formatBlock: {

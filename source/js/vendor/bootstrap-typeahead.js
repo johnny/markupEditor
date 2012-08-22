@@ -29,7 +29,6 @@
     this.highlighter = this.options.highlighter || this.highlighter
     this.$menu = $(this.options.menu).appendTo('body')
     this.source = this.options.source
-    console.log(this.source);
     this.shown = false
     this.listen()
   }
@@ -79,7 +78,7 @@
       items = $.grep(this.source, function (item) {
         if (that.matcher(item)) return item
       })
-      console.log(items);
+
       items = this.sorter(items)
 
       if (!items.length) {

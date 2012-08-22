@@ -1,4 +1,4 @@
-!!! 5
+!!!
 %html{ :lang => "en" }
   %head
     %meta{ :charset => "utf-8" }    
@@ -14,7 +14,7 @@
 
     = yield
 
-    = javascript_include_tag "vendor/jquery", "vendor/jquery-ui", "vendor/bootstrap"
+    = javascript_include_tag "vendor/jquery", "vendor/bootstrap"
     = javascript_include_tag "markupEditor.js", "site.js"
 
     = yield_content :bottom

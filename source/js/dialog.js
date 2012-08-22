@@ -1,38 +1,68 @@
 (function($, _){
-  var callback;
+  var callback,
+  loadedDialogs = {},
+  dialogFields = {
+    link: [
+      ['title', {
+        required: true
+      }],
+      ['uri', {
+        combobox: {key: 'uri'},
+        required: true
+      }]
+    ],
+    insertImage: [
+      ['imageUri', {
+        combobox: {key: 'imageUri'},
+        required: true
+      }],
+      ['title'],
+      ['uri', {
+        combobox: {key: 'uri'}
+      }]
+    ]
+  }
 
   $.fn.isValid.init();
   
-  function Proxy($dialogNode, availableButtons, $textNode){
-    this.dialogNode = $dialogNode;
-    this.availableButtons = availableButtons;
+  function Proxy($dialogNode, $textNode){
+    this.body = $dialogNode.find('.modal-body')
+    this.footer = $dialogNode.find('.modal-footer')
+    this.dialogNode = $dialogNode
     this.textNode = $textNode;
   }
   
   Proxy.prototype = {
-    dialog: function(task, cb){
+    show: function (buttons, values, cb) {
+      this.setButtons(buttons);
+      if(typeof values === 'string')
+        this.setText(values)
+      else if(values)
+        this.setValues(values)
       if(cb){
         callback = cb;
       }
-      this.dialogNode.modal(task);
+      this.dialogNode.modal('show');
     },
     find: function(query){
       return this.dialogNode.find(query);
     },
-    selectButtons: function(buttonNames){
-      var buttons={},i=buttonNames.length;
+    setButtons: function(buttons){
+      var html = '',
+      i = buttons.length;
       while(i--){
-        buttons[buttonNames[i]] = this.availableButtons[buttonNames[i]];
+        html = html + '<a class=\"btn ' + buttons[i].toLowerCase() + '\">' + buttons[i] + '</a>'
       }
-      // this.dialogNode.dialog('option','buttons',buttons);
+      this.footer.html(html)
     },
     setText: function(text){
       if(this.textNode){
         this.textNode.html(text);
       }
     },
-    val: function(query,value){
-      this.find(query).val(value);
+    setValues: function(values){
+      for(var field in values)
+        this.find(field).val(values[field])
     }
   };
 
@@ -43,27 +73,19 @@
       if(callback && callback.close){
         callback.close();
       }
+    }).on('click', '.ok', function(){
+      if(callback && callback.submit){
+        callback.submit();
+      }
+      $dialogNode.modal("hide");
     });
 
-    return new Proxy($dialogNode, {
-      Ok: function(){
-        if(callback && callback.submit){
-          callback.submit();
-        }
-        $dialogNode.modal("hide");
-      },
-      Cancel: function(){
-        if(callback && callback.cancel){
-          callback.cancel();
-        }
-        $dialogNode.modal("hide");
-      }
-    }, $textNode);
+    return new Proxy($dialogNode, $textNode);
   }
 
   function initFormDialog($dialogNode, fieldDefinitions){
     var fieldsLength = fieldDefinitions.length,
-    $form = $dialogNode.append('<form>'),
+    $form = $('<form>').appendTo($dialogNode.find('.modal-body')),
     fields = initFields($form, fieldDefinitions);
     
     var submit = function() {
@@ -92,19 +114,13 @@
         fields[i].change();
       }
       fields[0][0].setSelectionRange(0,0);
-    })
-
-    return new Proxy($dialogNode, {
-      Create: submit,
-      Update: submit,
-      Remove: function(){
+    }).on('click', '.create, .update', submit)
+      .on('click', '.remove', function(){
         callback.remove();
         $dialogNode.modal("hide");
-      },
-      Cancel: function() {
-	      $dialogNode.modal("hide");
-      }
-    });
+      })
+
+    return new Proxy($dialogNode);
   }
 
   function initFields($form, fieldDefinitions){
@@ -126,10 +142,8 @@
       
       if(jQueryFunctions){
         for(method in jQueryFunctions){
-          if(jQueryFunctions.hasOwnProperty(method)){
-            args = jQueryFunctions[method];
-            fields[i][method](args);
-          }
+          args = jQueryFunctions[method];
+          fields[i][method](args);
         }
       }
     }
@@ -139,8 +153,13 @@
   function createDialog(name, fieldDefinitions){
     var $dialogNode, proxy;
 
-    $dialogNode = $('<div id=\"'+ name + '-dialog\" title=\"' + 
-                    _(name + "Title") + '\">');
+    $dialogNode = $('<div id='+ name + '-dialog class=modal>')
+      .append('<div class=modal-header><a class=close data-dismiss=modal>x</a><h3>' + _(name + "Title") + '</h3></div>')
+      .append('<div class=modal-body>')
+      .append('<div class=modal-footer>')
+      .on('click', '.cancel', function(){
+        $dialogNode.modal("hide");
+      })
 
     if(fieldDefinitions){
       proxy = initFormDialog($dialogNode, fieldDefinitions);
@@ -148,39 +167,17 @@
       proxy = initDialog($dialogNode);
     }
 
-    return function(buttonNames, text){
-      proxy.selectButtons(buttonNames);
-      proxy.setText(text);
-      return proxy;
-    };
+    return proxy;
   }
 
-  var loadedDialogs = {},
-  dialogFields = {
-    link: [
-      ['title', {
-        required: true
-      }],
-      ['uri', {
-        combobox: {key: 'uri'},
-        required: true
-      }]
-    ],
-    insertImage: [
-      ['imageUri', {
-        combobox: {key: 'imageUri'},
-        required: true
-      }],
-      ['title'],
-      ['uri', {
-        combobox: {key: 'uri'}
-      }]
-    ]
-  }
-  ME.getDialog = function (name) {
+  function  getDialog(name) {
     if(!loadedDialogs[name])
       loadedDialogs[name] = createDialog(name, dialogFields[name])
     return loadedDialogs[name]
+  }
+
+  ME.showDialog = function(name, buttons, values, callback) {
+    getDialog(name).show(buttons, values, callback)
   }
   
 })(jQuery, ME.t10n);

@@ -273,7 +273,7 @@
       },
       link: {
         clicked: function(editor, target) {
-          var dialog, callback, titleString, href, r, match;
+          var dialog, callback, titleString, href, r, match, buttons, values = {};
           
           callback = {
             submit: function(title,uri){
@@ -289,29 +289,28 @@
           };
 
           if(/ on$/.test(target.className)){
-            dialog = ME.getDialog('link')(['Update','Remove','Cancel']);
             href = editor.currentNodes.a.attributes.href;
 
             match = scanForMatch(editor, new RegExp('\"([^\"]*)\":'+href,'g'));
             titleString = match[1];
-            dialog.val('input.uri', href);
+
+            buttons = ['Update','Remove','Cancel']
+            values['input.uri'] = href
           }
           else {
-            dialog = ME.getDialog('link')(['Create','Cancel']);
+            buttons = ['Create','Cancel']
             titleString = firstLine(editor, " ");
           }
           
           if(!/^\s*$/.test(titleString)){
-            dialog.val('.title', titleString);
+            values['.title'] = titleString
           }
-          
-          dialog.dialog('show', callback);
+          ME.showDialog('link', buttons, values, callback)
         }
       },
       insertImage: {
         clicked: function(editor, target) {
-          var dialog, callback, href, src, r;
-
+          var href, src, r, buttons, values,
           callback = {
             submit: function(imageUri,title,uri){
               var replacement = imageUri;
@@ -335,7 +334,6 @@
           };
           
           if(/ on$/.test(target.className)){
-            dialog = ME.getDialog('insertImage')(['Update','Remove','Cancel']);
             src = editor.currentNodes.img.attributes.src;
 
             scanForMatch(editor, new RegExp('!' + src + "(\\([^\\)]*\\))?!(:[^ \n]*)?",'g'));
@@ -343,16 +341,19 @@
             if(editor.currentNodes.a){
               href = editor.currentNodes.a.attributes.href;
             }
-            dialog.val('input.uri', href);
-            dialog.val('input.imageUri', src);
-            dialog.val('input.title', editor.currentNodes.img.attributes.title);
+            
+            buttons = ['Update','Remove','Cancel']
+            values = {
+              'input.uri': href,
+              'input.imageUri': src,
+              'input.title': editor.currentNodes.img.attributes.title
+            }
           }
           else {
-            dialog = ME.getDialog('insertImage')(['Create','Cancel']);
+            buttons = ['Create','Cancel']
             firstLine(editor, " ");
           }
-
-          dialog.dialog('show', callback);
+          ME.showDialog('insertImage', buttons, values, callback)
         }
       },
       formatBlock: {
