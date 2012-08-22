@@ -165,7 +165,7 @@
         } else {
           text = 'noticeMissingToText';
         }
-        dialogProxy = ME.dialog.notice(['Ok', 'Cancel'], _(text));
+        dialogProxy = ME.getDialog('notice')(['Ok', 'Cancel'], _(text));
         dialogProxy.dialog('open', {
           submit: function(){
             if(callback){

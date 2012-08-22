@@ -165,9 +165,10 @@
       return proxy;
     };
   }
-  
-  ME.dialog = {
-    link: createDialog('link',[
+
+  var loadedDialogs = {},
+  dialogFields = {
+    link: [
       ['title', {
         required: true
       }],
@@ -175,8 +176,8 @@
         combobox: {key: 'uri'},
         required: true
       }]
-    ]),
-    insertImage: createDialog('insertImage', [
+    ],
+    insertImage: [
       ['imageUri', {
         combobox: {key: 'imageUri'},
         required: true
@@ -185,7 +186,12 @@
       ['uri', {
         combobox: {key: 'uri'}
       }]
-    ]),
-    notice: createDialog('notice')
-  };
+    ]
+  }
+  ME.getDialog = function (name) {
+    if(!loadedDialogs[name])
+      loadedDialogs[name] = createDialog(name, dialogFields[name])
+    return loadedDialogs[name]
+  }
+  
 })(jQuery, ME.t10n);

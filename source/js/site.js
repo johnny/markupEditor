@@ -1,4 +1,6 @@
 $(document).ready(function(){
+  ME.setOptions({uri: ['www.google.com','www.example.com','index.html']});
+  
   $(".markup").markupEditor({
   });
 
@@ -20,5 +22,4 @@ $(document).ready(function(){
     select: $("#externalSelect select.availableModes")
   });
 
-  ME.setOptions({uri: ['www.google.com','www.example.com','index.html']});
 });

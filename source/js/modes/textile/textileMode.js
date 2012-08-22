@@ -289,7 +289,7 @@
           };
 
           if(/ on$/.test(target.className)){
-            dialog = ME.dialog.link(['Update','Remove','Cancel']);
+            dialog = ME.getDialog('link')(['Update','Remove','Cancel']);
             href = editor.currentNodes.a.attributes.href;
 
             match = scanForMatch(editor, new RegExp('\"([^\"]*)\":'+href,'g'));
@@ -297,7 +297,7 @@
             dialog.val('input.uri', href);
           }
           else {
-            dialog = ME.dialog.link(['Create','Cancel']);
+            dialog = ME.getDialog('link')(['Create','Cancel']);
             titleString = firstLine(editor, " ");
           }
           
@@ -335,7 +335,7 @@
           };
           
           if(/ on$/.test(target.className)){
-            dialog = ME.dialog.insertImage(['Update','Remove','Cancel']);
+            dialog = ME.getDialog('insertImage')(['Update','Remove','Cancel']);
             src = editor.currentNodes.img.attributes.src;
 
             scanForMatch(editor, new RegExp('!' + src + "(\\([^\\)]*\\))?!(:[^ \n]*)?",'g'));
@@ -348,7 +348,7 @@
             dialog.val('input.title', editor.currentNodes.img.attributes.title);
           }
           else {
-            dialog = ME.dialog.insertImage(['Create','Cancel']);
+            dialog = ME.getDialog('insertImage')(['Create','Cancel']);
             firstLine(editor, " ");
           }
 

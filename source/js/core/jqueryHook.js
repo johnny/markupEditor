@@ -54,7 +54,7 @@
 
   function isValidDatatype(cssClass, changeDatamodeSelect){
     if(!ME.Editor.extractDataType(cssClass, changeDatamodeSelect)){
-      ME.dialog.notice(['Ok'], ME.t10n('noticeMissingDatamode'))
+      ME.getDialog('notice')(['Ok'], ME.t10n('noticeMissingDatamode'))
         .dialog('open');
     } else {
       return true;

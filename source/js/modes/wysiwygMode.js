@@ -620,7 +620,7 @@
           
           if(/ on$/.test(target.className)){
             linkNode = $(editor.currentNodes.a);
-            dialog = ME.dialog.link(['Update','Remove','Cancel']);
+            dialog = ME.getDialog('link')(['Update','Remove','Cancel']);
             
             callback.submit = function(title,uri){
               linkNode.attr('href',uri).text(title);
@@ -635,7 +635,7 @@
             dialog.val('input.uri', linkNode.attr('href'));
           }
           else {
-            dialog = ME.dialog.link(['Create','Cancel']);
+            dialog = ME.getDialog('link')(['Create','Cancel']);
             
             callback.submit = function(title,uri){
               var newNode = $("<a href=\"" + uri + "\">" + title + "</a>")[0];
@@ -691,7 +691,7 @@
           };
 
           if(/ on$/.test(target.className)){
-            dialog = ME.dialog.insertImage(['Update','Remove','Cancel']);
+            dialog = ME.getDialog('insertImage')(['Update','Remove','Cancel']);
             if(editor.currentNodes.a){
               linkNode = $(editor.currentNodes.a);
               dialog.val('input.uri', linkNode.attr('href'));
@@ -703,7 +703,7 @@
             dialog.val('input.title', imageNode.attr('title'));
           }
           else {
-            dialog = ME.dialog.insertImage(['Create','Cancel']);
+            dialog = ME.getDialog('insertImage')(['Create','Cancel']);
           }
 
           dialog.dialog('open', callback);
