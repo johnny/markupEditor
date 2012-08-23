@@ -419,6 +419,7 @@ $(document).ready(function(){
     checkConversion("*bold*");
     checkConversion(" *bold* ");
     checkConversion("_italic_");
+    checkConversion("_italic_:")
     checkConversion(" _italic_ ");
     checkConversion("\"This\":uri");
     checkConversion(" \"This\":uri ");

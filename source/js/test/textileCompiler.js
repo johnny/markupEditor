@@ -50,6 +50,7 @@ $(document).ready(function(){
   
   textileTest("Italic",
               ["_italic_", "<p><i>italic</i></p>",
+               "_italic_:", "<p><i>italic</i>:</p>",
                "_italic_edgecase_", "<p><i>italic_edgecase</i></p>",
                " _italic with spaces_", "<p> <i>italic with spaces</i></p>",
                "_italic _with a twist_", "<p><i>italic _with a twist</i></p>",
