@@ -505,7 +505,7 @@
         builder.pushTagUnlessOpen("b");
       }
       // italic end
-      else if(match = advance(/^([^ \n"\*]+)_([\*]*)(\W+|(?=\n|$))/)){
+      else if(match = advance(/^([^ \n"\*]+)_([\*]*)([: ,.]+|(?=\n|$))/)){
         builder.closeTagIfOpen("i", match[1]);
         if(match[2]){
           builder.closeTagIfOpen('b');
@@ -513,7 +513,7 @@
         builder.pushString(match[3]);
       }
       // bold end
-      else if(match = advance(/^([^ \n"_]+)\*([_]*)(\W+|(?=\n|$))/)){
+      else if(match = advance(/^([^ \n"_]+)\*([_]*)([: ,.]+|(?=\n|$))/)){
         builder.closeTagIfOpen("b", match[1]);
         if(match[2]){
           builder.closeTagIfOpen('i');
