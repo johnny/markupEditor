@@ -5,6 +5,11 @@
     - [ ] better loading:
       - [ ] specify textile etc. from attribute
       - [ ] properly convert html to textile
+    - [ ] better extensibility
+      - [ ] hook into toHTML (for conversion of uris in markupText)
+      - [ ] hook after fromHTML
+    - [ ] image floating
+      - [ ] left/right/center
     - [ ] style fixes
       - [ ] selects
       - [ ] form in modal
