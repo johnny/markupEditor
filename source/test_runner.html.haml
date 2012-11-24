@@ -11,12 +11,12 @@
   will be hidden
 
 %form#textile
-  %textarea.markup.textile
+  %textarea.markup(data-markup="textile")
 
 %form#wysiwyg
-  %textarea.markup.textile.wysiwyg
+  %textarea.markup(data-markup="textile" data-preview-only="true")
 
-%div.markupClick.textile
+%div.markupClick(data-markup="textile")
   = textarea 'html'
 
 %form#externalSelect
@@ -26,23 +26,23 @@
     %option{:value => 'modeWithoutToText'} Basic Mode
     %option{:value => 'completeSyncMode'} Basic Mode
     %option{:value => 'unknown'} Unknown
-  %textarea.ta1.markupExternalSelect.textile
-  %textarea.ta2.markupExternalSelect.textile
+  %textarea.ta1.markupExternalSelect(data-markup="textile")
+  %textarea.ta2.markupExternalSelect(data-markup="textile")
 
 %form#externalSelect2
   %select.availableModes
     %option{:value => 'textile'} Textile
-  %textarea.markupExternalSelect2.textile
+  %textarea.markupExternalSelect2(data-markup="textile")
 
 %div.markupClick.unknown2{ :src => 'api/markup/get?file=unknown'}
   = textarea 'html'
 
 %form#wrongExternalSelect
-  %textarea.textile
+  %textarea(data-markup="textile")
 
-%div.markupWithWrongSelect.textile
+%div.markupWithWrongSelect(data-markup="textile")
 
-%div.markupClick.haml{ :src => 'api/markup/get?file=haml'}
+%div.markupClick(data-markup="haml" src="api/markup/get?file=haml")
   = textarea 'html'
 
 - content_for :bottom do

@@ -25,10 +25,8 @@
     // console.log("init editor " + numberOfEditors);
     numberOfEditors ++;
 
-    this.setDataType(textArea.attr("class"));
+    this.dataType = settings.markup
     this.settings = settings;
-
-    if(!this.dataType) { return ;}
 
     function addKeyListeners(object, isTextarea){
       object.keydown(function(e){
@@ -79,32 +77,21 @@
       .append(this.overlay)
       .prepend(this.toolbar.div);
     textArea.wrap("<div class=\"textarea\">");
+    this.load()
   } // Editor
 
-  /**
-   * Extract the datatype from the given class string. It looks for
-   * known modes or valid options in the given select
-   *
-   * @param {String} classString The css class string to scan
-   * @param {HTMLSelect} [select] The select with all available modes
-   * (even undefined ones, which will be created on the fly)
-   *
-   * @returns {String|undefined} The mode id of the data mode, if it exists
-   */
-  ME.Editor.extractDataType = function(classString, select){
-    var i, cssClass,
-    cssClasses = classString.split(/\s+/);
-
-    for(i = 0; i < cssClasses.length; i += 1) {
-      cssClass = cssClasses[i];
-
-      if(cssClass !== "wysiwyg" && ME.hasMode(cssClass)) {
-        return cssClass;
-      }
-    }
-  };
-
   ME.Editor.prototype = {
+    load: function () {
+      this.currentMode = this.getDataMode()
+      if(this.settings.previewOnly){
+        this.changeMode('wysiwyg');
+      } else {
+        var editor = this
+        editor.currentMode.activate(editor, function(){
+          editor.currentMode.afterActivation(editor);
+        });
+      }
+    },
     /**
      * Change the current mode to the given id
      * 
@@ -221,14 +208,6 @@
      */
     getDataMode: function() {
       return ME.getMode(this.dataType);
-    },
-    /**
-     * Extract the datatype from the given class string 
-     *
-     * @param {String} classString The class string of the editor element
-     */
-    setDataType: function(classString) {
-      this.dataType = ME.Editor.extractDataType(classString);
     },
     /**
      * @param {String} text The text inside the textarea to save one

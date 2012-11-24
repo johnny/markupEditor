@@ -52,15 +52,6 @@
     return methods[method].apply(this, args);
   };
 
-  function isValidDatatype(cssClass, changeDatamodeSelect){
-    if(!ME.Editor.extractDataType(cssClass, changeDatamodeSelect)){
-      ME.getDialog('notice')(['Ok'], ME.t10n('noticeMissingDatamode'))
-        .dialog('open');
-    } else {
-      return true;
-    }
-  }
-  
   /**
    * Initialize the editor from a given HTML element
    *
@@ -70,16 +61,14 @@
    * @param {Option} settings Settings for this editor
    */
   function initEditorFromHTML(container, settings){
-    if(!isValidDatatype(container[0].className)){
-      return;
-    }
     var editor,src,
-    textarea = $("<textarea class=\"" + container[0].className + "\">");
+    textarea = $("<textarea>");
 
     container.css("min-height", container.height());
     container.before(textarea); // needs to be attached to DOM in firefox
 
     settings = settings || {};
+    $.extend(settings, container.data())
     settings.preview = container;
     editor = initEditorFromTextarea(textarea, settings);
 
@@ -106,24 +95,10 @@
    * @param {Option} instanceSettings Settings for this editor
    */
   function initEditorFromTextarea(textarea,instanceSettings){
-    if(!isValidDatatype(textarea[0].className)){
-      return;
-    }
     var editor,settings = {};
-    $.extend(settings,globalSettings,instanceSettings);
-    editor = new ME.Editor(textarea, settings);
 
-    editor.currentMode = editor.getDataMode();
-
-    if(textarea.hasClass("wysiwyg")) {
-      editor.changeMode('wysiwyg');
-    } else {
-      editor.currentMode.activate(editor, function(){
-        editor.currentMode.afterActivation(editor);
-      });
-    }
-
-    return editor;
+    $.extend(settings,globalSettings,instanceSettings, textarea.data());
+    return new ME.Editor(textarea, settings);
   }
 
 }(jQuery);
