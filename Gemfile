@@ -6,6 +6,8 @@ gem 'sass', :git => 'https://github.com/nex3/sass.git'
 
 gem 'middleman', '>= 3'
 
+gem 'guard'
+gem 'em-websocket'
 gem 'guard-livereload'
 gem 'rack-livereload'
 
