@@ -4,10 +4,10 @@
 %h1 MarkupEditor
 
 %form#textile
-  %textarea.markup.textile.wysiwyg{:name => 'textile'}= textarea 'textile'
+  %textarea.markup(data-markup="textile" preview-only="true")= textarea 'textile'
 
-%div.markup.textile
+%div.markup(data-markup="textile")
   = textarea 'html'
 
-%div.markupClick.textile
+%div.markupClick(data-markup="textile")
   = textarea 'html'

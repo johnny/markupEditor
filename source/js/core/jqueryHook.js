@@ -13,7 +13,6 @@
      * @see ME#settings
      */
     init: function(settings) {
-      ME.settings = settings;
       return this.each(function(index,element) {
         var $element = $(element), editor;
         if($element.is("textarea")) {
