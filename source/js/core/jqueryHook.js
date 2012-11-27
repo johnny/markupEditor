@@ -68,7 +68,7 @@
 
     settings = settings || {};
     $.extend(settings, container.data())
-    settings.preview = container;
+    settings.source = container;
     editor = initEditorFromTextarea(textarea, settings);
 
     src = container.attr('src');
@@ -77,10 +77,10 @@
       }, function(text, status, response){
         textarea.val(text);
         editor.checkState();
-        editor.currentMode.updatePreview(editor);
+        editor.updatePreview();
       });
     } else {
-      editor.currentMode.updateTextArea(editor);
+      editor.currentMode().updateTextarea(editor);
       editor.changeMode("wysiwyg");
     }
   }

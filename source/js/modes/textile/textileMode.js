@@ -283,7 +283,7 @@
               textileMode.replaceSelection(editor, match[1]);
             },
             close: function(){
-              textileMode.updatePreview(editor);
+              editor.updatePreview();
               editor.checkState();
             }
           };
@@ -328,7 +328,7 @@
               textileMode.replaceSelection(editor, "");
             },
             close: function(){
-              textileMode.updatePreview(editor);
+              editor.updatePreview();
               editor.checkState();
             }
           };

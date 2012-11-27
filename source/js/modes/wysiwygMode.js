@@ -805,7 +805,7 @@
      *
      * @param {Editor} editor The editor to work on
      */
-    afterActivation: function(editor) {
+    activate: function(editor) {
       editor.textArea.parent().hide();
       editor.preview.attr("contentEditable",true);
 
@@ -896,7 +896,7 @@
      * mode. Depends on the current data mode.
      */
     toText: function(editor, callback) {
-      return editor.getDataMode().toText(editor, callback);
+      return editor.currentDataMode().toText(editor, callback);
     },
     /**
      * @param {Editor} editor The editor to work on

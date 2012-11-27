@@ -9,6 +9,7 @@
 //= require "core/jqueryHook"
 //= require 'core/mode'
 //= require 'core/editor'
+//= require 'core/hub'
 //= require 'core/toolbar'
 //= require "modes/textile/textileMode"
 //= require "modes/textile/bruteForceCompiler"

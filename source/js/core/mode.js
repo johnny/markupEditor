@@ -44,73 +44,12 @@
      */
     clicked: $.noop,
     /**
-     * Activate this mode for the editor
-     *
-     * @param {Editor} editor The editor to work on
-     */
-    activate: function(editor, callback) {
-      if(editor.preview.is(":empty")) {
-        this.updatePreview(editor, callback);
-      } else {
-        this.updateTextArea(editor, callback);
-      }
-      editor.toolbar.loadModeToolbar(editor);
-    },
-    /**
-     * Update the preview html div with the html representation of the
-     * mode
-     * CONSIDER move to editor
-     *
-     * @param {Editor} editor The editor to work on
-     */
-    updatePreview: function(editor, callback) {
-      var html;
-      if(this.toHTML){
-        console.log("updating preview in Mode " + this.id);
-
-        html = this.toHTML(editor, callback);
-        if(html !== undefined){
-          editor.preview.html(html || "<p>&nbsp;</p>");
-          
-          if(callback){
-            callback();
-          }
-        }
-      } else if(callback){
-        callback();
-      }
-    },
-    /**
-     * Update the textarea with the text representation of the mode
-     *
-     * @param {Editor} editor The editor to work on
-     */
-    updateTextArea: function(editor, callback) {
-      var text, dialogProxy;
-      if(this.toText && (!editor.oldMode || editor.oldMode.toHTML)){
-        console.log("updating TA in Mode " + this.id);
-
-        text = this.toText(editor, callback);
-        if(text !== undefined){
-          editor.textArea.val(text);
-          
-          if(callback){
-            callback();
-          }
-        }
-      } else {
-        if(callback){
-          callback();
-        }
-      }
-    },
-    /**
      * Run after activation. Default behaviour for text modes. wysiwyg mode has 
      * its own version
      *
      * @param {Editor} editor The editor to work on
      */
-    afterActivation: function(editor) {
+    activate: function(editor) {
       var preview = editor.preview;
       editor.textArea
         .parent().show()

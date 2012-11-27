@@ -200,7 +200,7 @@
      * supported, it will be hidden.
      */
     loadModeToolbar: function(editor){
-      var supportedItems = editor.currentMode.supportedItems,
+      var supportedItems = editor.currentMode().supportedItems,
       oldVisibleItems = this.visibleItems,
       newVisibleItems = [];
       
@@ -230,7 +230,7 @@
     runAction: function(editor,action,target) {
       var asynchronous,
       item = toolbarItems[action],
-      mode = editor.currentMode;
+      mode = editor.currentMode();
 
       if(editor.is('wysiwyg')){
         editor.preview.focus();
@@ -241,10 +241,7 @@
       
       if(!asynchronous){
         editor.checkState();
-        // Update Preview in case something has changed
-        if( !editor.is("wysiwyg")) {
-          mode.updatePreview(editor);
-        }
+        editor.updatePreview();
       }
     },
     /**
@@ -298,14 +295,10 @@
   });
 
   toolbarItems.wysiwyg = new ME.ToolbarButton("wysiwyg", function(editor){
-    if(editor.is('wysiwyg')){
-      editor.changeMode(editor.dataType);
-    } else {
-      editor.changeMode('wysiwyg');
-    }
+    editor.togglePreview()
     return true;
   }, function(editor){
-    var mode = editor.currentMode;
+    var mode = editor.currentMode();
     return mode.toHTML && mode.toText;
   });
 

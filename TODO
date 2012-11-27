@@ -2,9 +2,12 @@
   - [-] make work with din
     - [X] remove jquery-ui
     - [X] use bootstrap
-    - [ ] better loading:
-      - [ ] specify textile etc. from attribute
+    - [-] better loading:
+      - [X] specify textile etc. from attribute
+      - [X] proper editor loading
       - [ ] properly convert html to textile
+    - [ ] improve editor closing
+      - [ ] write data attributes (otherwise a datamode change will not save)
     - [ ] better extensibility
       - [ ] hook into toHTML (for conversion of uris in markupText)
       - [ ] hook after fromHTML
@@ -27,9 +30,11 @@
     - [X] list specs
     - [X] config.current error (Border find error)
   - [ ] fix specs in chrome again
-  - [ ] create a class which handles the mode change in order to avoid
-    the same requests on mode change
+  - [-] Hub
+    - [X] create a class which handles the mode change in order to avoid
+      the same requests on mode change
     - [ ] spec form submission, which currently won't work
+    - [ ] make sync work again
   - [ ] update docs
   - [ ] better editor loading
     - [ ] handle multiple init gracefully. Currently it stacks two editors on top of each other
