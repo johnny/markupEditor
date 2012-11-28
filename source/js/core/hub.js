@@ -20,15 +20,15 @@
   
   ME.Hub = {
     loadEditor: function  (editor) {
-      var actions = [],
-      loadedFromPreview = editor.settings.source
+      var actions = []
+      editor.wysiwyg = !!editor.settings.source
 
-      if(loadedFromPreview && !editor.currentDataMode().toText ||
-         !loadedFromPreview && editor.settings.previewOnly){
+      if(editor.wysiwyg && !editor.currentDataMode().toText ||
+         !editor.wysiwyg && editor.settings.previewOnly){
         return ME.Hub.togglePreview(editor)
       }
       
-      if(!loadedFromPreview){
+      if(!editor.wysiwyg){
         actions.push('updatePreview')
       }
       processActions(editor, actions)
@@ -46,7 +46,7 @@
      * @param {String} modeId The id of the mode (e.g. textile)
      */
     changeDataMode: function  (editor, modeId) {
-      if(!modeId || modeId === this.currentMode().id) {
+      if(!modeId || modeId === editor.currentMode().id) {
         return false;
       }
       

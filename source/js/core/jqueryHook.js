@@ -4,7 +4,9 @@
    * @namespace jQuery hooks for markup editor
    */
 
-  var globalSettings = {},
+  var globalSettings = {
+    editorClass: 'markupEditor'
+  },
   methods = /** scope jQuery.markupEditor.prototype */{
     /**
      * Create the markup editor
@@ -12,13 +14,18 @@
      * @param {Object} settings The specific settings for the editor
      * @see ME#settings
      */
-    init: function(settings) {
+    init: function(parameters) {
       return this.each(function(index,element) {
-        var $element = $(element), editor;
-        if($element.is("textarea")) {
-          initEditorFromTextarea($element, settings);
-        } else {
-          initEditorFromHTML($element, settings);
+        var $element = $(element),
+        data = $element.data()
+        
+        if(!$element.closest('.' + globalSettings.editorClass)[0]){
+          if($element.is("textarea")) {
+            data.textarea = $element
+          } else {
+            data.source = $element
+          }
+          new ME.Editor($.extend({}, globalSettings, parameters, data));
         }
       });
     },
@@ -60,18 +67,7 @@
    * @param {Option} settings Settings for this editor
    */
   function initEditorFromHTML(container, settings){
-    var editor,src,
-    textarea = $("<textarea>");
-
-    container.css("min-height", container.height());
-    container.before(textarea); // needs to be attached to DOM in firefox
-
-    settings = settings || {};
-    $.extend(settings, container.data())
-    settings.source = container;
-    editor = initEditorFromTextarea(textarea, settings);
-
-    src = container.attr('src');
+    var src = container.attr('src');
     if(src){
       $.get(src, {
       }, function(text, status, response){
@@ -79,26 +75,7 @@
         editor.checkState();
         editor.updatePreview();
       });
-    } else {
-      editor.currentMode().updateTextarea(editor);
-      editor.changeMode("wysiwyg");
-    }
+    } 
   }
-  
-  /**
-   * Initialize the editor from a given textarea
-   *
-   * @memberOf jQuery.markupEditor
-   * @inner
-   * @param {jQuery} textarea The textarea which will be enhanced
-   * @param {Option} instanceSettings Settings for this editor
-   */
-  function initEditorFromTextarea(textarea,instanceSettings){
-    var editor,settings = {};
-
-    $.extend(settings,globalSettings,instanceSettings, textarea.data());
-    return new ME.Editor(textarea, settings);
-  }
-
 }(jQuery);
 

@@ -1,11 +1,11 @@
 $(document).ready(function(){
 
   var form = $("form#textile"),
-  textArea = form.find("textarea");
+  textarea = form.find("textarea");
 
   textile = new TextileHelper({
     form: form,
-    textArea: textArea
+    textarea: textarea
   });
 
   module("textile");
@@ -408,7 +408,7 @@ $(document).ready(function(){
     textile.set(value)
       .click(".wysiwyg")
       .click(".wysiwyg");
-    equal(textArea.val(),result || value);
+    equal(textarea.val(),result || value);
   }
   
   test("Conversion", function(){
@@ -440,7 +440,7 @@ $(document).ready(function(){
     textile.click('.wysiwyg')
       .find('.preview').html(html);
     textile.click('.wysiwyg');
-    equal(textArea.val(),result);
+    equal(textarea.val(),result);
   }
   test('conversion from special html', function(){
     checkConversionFromHTML('<p>test\n<a href=\"src\">link</a>\ntest</p>', 'test \"link\":src test');

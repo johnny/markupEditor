@@ -29,12 +29,12 @@ ME.addMode("html",function() {
       formatBlock: {
         clicked: function(toolbar, target) {
           // It won't work if the caret rests on top of the tags
-          var textArea = toolbar.textArea;
-          var caretPosition = textArea[0].selectionStart;
+          var textarea = toolbar.textarea;
+          var caretPosition = textarea[0].selectionStart;
           if(caretPosition === 0) {
             return false;
           }
-          var content = textArea.val();
+          var content = textarea.val();
           var before = content.slice(0, caretPosition);
           var after = content.slice(caretPosition);
           var replacementEndTag = "</" + target.value + ">";
@@ -61,12 +61,12 @@ ME.addMode("html",function() {
             after = after.slice(0, tagIndex) + replacementEndTag + after.slice(tagIndex + endTag.length);
           }
           
-          textArea.val(before + after);
+          textarea.val(before + after);
         }
       }
     },
     toHTML: function() {
-      return this.textArea.val();
+      return this.textarea.val();
     },
     toText: function() {
       return this.preview.html();

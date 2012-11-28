@@ -152,7 +152,7 @@
           if(editor.is('wysiwyg')){
             editor.preview.focus();
           } else {
-            editor.textArea.focus();
+            editor.textarea.focus();
           }
           return false;
         }
@@ -306,7 +306,7 @@
     editor.close();
   }, function(editor) {
     var settings = editor.settings;
-    return settings.preview || settings.closable;
+    return settings.source || settings.closable;
   });
 
 }(jQuery, ME.t10n);

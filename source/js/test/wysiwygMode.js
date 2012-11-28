@@ -1,7 +1,7 @@
 $(document).ready(function(){
 
   var form = $("form#wysiwyg"),
-  textArea = form.find("textarea"),
+  textarea = form.find("textarea"),
   preview = form.find(".preview"),
   selection = window.getSelection(),
   range = document.createRange();
@@ -12,7 +12,7 @@ $(document).ready(function(){
 
   var w = new WysiwygHelper({
     form: form,
-    textArea: textArea,
+    textarea: textarea,
     preview: preview,
     selection: selection,
     range: range
@@ -24,7 +24,7 @@ $(document).ready(function(){
     var otherEditor = $("div.markupClick.textile").parent(),
     w2 = new WysiwygHelper({
       form: otherEditor,
-      textArea: otherEditor.find('textarea'),
+      textarea: otherEditor.find('textarea'),
       preview: otherEditor.find('.preview'),
       selection: selection,
       range: range

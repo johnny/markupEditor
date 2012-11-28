@@ -96,10 +96,10 @@ $(function(){
   editor2 = $('textarea.ta2').parents('.markupEditor'),
   changeMode1 = editor1.find('.changeDataMode'),
   changeMode2 = editor2.find('.changeDataMode'),
-  textArea1 = editor1.find('textarea'),
+  textarea1 = editor1.find('textarea'),
   helper1 = new GeneralHelper({
     form: editor1,
-    textArea: textArea1
+    textarea: textarea1
   });
   
   test('should hide external select', function(){
@@ -167,7 +167,7 @@ $(function(){
     dialogText = '';
 
     changeMode1.val('textile').change();
-    textArea1.val(text).mouseup();
+    textarea1.val(text).mouseup();
     
     changeMode1.val('unknown').change();
     helper1.handleDialog('notice', function(d){
@@ -178,10 +178,10 @@ $(function(){
     ok(dialogOpen, 'a change to a mode without toText should warn');
     ok(/convert HTML to your markup/.test(dialogText), 'The dialog should warn about unsupported conversion to markup, text was: ' + dialogText);
     
-    ok(textArea1.val() === text, 'The text should not change, was ' + textArea1.val());
+    ok(textarea1.val() === text, 'The text should not change, was ' + textarea1.val());
 
     text = text + 'bla';
-    textArea1.val(text);
+    textarea1.val(text);
 
     dialogOpen = false;
     changeMode1.val('textile').change();
@@ -193,7 +193,7 @@ $(function(){
     ok(dialogOpen, 'a change to a mode with preview should warn about possible problems');
     ok(/convert to HTML/.test(dialogText), 'The dialog should warn about unsupported conversion to HTML, text was: ' + dialogText);
     
-    ok(textArea1.val() === text, 'Textile Mode should not convert preview div, was ' + textArea1.val());
+    ok(textarea1.val() === text, 'Textile Mode should not convert preview div, was ' + textarea1.val());
     
     changeMode1.val('modeWithoutToText').change();
     dialogOpen = false;
@@ -205,7 +205,7 @@ $(function(){
     ok(dialogOpen, 'a change to a mode without toText should warn');
     ok(/convert HTML to your markup/.test(dialogText), 'The dialog should warn about unsupported conversion to markup, text was: ' + dialogText);
 
-    ok(textArea1.val() === text, 'The text should not change, was ' + textArea1.val());
+    ok(textarea1.val() === text, 'The text should not change, was ' + textarea1.val());
 
     editor1.find('.preview').html('<p>Changed text</p>');
 
@@ -218,7 +218,7 @@ $(function(){
 
     ok(!dialogOpen, 'a change to a mode with preview should not warn about possible problems if the source mode has toHTML');
     
-    ok(textArea1.val() === 'Changed text', 'Textile mode should use preview div');
+    ok(textarea1.val() === 'Changed text', 'Textile mode should use preview div');
     
     changeMode1.val('modeWithoutToText').change();
     helper1.handleDialog('notice', function(d){
@@ -239,7 +239,7 @@ $(function(){
       previewButton.mouseup();
     }
 
-    textArea1.val(text).mouseup();
+    textarea1.val(text).mouseup();
 
     changeMode1.val('haml').change();
     stop();
@@ -249,13 +249,13 @@ $(function(){
 
       async(editor1, 'to_html', function(){
         start();
-        ok(textArea1.val() === text, 'The text should not change, was ' + textArea1.val());
+        ok(textarea1.val() === text, 'The text should not change, was ' + textarea1.val());
       });
     });
   });
 
   test('From div should work only, if the mode has toText or getText', function(){
-    var dialogOpen, $textArea,
+    var dialogOpen, $textarea,
     $editor = $('.markupClick.haml');
 
     $editor.click();
@@ -270,15 +270,15 @@ $(function(){
     async(function(){
       start();
 
-      $textArea = $editor.parent().find('textarea');
+      $textarea = $editor.parent().find('textarea');
 
       ok(!dialogOpen, 'loading from haml should not open dialog');
-      ok(/server version/.test($textArea.val()), 'haml should load from server');
-      ok($textArea.is(':visible'), 'textarea should be visible if loaded from file');
+      ok(/server version/.test($textarea.val()), 'haml should load from server');
+      ok($textarea.is(':visible'), 'textarea should be visible if loaded from file');
       equals($editor.parent().find('.changeDataMode').val(), 'haml', 'should set select to haml');
 
       $editor = $('.markupClick.unknown2');
-      $textArea = $editor.find('textarea');
+      $textarea = $editor.find('textarea');
 
       $editor.click();
             

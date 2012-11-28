@@ -806,7 +806,7 @@
      * @param {Editor} editor The editor to work on
      */
     activate: function(editor) {
-      editor.textArea.parent().hide();
+      editor.$textarea().hide();
       editor.preview.attr("contentEditable",true);
 
       // Force Mozilla to generate tags instead of inline styles

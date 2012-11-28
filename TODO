@@ -1,11 +1,16 @@
-* [2/13] Further improvements
+* [2/12] Further improvements
   - [-] make work with din
     - [X] remove jquery-ui
     - [X] use bootstrap
     - [-] better loading:
       - [X] specify textile etc. from attribute
       - [X] proper editor loading
+      - [X] just one entry point for div/textarea
+      - [ ] handle source properties within the editor
       - [ ] properly convert html to textile
+    - [ ] better editor loading
+      - [ ] handle multiple init gracefully. Currently it stacks two editors on top of each other
+      - [ ] loading from textarea with an unknown mode, that is a select option, should work
     - [ ] improve editor closing
       - [ ] write data attributes (otherwise a datamode change will not save)
     - [ ] better extensibility
@@ -23,6 +28,16 @@
       - [X] fix dev.html / test.html
       - [ ] remove haml instances
       - [ ] versioning
+      - [ ] move to amd/requirejs
+        - [ ] references
+          http://requirejs.org/docs/optimization.html
+          https://github.com/jrburke/almond
+          http://addyosmani.com/writing-modular-js/
+  - [-] Hub
+    - [X] create a class which handles the mode change in order to avoid
+      the same requests on mode change
+    - [ ] spec form submission, which currently won't work
+    - [ ] make sync work again
   - [-] fix specs in Firefox
     - [ ] general specs
     - [ ] better async handling. is there a global jQuery trigger
@@ -30,15 +45,7 @@
     - [X] list specs
     - [X] config.current error (Border find error)
   - [ ] fix specs in chrome again
-  - [-] Hub
-    - [X] create a class which handles the mode change in order to avoid
-      the same requests on mode change
-    - [ ] spec form submission, which currently won't work
-    - [ ] make sync work again
   - [ ] update docs
-  - [ ] better editor loading
-    - [ ] handle multiple init gracefully. Currently it stacks two editors on top of each other
-    - [ ] loading from textarea with an unknown mode, that is a select option, should work
   - [ ] flexible toolbar, which stays on top
   - [ ] wysiwyg
     - [ ] checkIfDeleteAll should work with holding a neutral key combined with a destructive action

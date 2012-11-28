@@ -3,10 +3,10 @@ function fireEvent(element, eventName){
 }
 $(function(){
   form = $("form#textile");
-  textArea = form.find("textarea");
+  textarea = form.find("textarea");
 
   textile = new TextileHelper({
     form: form,
-    textArea: textArea
+    textarea: textarea
   });
 });

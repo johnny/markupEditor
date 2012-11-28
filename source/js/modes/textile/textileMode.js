@@ -119,7 +119,7 @@
    * @param {RegExp} r The regexp to search for
    */
   function scanForMatch(editor, r){
-    var text = editor.textArea.val(),
+    var text = editor.textarea.val(),
     match = r.exec(text);
     if(r.lastIndex === 0){
       return;   // TODO escalate this return to break the caller too
@@ -378,7 +378,7 @@
      * @returns {String} HTML String
      */
     toHTML: function(editor, callback) {
-      return textileCompiler.compile(editor.textArea.val());
+      return textileCompiler.compile(editor.textarea.val());
     },
     /**
      * Convert preview div to textile
@@ -504,13 +504,13 @@
      * @param {String[]} paragraphs An array of paragraphs
      */
     setParagraphs: function(editor, paragraphs) {
-      var text = editor.textArea.val();
+      var text = editor.textarea.val();
       paragraphs = paragraphs.join("\n\n");
 
       if(editor.boundaryStart === -1) {
-        editor.textArea.val(text.slice(0,editor.boundaryStart) + paragraphs);
+        editor.textarea.val(text.slice(0,editor.boundaryStart) + paragraphs);
       } else {
-        editor.textArea.val(text.slice(0,editor.boundaryStart) + paragraphs + text.slice(editor.boundaryEnd));
+        editor.textarea.val(text.slice(0,editor.boundaryStart) + paragraphs + text.slice(editor.boundaryEnd));
       }
       
       this.moveCaret(editor, paragraphs.length - editor.boundaryDistance);
@@ -533,7 +533,7 @@
         selectionStart = startOfParagraphs;
       }
       
-      editor.textArea.focus();
+      editor.textarea.focus();
       editor.setSelectionRange(selectionStart, selectionStart);
     },
     /**

@@ -5,6 +5,23 @@
   activeEditors = [],
   numberOfEditors = 0;
 
+  function addKeyListeners(editor, object, isTextarea){
+    object.keydown(function(e){
+      if(isTextarea || editor.is('wysiwyg')){
+        return editor.currentMode().pressed(editor, e.keyCode);
+      }
+    }).keyup(function(e){
+      if(isTextarea || editor.is('wysiwyg')){
+        return editor.currentMode().released(editor, e.keyCode);
+      }
+    }).mouseup(function(){
+      if(isTextarea || editor.is('wysiwyg')){
+        editor.focus();
+        return editor.currentMode().clicked(editor);
+      }
+    });
+  }
+  
   /**
    * Create a new Editor
    * 
@@ -14,14 +31,12 @@
    *
    * @constructor
    * 
-   * @param {jQuery} textArea The textarea
    * @param {Object} settings Editor specific settings
    */
-  ME.Editor = function Editor(textArea, settings) {
+  ME.Editor = function Editor(settings) {
     var preview,
     editor = this,
-    timer = 0,
-    source = settings.source;
+    target = settings.source || settings.textarea
 
     activeEditors[numberOfEditors] = editor;
     editor.id = numberOfEditors;
@@ -31,56 +46,19 @@
     this.dataType = settings.markup
     this.settings = settings;
 
-    function addKeyListeners(object, isTextarea){
-      object.keydown(function(e){
-        if(isTextarea || editor.is('wysiwyg')){
-          return editor.currentMode().pressed(editor, e.keyCode);
-        }
-      }).keyup(function(e){
-        if(isTextarea || editor.is('wysiwyg')){
-          return editor.currentMode().released(editor, e.keyCode);
-        }
-      }).mouseup(function(){
-        if(isTextarea || editor.is('wysiwyg')){
-          editor.focus();
-          return editor.currentMode().clicked(editor);
-        }
-      });
-    }
-
-    // mouseup will catch all three mouse buttons. Since all keys move
-    // the cursor a check is necessary
-    this.textArea = textArea.bind("mouseup keyup", function() {
-      editor.checkState();
-      clearTimeout(timer);
-      timer = setTimeout(function(){
-        editor.updatePreview();
-      },1000);
-    });
-    addKeyListeners(textArea,true);
-
-    if(source){
-      preview = source.clone().addClass('preview');
-      source.hide()
-    } else {
-      preview = $("<div class=\"preview\">");
-    }
-    this.preview = preview.bind("mouseup keyup", function() {
-      if(editor.is("wysiwyg")) {
-        editor.checkState();
-      }
-    });
-    addKeyListeners(this.preview);
-
+    this.container = $("<div class=\"markupEditor\">")
+    this.toolbar = new ME.Toolbar(this);
     this.overlay = $('<div class=\"overlay\"><div class=\"background\"></div><div class=\"spinner\"></div></div>');
     
-    this.toolbar = new ME.Toolbar(this);
-    this.container = textArea.wrap("<div class=\"markupEditor\">")
-      .parent()
-      .append(editor.preview)
-      .append(this.overlay)
-      .prepend(this.toolbar.div);
-    textArea.wrap("<div class=\"textarea\">");
+    target.replaceWith(this.container)
+    console.log(target, this.container);
+    this.container.append(this.toolbar.div,
+                          this.$textarea(),
+                          this.$preview(),
+                          this.overlay)
+    
+    this.setupTextarea()
+    this.setupPreview()
 
     ME.Hub.loadEditor(this)
   } // Editor
@@ -162,7 +140,7 @@
 
         var text = mode.toText(this, callback);
         if(text !== undefined){ // handle synchronous conversion
-          this.textArea.val(text);
+          this.textarea.val(text);
           
           if(callback){
             callback();
@@ -174,17 +152,62 @@
         }
       }
     },
+    $textarea: function () {
+      if(!this.textarea){
+        this.textarea = this.settings.textarea || $("<textarea>")
+        this._$textarea = this.textarea.wrap("<div class=\"textarea\"/>").parent()
+      }
+      return this._$textarea
+    },
+    $preview: function () {
+      if(!this.preview){
+        var source = this.settings.source
+        if(source){
+          this.preview = source.clone().addClass('preview').css("min-height", source.height());
+          source.hide()
+        } else {
+          this.preview = $("<div class=\"preview\">");
+        }
+      }
+      return this.preview
+    },
+    setupTextarea: function  () {
+      var timer,
+      textarea = this.textarea,
+      editor = this
+      // mouseup will catch all three mouse buttons. Since all keys move
+      // the cursor a check is necessary
+      textarea.bind("mouseup keyup", function() {
+        editor.checkState();
+        clearTimeout(timer);
+        timer = setTimeout(function(){
+          editor.updatePreview();
+        },1000);
+      });
+      addKeyListeners(editor, textarea, true);
+    },
+    setupPreview: function () {
+      var preview = this.preview,
+      editor = this
+
+      preview.bind("mouseup keyup", function() {
+        if(editor.is("wysiwyg")) {
+          editor.checkState();
+        }
+      });
+      addKeyListeners(editor, preview);
+    },
     /**
      * @param {String} text The text inside the textarea to save one
      *    dom call
      */
     initSelectionProperties: function(text){
-      var textArea = this.textArea,
+      var textarea = this.textarea,
       selectionEnd;
       
-      this.scrollPosition = textArea.scrollTop;
-      this.selectionStart = textArea[0].selectionStart;
-      selectionEnd = textArea[0].selectionEnd;
+      this.scrollPosition = textarea.scrollTop;
+      this.selectionStart = textarea[0].selectionStart;
+      selectionEnd = textarea[0].selectionEnd;
       
       // Shrink selection if cursor is before a line since the
       // replacement will not contain a trailing new line
@@ -194,7 +217,7 @@
       this.selectionEnd = selectionEnd;
     },
     setSelectionRange: function(selectionStart, selectionEnd){
-      this.textArea[0].setSelectionRange(selectionStart, selectionEnd);
+      this.textarea[0].setSelectionRange(selectionStart, selectionEnd);
       this.selectionStart = selectionStart;
       this.selectionEnd = selectionEnd;
     },
@@ -206,9 +229,9 @@
         if(callback){
           callback();
         }
-        this.currentMode().updateTextarea(this, callback);
+        this.updateTextarea(callback);
       } else {
-        this.currentMode().updatePreview(this, callback);
+        this.updatePreview(callback);
       }
     },
     /**
@@ -249,7 +272,7 @@
      * Close the editor and restore the original div/textarea
      */
     close: function() {
-      var replacement = this.settings.preview || this.textArea;
+      var replacement = this.settings.source ? this.preview : this.textarea;
       this.synchronize();
       
       this.container.replaceWith(replacement);

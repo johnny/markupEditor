@@ -85,17 +85,17 @@ function TextileHelper(object){
 TextileHelper.prototype = (function (){
   var methods = {
     set: function set(string){
-      this.textArea.val(string);
-      this.textArea[0].setSelectionRange(string.length, string.length);
+      this.textarea.val(string);
+      this.textarea[0].setSelectionRange(string.length, string.length);
       // reset Toolbar
       return this.click('textarea');
     },
     selectAll: function(){
-      this.textArea[0].setSelectionRange(0, this.textArea.val().length);
+      this.textarea[0].setSelectionRange(0, this.textarea.val().length);
       return this.click('textarea');
     },
     select: function select(string, collapse){
-      var start = this.textArea.val().indexOf(string),
+      var start = this.textarea.val().indexOf(string),
       end = start + string.length;
       
       if(collapse === true){
@@ -104,12 +104,12 @@ TextileHelper.prototype = (function (){
         end = start;
       }
 
-      this.textArea[0].setSelectionRange(start, end);
+      this.textarea[0].setSelectionRange(start, end);
       // set toolbar items active
       return this.click('textarea');
     },
     _match: function _match(object, intendedResult, string){
-      var val = this.textArea.val(), result;
+      var val = this.textarea.val(), result;
       if(typeof object == "string"){
         result = val.indexOf(object) != -1;
       } else {
@@ -123,7 +123,7 @@ TextileHelper.prototype = (function (){
       return this;
     },
     equal: function(string){
-      equal(this.textArea.val(),string);
+      equal(this.textarea.val(),string);
       return this;
     },
     notMatch: function notMatch(object){

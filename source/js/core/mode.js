@@ -50,12 +50,11 @@
      * @param {Editor} editor The editor to work on
      */
     activate: function(editor) {
-      var preview = editor.preview;
-      editor.textArea
-        .parent().show()
-        .find(":first-child").focus()[0]
-        .setSelectionRange(0,0);
-      editor.dataType = this.id;
+      var preview = editor.preview
+
+      editor.$textarea().show()
+      editor.textarea.focus()[0].setSelectionRange(0,0)
+
       preview.attr("contentEditable",false);
       if(this.toHTML){
         preview.show();
@@ -161,7 +160,7 @@
      * the line
      */
     atBeginningOfLine: function(editor){
-      var text = editor.textArea.val();
+      var text = editor.textarea.val();
       return text[editor.selectionStart-1] === "\n";
     },
     /**
@@ -176,9 +175,9 @@
      */
     getSelection: function(editor, boundary) {
       var boundaryPosition, subString, outerLimit, outerLimitLength, searchLimit, boundaryStart, boundaryEnd, selectionEnd, selectionStart,
-      textArea = editor.textArea,
-      text = textArea.val();
-      textArea.focus();
+      textarea = editor.textarea,
+      text = textarea.val();
+      textarea.focus();
 
       editor.initSelectionProperties(text);
       selectionEnd = editor.selectionEnd;
@@ -252,12 +251,12 @@
      * @param {Boolean} collapseToStart If the selection should collapse
      */
     replaceSelection: function(editor, string, collapseToStart) {
-      var textArea = editor.textArea,
+      var textarea = editor.textarea,
       newSelectionStart = editor.selectionStart,
       newSelectionEnd = editor.selectionStart + string.length;
 
       // gecko & webkit
-      textArea.val(textArea.val().slice(0, editor.selectionStart) + string + textArea.val().slice(editor.selectionEnd, textArea.val().length));
+      textarea.val(textarea.val().slice(0, editor.selectionStart) + string + textarea.val().slice(editor.selectionEnd, textarea.val().length));
 
       // move caret gecko
       if(collapseToStart === true){
@@ -267,7 +266,7 @@
       }
 
       editor.setSelectionRange(newSelectionStart, newSelectionEnd);
-      textArea.focus();
+      textarea.focus();
     },
     /**
      * Extend the right selection with a regexp. Everything matched will be added
@@ -284,7 +283,7 @@
       var match;
       regexp = new RegExp(regexp.source,'g');
       regexp.lastIndex = editor.selectionEnd;
-      match = regexp.exec(editor.textArea.val());
+      match = regexp.exec(editor.textarea.val());
 
       if(match && regexp.lastIndex == editor.selectionEnd + match[0].length){
         editor.selectionEnd += match[0].length;
@@ -303,7 +302,7 @@
      * extendLeftSelection(/[ .]+/)
      */
     extendLeftSelection: function(editor, regexp){
-      var match, substring = editor.textArea.val().slice(0,editor.selectionStart);
+      var match, substring = editor.textarea.val().slice(0,editor.selectionStart);
       regexp = new RegExp(regexp.source + "$");
       match = regexp.exec(substring);
       
