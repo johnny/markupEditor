@@ -6,7 +6,7 @@
       - [X] specify textile etc. from attribute
       - [X] proper editor loading
       - [X] just one entry point for div/textarea
-      - [ ] handle source properties within the editor
+      - [X] handle source properties within the editor
       - [ ] properly convert html to textile
     - [ ] better editor loading
       - [ ] handle multiple init gracefully. Currently it stacks two editors on top of each other
@@ -37,6 +37,7 @@
     - [X] create a class which handles the mode change in order to avoid
       the same requests on mode change
     - [ ] spec form submission, which currently won't work
+    - [ ] handle editor instances
     - [ ] make sync work again
   - [-] fix specs in Firefox
     - [ ] general specs

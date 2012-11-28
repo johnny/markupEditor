@@ -57,25 +57,5 @@
     }
     return methods[method].apply(this, args);
   };
-
-  /**
-   * Initialize the editor from a given HTML element
-   *
-   * @memberOf jQuery.markupEditor
-   * @inner
-   * @param {jQuery} container The element which will be editable
-   * @param {Option} settings Settings for this editor
-   */
-  function initEditorFromHTML(container, settings){
-    var src = container.attr('src');
-    if(src){
-      $.get(src, {
-      }, function(text, status, response){
-        textarea.val(text);
-        editor.checkState();
-        editor.updatePreview();
-      });
-    } 
-  }
 }(jQuery);
 

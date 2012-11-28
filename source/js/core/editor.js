@@ -142,11 +142,17 @@
         if(text !== undefined){ // handle synchronous conversion
           this.textarea.val(text);
           
-          if(callback){
-            callback();
-          }
+          if(callback)
+            callback()
         }
       } else {
+        if(this.settings.src){
+          $.get(this.settings.src, {}, function(text, status, response){
+            this.textarea.val(text);
+            if(callback)
+              callback()
+          });
+        }
         if(callback){
           callback();
         }
