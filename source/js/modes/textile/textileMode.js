@@ -377,8 +377,8 @@
      *
      * @returns {String} HTML String
      */
-    toHTML: function(editor, callback) {
-      return textileCompiler.compile(editor.textarea.val());
+    toHTML: function(editor, text, callback) {
+      callback(textileCompiler.compile(text))
     },
     /**
      * Convert preview div to textile
@@ -387,9 +387,7 @@
      *
      * @returns {String} A textile string
      */
-    toText: function(editor, callback) {
-      var html = editor.preview.html();
-
+    toText: function(editor, html, callback) {
       /**
        * Fetch the regexps for the given tags and call the given
        * callback
@@ -472,7 +470,7 @@
       html = html.replace(/&nbsp;/g, ' ');
       html = html.replace(/^[\r\n]+|[\r\n]+$/g, '');
 
-      return html;
+      callback(html)
     },
     /**
      * Get the states for the current selection

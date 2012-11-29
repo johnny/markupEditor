@@ -623,6 +623,7 @@
             linkNode = $(editor.currentNodes.a);
             
             callback.submit = function(title,uri){
+              uri = editor.settings.denormalizeUrl(uri)
               linkNode.attr('href',uri).text(title);
               
               // Firefox start
@@ -633,11 +634,12 @@
             };
             titleString = linkNode.text();
             
-            values['input.uri'] = linkNode.attr('href')
+            values['input.uri'] = editor.settings.normalizeUrl(linkNode.attr('href'))
             buttons = ['Update','Remove','Cancel']
           }
           else {
             callback.submit = function(title,uri){
+              uri = editor.settings.denormalizeUrl(uri)
               var newNode = $("<a href=\"" + uri + "\">" + title + "</a>")[0];
               range.deleteContents();
               range.insertNode(newNode);
@@ -672,6 +674,7 @@
               }
 
               if(!/^\s*$/.test(uri)){
+                uri = editor.settings.denormalizeUrl(uri)
                 parentNode = $("<a href=\"" + uri + "\"/>").append(imageNode);
               }
               
@@ -699,7 +702,7 @@
             }
             if(editor.currentNodes.a){
               linkNode = $(editor.currentNodes.a);
-              values['input.uri'] = linkNode.attr('href')
+              values['input.uri'] = editor.settings.normalizeUrl(linkNode.attr('href'))
               range.selectNode(editor.currentNodes.a);
             }
 
@@ -895,16 +898,16 @@
      * @returns {String} The text representation of the preview
      * mode. Depends on the current data mode.
      */
-    toText: function(editor, callback) {
-      return editor.currentDataMode().toText(editor, callback);
+    toText: function(editor, text, callback) {
+      editor.currentDataMode().toText(editor, text, callback);
     },
     /**
      * @param {Editor} editor The editor to work on
      *
      * @returns {String} The html behind the preview
      */
-    toHTML: function(editor) {
-      return editor.preview.html();
+    toHTML: function(editor, html, callback) {
+      callback(html)
     }
   });
 }();

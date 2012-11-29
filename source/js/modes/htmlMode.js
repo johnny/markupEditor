@@ -65,11 +65,11 @@ ME.addMode("html",function() {
         }
       }
     },
-    toHTML: function() {
-      return this.textarea.val();
+    toHTML: function(editor, text, callback) {
+      callback(text)
     },
-    toText: function() {
-      return this.preview.html();
+    toText: function(editor, html, callback) {
+      callback(html)
     }
   };
 });

@@ -2,29 +2,23 @@ ME.addMode('haml', function(){
   var $ = jQuery;
   return {
     name: "Haml Mode",
-    toHTML: function(editor, callback) {
+    toHTML: function(editor, text, callback) {
       $.get('/api/markup/to_html', {
         type: 'haml',
-        content: editor.textarea.val()
+        content: text
       }, function(html, status, response){
         console.log('to');
-        editor.preview.html(html);
-        if(callback){
-          callback();
-        }
+        callback(html)
         editor.container.trigger('to_html');
       });
     },
-    toText: function(editor, callback) {
+    toText: function(editor, html, callback) {
       $.get('/api/markup/from_html', {
         type: 'haml',
-        content: editor.preview.html()
+        content: html
       }, function(haml, status, response){
         console.log('from');
-        editor.textarea.val(haml);
-        if(callback){
-          callback();
-        }
+        callback(haml)
         editor.container.trigger('from_html');
       });
     }

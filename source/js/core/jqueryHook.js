@@ -5,7 +5,13 @@
    */
 
   var globalSettings = {
-    editorClass: 'markupEditor'
+    editorClass: 'markupEditor',
+    normalizeUrl: function (url) {
+      return url
+    },
+    denormalizeUrl: function (url) {
+      return url
+    }
   },
   methods = /** scope jQuery.markupEditor.prototype */{
     /**

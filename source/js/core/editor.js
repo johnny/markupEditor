@@ -25,7 +25,7 @@
   /**
    * Create a new Editor
    * 
-   * An editor has a current mode and a textarea mode. Both are the same if you 
+   * An editor has a current mode and a textarea mode. Both are the same if you
    * edit the textarea directly (e.g. textile). In the wysiwyg mode you edit the
    * html directly.
    *
@@ -51,7 +51,7 @@
     this.overlay = $('<div class=\"overlay\"><div class=\"background\"></div><div class=\"spinner\"></div></div>');
     
     target.replaceWith(this.container)
-    console.log(target, this.container);
+
     this.container.append(this.toolbar.div,
                           this.$textarea(),
                           this.$preview(),
@@ -112,18 +112,19 @@
      * @param {Editor} editor The editor to work on
      */
     updatePreview: function(callback) {
-      var mode = this.currentDataMode();
+      var mode = this.currentDataMode(),
+      editor = this
       if(mode.toHTML && !this.wysiwyg){
         console.log("updating preview in Mode " + mode.id);
 
-        var html = mode.toHTML(this, callback);
-        if(html !== undefined){ // its a synchronous mode
-          this.preview.html(html || "<p>&nbsp;</p>");
-          
-          if(callback){
-            callback();
-          }
-        }
+        var html = mode.toHTML(this, this.textarea.val(), function (html) {
+          editor.preview.html(
+            editor.denormalizeUrls(html || "<p>&nbsp;</p>")
+          )
+
+          if(callback)
+            callback()
+        });
       } else if(callback){
         callback();
       }
@@ -134,27 +135,38 @@
      * @param {Editor} editor The editor to work on
      */
     updateTextarea: function(callback) {
-      var mode = this.currentMode();
+      var mode = this.currentMode(),
+      editor = this,
+      writeTextarea = function (text) {
+        editor.textarea.val(text);
+
+        if(callback)
+          callback()
+      }
       if(mode.toText){
         console.log("updating TA in Mode " + mode.id);
-
-        var text = mode.toText(this, callback);
-        if(text !== undefined){ // handle synchronous conversion
-          this.textarea.val(text);
-          
-          if(callback)
-            callback()
-        }
+        
+        var html = this.normalizeUrls(this.preview.html())
+        
+        mode.toText(this, html, writeTextarea);
       } else if(this.settings.src){
-        $.get(this.settings.src, {}, function(text, status, response){
-          this.textarea.val(text);
-          if(callback)
-            callback()
-        });
+        $.get(this.settings.src, {}, writeTextarea);
       } else {
         if(callback)
           callback()
       }
+    },
+    denormalizeUrls: function (html) {
+      var editor = this
+      return html.replace(/<a href="([^\"]*)">/gi, function (match, url) {
+        return '<a href="' + editor.settings.denormalizeUrl(url) + '">'
+      })
+    },
+    normalizeUrls: function (html) {
+      var editor = this
+      return html.replace(/<a href="([^\"]*)">/gi, function (match, url) {
+        return '<a href="' + editor.settings.normalizeUrl(url) + '">'
+      })
     },
     $textarea: function () {
       if(!this.textarea){
