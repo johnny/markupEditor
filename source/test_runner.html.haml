@@ -16,7 +16,7 @@
 %form#wysiwyg
   %textarea.markup(data-markup="textile" data-preview-only="true")
 
-%div.markupClick(data-markup="textile")
+%div.markupClick.textile(data-markup="textile")
   = textarea 'html'
 
 %form#externalSelect
@@ -42,7 +42,7 @@
 
 %div.markupWithWrongSelect(data-markup="textile")
 
-%div.markupClick(data-markup="haml" src="api/markup/get?file=haml")
+%div.markupClick.haml(data-markup="haml" src="api/markup/get?file=haml")
   = textarea 'html'
 
 - content_for :bottom do

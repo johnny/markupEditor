@@ -13,7 +13,7 @@ DialogHelper.prototype = {
   click: function(title){
     var button = this.cachedButtons[title], id;
     if(!button){
-      button = this.dialog.find("button:contains("+title+")");
+      button = this.dialog.find("a:contains("+title+")");
       this.cachedButtons[title] = button;
     }
     button.click();
@@ -69,7 +69,7 @@ GeneralHelper.prototype = {
   },
   handleDialog: function(name, callback){
     var identifier = '#'+name+'-dialog',
-    d = this.cache[identifier] || (this.cache[identifier] = $(identifier).parent());
+    d = this.cache[identifier] || (this.cache[identifier] = $(identifier));
 
     if(d.is(':visible')){
       callback(new DialogHelper(d, name));

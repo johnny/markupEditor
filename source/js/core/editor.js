@@ -43,7 +43,7 @@
     // console.log("init editor " + numberOfEditors);
     numberOfEditors ++;
 
-    this.dataType = settings.markup
+    this.dataType = settings.markup || settings.select && settings.select.val()
     this.settings = settings;
 
     this.container = $("<div class=\"markupEditor\">")

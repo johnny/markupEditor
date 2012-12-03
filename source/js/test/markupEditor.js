@@ -1,5 +1,6 @@
 $(function(){
-  var editor = $("div.markupClick.textile").click().parent(),
+  $("div.markupClick.textile").click()
+  var editor,
   timeout_ms = 200;
 
   function async(editor, trigger, callback){
@@ -20,6 +21,7 @@ $(function(){
     setTimeout(callback, timeout_ms);
   }
 
+  editor = $("div.markupClick.textile").parent()
 
   module("Markup");
   
@@ -60,7 +62,7 @@ $(function(){
       ok(!previewButton.is('.on'), 'preview off');
       ok(changeMode.val() === 'haml', 'The datamode should stay the same, was ' + changeMode.val());
       previewButton.mouseup();
-      async(editor, 'from_html', function(){
+      async(editor, 'to_html', function(){
         start();
         ok(previewButton.is('.on'), 'preview on');
         ok(changeMode.val() === 'haml', 'The datamode should stay the same, was ' + changeMode.val());
@@ -85,7 +87,10 @@ $(function(){
     ok(div.parent()[0] !== editor[0], 'editor should be closed');
     ok(!div.data('events') || !div.data('events').keyup, 'events should be removed');
     ok(div.attr('contentEditable') === 'false', 'content should no longer be editable');
-    div.click();
+
+    $('.markupClick.textile').click()
+    editor = $('.markupClick.textile').parent()
+    div = $('.markupClick.textile')
     ok(div.attr('contentEditable') === 'true', 'editor should be reopened');
     ok(div.parent().find("a.save").is(":visible"), "save settings should be remembered");
     ok(div.parent().find("select.changeDataMode option[value='unknown']")[0], "select settings should be remembered");

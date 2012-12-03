@@ -2,12 +2,6 @@ $(document).ready(function(){
   ME.setOptions({uri: ['www.google.com','www.example.com','index.html']});
   
   $(".markup").markupEditor({
-    denormalizeUrl: function (uri) {
-      return "http://" + uri
-    },
-    normalizeUrl: function (uri) {
-      return uri.replace(/http:\/\/(.*)/, "$1")
-    }
   });
 
   $(".markupExternalSelect").markupEditor({
@@ -27,5 +21,14 @@ $(document).ready(function(){
     },
     select: $("#externalSelect select.availableModes")
   });
+
+  $(".markupUrlTest").markupEditor({
+    denormalizeUrl: function (uri) {
+      return "http://" + uri
+    },
+    normalizeUrl: function (uri) {
+      return uri.replace(/http:\/\/(.*)/, "$1")
+    }
+  })
 
 });
