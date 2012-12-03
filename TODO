@@ -11,7 +11,10 @@
     - [X] better extensibility
       - [X] hook into toHTML (for conversion of uris in markupText)
       - [X] hook after fromHTML
-    - [ ] fix specs in chrome
+    - [-] specs in chrome
+      - [X] fix most
+      - [ ] fix editor synch specs
+      - [ ] spec uri normalization
     - [ ] improve editor closing
       - [ ] write data attributes (otherwise a datamode change will not save)
     - [-] better editor loading

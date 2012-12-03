@@ -1,4 +1,13 @@
 GIT
+  remote: https://github.com/johnny/rack-coderay.git
+  revision: d777e04aedf5287786d0afab3d5b84a5a466a37f
+  specs:
+    rack-coderay (0.2.0)
+      coderay (>= 0.8.312)
+      hpricot (>= 0.8.1)
+      rack (>= 1.0.0)
+
+GIT
   remote: https://github.com/johnny/sass-twitter-bootstrap.git
   revision: 06795315e0476e1f64c991d6686a21c16c68423e
   branch: customizations
@@ -107,10 +116,6 @@ GEM
       method_source (~> 0.8)
       slop (~> 3.3.1)
     rack (1.4.1)
-    rack-coderay (0.2.0)
-      coderay (>= 0.8.312)
-      hpricot (>= 0.8.1)
-      rack (>= 1.0.0)
     rack-livereload (0.3.8)
       rack
     rack-protection (1.2.0)
@@ -174,7 +179,7 @@ DEPENDENCIES
   guard-livereload
   hpricot
   middleman (>= 3)
-  rack-coderay
+  rack-coderay!
   rack-livereload
   rdiscount
   rspec

@@ -62,11 +62,15 @@ end
 if development?
   require 'rack-livereload'
   use Rack::LiveReload,
-  :source => :vendored
+  :source => :vendored,
+  :ignore => [ %r{/doc} ]
+end
+map "/doc" do
+  run Rack::Directory.new(Dir.pwd + "/source/doc")
 end
 
 require 'rack/coderay'
-use Rack::Coderay, "//pre[@lang]"
+use Rack::Coderay, "//pre[@lang]", :ignore => [ %r{/doc} ]
 
 # Hack to fix haml output
 class Rack::Coderay::Parser

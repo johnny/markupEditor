@@ -11,7 +11,7 @@ gem 'em-websocket'
 gem 'guard-livereload'
 gem 'rack-livereload'
 
-gem 'rack-coderay'
+gem 'rack-coderay', :git => 'https://github.com/johnny/rack-coderay.git'
 
 gem 'therubyracer'
 gem 'closure-compiler'
