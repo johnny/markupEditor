@@ -1,5 +1,5 @@
-!function() {
-  var $ = jQuery, textileMode;
+!function($,undefined) {
+  var textileMode;
 
   /**
    * Iterate over each paragraph and call the functor on it and set the paragraphs
@@ -550,4 +550,4 @@
       }
     }
   });
-}();
+}(jQuery);

@@ -1,3 +1,9 @@
+Interesting links
+
+https://github.com/domchristie/to-markdown
+https://github.com/evilstreak/markdown-js
+https://github.com/coreyti/showdown
+
 * [2/12] Further improvements
   - [-] make work with din
     - [X] remove jquery-ui
@@ -11,16 +17,16 @@
     - [X] better extensibility
       - [X] hook into toHTML (for conversion of uris in markupText)
       - [X] hook after fromHTML
+    - [-] better editor loading
+      - [X] handle multiple init gracefully. Currently it stacks two editors on top of each other
+      - [ ] loading from textarea with an unknown mode, that is a select option, should work
+      - [ ] add spec for mupltiple inits
     - [-] specs in chrome
       - [X] fix most
       - [ ] fix editor synch specs
       - [ ] spec uri normalization
     - [ ] improve editor closing
       - [ ] write data attributes (otherwise a datamode change will not save)
-    - [-] better editor loading
-      - [X] handle multiple init gracefully. Currently it stacks two editors on top of each other
-      - [ ] add spec for mupltiple inits
-      - [ ] loading from textarea with an unknown mode, that is a select option, should work
     - [ ] image floating
       - [ ] left/right/center
     - [ ] style fixes
@@ -31,7 +37,7 @@
       - [X] build
       - [X] remove erb calls
       - [X] fix dev.html / test.html
-      - [ ] remove haml instances
+      - [X] remove haml instances
       - [ ] versioning
       - [ ] move to amd/requirejs
         - [ ] references
