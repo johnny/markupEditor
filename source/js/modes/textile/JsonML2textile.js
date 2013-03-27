@@ -14,7 +14,9 @@
   TextileBuilder.prototype = {
     delimiters : {
       b: '*',
-      i: '_'
+      i: '_',
+      del: '-',
+      u: '+'
     },
     toText : function (ml) {
       this.consume(ml)
@@ -32,11 +34,12 @@
         }
         else if(!validTags || validTags.indexOf(token[0]) >= 0)
           this.pushTag(token)
+        this.lastToken = token
       }
     },
     pushString: function (string) {
       if(this.lazyTags[0] && !/^ *$/.test(string)){
-        this.closeLazyTags()
+        this.closeTags('lazyTags')
         this.out += " "
       }
 
@@ -60,16 +63,16 @@
         this.currentTags.remove(this.currentTags.indexOf(tag))
       }
     },
-    closeLazyTags: function () {
-      this.closeTags(this.lazyTags)
-      this.lazyTags = []
-    },
-    closeTags: function (tags) {
-      var l = tags.length,
+    closeTags: function (name, keepTags) {
+      var tags = this[name],
+      l = tags.length,
       i = 0
 
       for(; i < l; i++)
         this.out += this.delimiters[tags[i]]
+      
+      if(!keepTags)
+        this[name] = []
     },
     openTags: function (tags) {
       var l = tags.length,
@@ -79,17 +82,18 @@
       for(; i < l; i++)
         this.out += this.delimiters[tags[i]]
     },
+    methods: {
+      a: 'link',
+      img: 'image',
+      br: 'newLine',
+      ul: 'list',
+      ol: 'list',
+      li: 'listItem'
+    },
     getMethod: function (tag){
       if(/p|h[1-6]/.test(tag))
         return "block"
-      else if(/a/.test(tag))
-        return 'link'
-      else if(tag == 'img')
-        return 'image'
-      else if(tag == 'br')
-        return 'newLine'
-      else
-        return "consumeChildren"
+      return this.methods[tag] || 'consumeChildren'
     },
     consumeChildren: function (tag, children, attributes){
       this.consume(children)
@@ -107,16 +111,42 @@
         this.consume(children, ['b','i','text'])
         this.out += "\""
       }
-      this.out += ":" + attributes.href
+      if(/ /.test(attributes.href))
+        this.out += ":\"" + attributes.href + "\""
+      else
+        this.out += ":" + attributes.href
     },
     image: function (tag, children, attributes) {
-      this.out += '!' + attributes.src + '!'
+      this.out += '!' + attributes.src
+      if(attributes.title)
+        this.out += '(' + attributes.title + ')'
+      this.out += '!'
     },
     newLine: function (tag) {
-      this.closeLazyTags()
-      this.closeTags(this.currentTags)
+      if(this.listType || this.lastToken && this.lastToken[0] === 'br' ){
+        if(!this.currentTags[0]) // check if the line starts with a delimiter
+          this.ensureSpace()
+        this.out += "</br> "
+      }
+      else {
+        this.closeTags('lazyTags')
+        this.closeTags('currentTags', true)
+        this.out += "\n"
+        this.openTags(this.currentTags)
+      }
+    },
+    list: function (tag, children, attributes) {
+      this.listType = tag
+      this.consume(children, ['li'])
       this.out += "\n"
-      this.openTags(this.currentTags)
+      this.listType = undefined
+    },
+    listItem: function (tag, children, attributes) {
+      this.out += this.listType == 'ul' ? '* ' : '# '
+      this.consume(children)
+      this.closeTags('lazyTags')
+      this.closeTags('currentTags')
+      this.out += "\n"
     },
     block: function (tag, children, attributes){
       if(attributes && attributes["class"])
@@ -125,13 +155,17 @@
         this.out += tag == 'p' ? '' : tag + '. '
 
       this.consume(children)
+      this.closeTags('lazyTags')
+      this.closeTags('currentTags')
       this.out += "\n\n"
     }
   }
   var ml = [
-    ['p', ['bla', ['b', [ 'bold', ['i',['bolditalic']]]], ['i', ['italic', ['br'], 'italic2']], 'normal'], {"class": "left"}],
+    ['p', ['bla', ['b', [ 'bold', ['i',['bolditalic']]]], ['i', ['italic', ['br'], ['br'], 'italic2']], 'normal', ['br'], ['br']], {"class": "left"}],
     ['p', ['bla', ['a', 'link', {href: 'uri'}]]],
-    ['p', [['a', [['img', null ,{src: "src"}]], {href: 'uri'}]]]
+    ['p', [['a', [['img', null ,{src: "src", title: 'test'}]], {href: 'uri with space'}]]],
+    ['ul', [['li', ['test', ['b', ['bold in list']]]], ['li', ['normal in', ['br'], 'list']]]],
+    ['ol', [['li', ['test', ['b', ['bold in list']]]], ['li', ['normal in list']]]]
   ],
   builder = new TextileBuilder()
 
