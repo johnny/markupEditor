@@ -13,7 +13,8 @@
 //= require 'core/toolbar'
 //= require "modes/textile/textileMode"
 //= require "modes/textile/bruteForceCompiler"
-//= require "modes/textile/JsonML2textile"
+// require "modes/textile/JsonML2textile"
+// require "modes/dom2JsonML"
 //= require "modes/hamlMode"
 //= require "modes/wysiwygMode"
 

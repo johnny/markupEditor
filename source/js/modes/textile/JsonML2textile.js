@@ -1,4 +1,4 @@
-!function($) {
+!function($, undefined) {
   Array.prototype.remove = function(from, to) {
     var rest = this.slice((to || from) + 1 || this.length);
     this.length = from < 0 ? this.length + from : from;
@@ -162,7 +162,7 @@
   }
   var ml = [
     ['p', ['bla', ['b', [ 'bold', ['i',['bolditalic']]]], ['i', ['italic', ['br'], ['br'], 'italic2']], 'normal', ['br'], ['br']], {"class": "left"}],
-    ['p', ['bla', ['a', 'link', {href: 'uri'}]]],
+    ['h1', ['bla', ['a', 'link', {href: 'uri'}]]],
     ['p', [['a', [['img', null ,{src: "src", title: 'test'}]], {href: 'uri with space'}]]],
     ['ul', [['li', ['test', ['b', ['bold in list']]]], ['li', ['normal in', ['br'], 'list']]]],
     ['ol', [['li', ['test', ['b', ['bold in list']]]], ['li', ['normal in list']]]]

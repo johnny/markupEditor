@@ -11,3 +11,10 @@
 
 %div.markupClick(data-markup="textile")
   = textarea 'html'
+
+%form#externalSelect
+  %select.availableModes
+    %option{:value => 'unknown'} Unknown
+    %option{:value => 'textile'} Textile
+%div.markupExternalSelect
+  = textarea 'html'
