@@ -158,14 +158,14 @@
     },
     denormalizeUrls: function (html) {
       var editor = this
-      return html.replace(/<a href="([^\"]*)">/gi, function (match, url) {
-        return '<a href="' + editor.settings.denormalizeUrl(url) + '">'
+      return html.replace(/(href|src)="([^\"]*)"/gi, function (match, type, url) {
+        return type + '="' + editor.settings.denormalizeUrl(url, type) + '"'
       })
     },
     normalizeUrls: function (html) {
       var editor = this
-      return html.replace(/<a href="([^\"]*)">/gi, function (match, url) {
-        return '<a href="' + editor.settings.normalizeUrl(url) + '">'
+      return html.replace(/(href|src)="([^\"]*)"/gi, function (match, type, url) {
+        return type + '="' + editor.settings.normalizeUrl(url, type) + '"'
       })
     },
     $textarea: function () {

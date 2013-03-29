@@ -31,8 +31,9 @@
           } else {
             data.source = $element
           }
-          new ME.Editor($.extend({}, globalSettings, parameters, data));
+          data.editor = new ME.Editor($.extend({}, globalSettings, parameters, data));
         }
+        $element.data(data)
       });
     },
     close: function(){
