@@ -306,7 +306,7 @@
     editor.close();
   }, function(editor) {
     var settings = editor.settings;
-    return settings.source || settings.closable;
+    return settings.source && settings.closable;
   });
 
 }(jQuery, ME.t10n);
